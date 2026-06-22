@@ -1,0 +1,890 @@
+/* =============================================================================
+   Agentic Transformation Dashboard — Application layer
+   Vanilla JS (no build step). Hash-routed views, computed KPIs, inline-SVG
+   charts, agent detail drawer, edit modal, filtering, search and export.
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  /* ---- Working state (in-memory; edits persist for the session) --------- */
+  const DATA = JSON.parse(JSON.stringify(window.DASHBOARD_DATA));
+  const CSCORE = DATA.complexityScore;
+  const STATE = {
+    view: "overview",
+    deptId: null,
+    search: "",
+    filters: { complexity: [], status: [], priority: [], kind: [] },
+    filterOpen: false
+  };
+
+  /* ---- Icon set (inline SVG, 24x24 stroke) ------------------------------ */
+  const I = {
+    overview:  'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z',
+    dept:      'M3 21h18M5 21V7l7-4 7 4v14M9 9h0M9 13h0M9 17h0M15 9h0M15 13h0M15 17h0',
+    agents:    'M12 2a5 5 0 015 5v1a5 5 0 01-10 0V7a5 5 0 015-5zM4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1',
+    sub:       'M4 6h16M7 12h13M10 18h10M4 12v6',
+    review:    'M12 9v4m0 4h.01M10.3 3.9l-8 14A2 2 0 004 21h16a2 2 0 001.7-3l-8-14a2 2 0 00-3.4 0z',
+    settings:  'M12 15a3 3 0 100-6 3 3 0 000 6zM19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-1.8-.3 1.6 1.6 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.6 1.6 0 00-1-1.5 1.6 1.6 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00.3-1.8 1.6 1.6 0 00-1.5-1H3a2 2 0 110-4h.1a1.6 1.6 0 001.5-1 1.6 1.6 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3H9a1.6 1.6 0 001-1.5V3a2 2 0 114 0v.1a1.6 1.6 0 001 1.5 1.6 1.6 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8V9a1.6 1.6 0 001.5 1H21a2 2 0 110 4h-.1a1.6 1.6 0 00-1.5 1z',
+    search:    'M11 19a8 8 0 100-16 8 8 0 000 16zm10 2l-4.3-4.3',
+    filter:    'M3 4h18l-7 8v6l-4 2v-8L3 4z',
+    export:    'M12 3v12m0-12l-4 4m4-4l4 4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2',
+    plus:      'M12 5v14M5 12h14',
+    chevR:     'M9 6l6 6-6 6',
+    chevL:     'M15 6l-6 6 6 6',
+    edit:      'M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4 9.5-9.5z',
+    close:     'M18 6L6 18M6 6l12 12',
+    check:     'M20 6L9 17l-5-5',
+    calendar:  'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z',
+    layers:    'M12 2l9 5-9 5-9-5 9-5zM3 12l9 5 9-5M3 17l9 5 9-5',
+    target:    'M12 22a10 10 0 100-20 10 10 0 000 20zm0-4a6 6 0 100-12 6 6 0 000 12zm0-4a2 2 0 100-4 2 2 0 000 4z',
+    pulse:     'M3 12h4l3 8 4-16 3 8h4',
+    user:      'M12 12a4 4 0 100-8 4 4 0 000 8zM6 21v-1a6 6 0 0112 0v1',
+    bolt:      'M13 2L4 14h6l-1 8 9-12h-6l1-8z',
+    doc:       'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM14 2v6h6',
+    cpu:       'M9 9h6v6H9zM4 9H2m2 6H2m20-6h-2m2 6h-2M9 4V2m6 2V2M9 22v-2m6 2v-2M6 6h12a1 1 0 011 1v10a1 1 0 01-1 1H6a1 1 0 01-1-1V7a1 1 0 011-1z',
+    link:      'M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1',
+    input:     'M4 7h16M4 12h10M4 17h7',
+    output:    'M14 3h7v7m0-7l-9 9M21 14v5a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h5',
+    flag:      'M4 21V4m0 0h11l-1.5 4L15 12H4',
+    shield:    'M12 2l8 4v6c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-4z',
+    gauge:     'M12 14a2 2 0 100-4 2 2 0 000 4zm0-10a10 10 0 00-9 14h18A10 10 0 0012 4zm0 0v2m6.5 4.5l-1.4 1.4',
+    list:      'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
+    menu:      'M3 6h18M3 12h18M3 18h18'
+  };
+  function icon(name, cls) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+      'stroke-linecap="round" stroke-linejoin="round"' + (cls ? ' class="' + cls + '"' : '') + '>' +
+      '<path d="' + I[name] + '"/></svg>';
+  }
+  function deptIconName(id) {
+    return ({ hr: "user", procurement: "doc", finance: "pulse", it: "cpu",
+      legal: "shield", admin: "layers", strategy: "target", comms: "link" })[id] || "dept";
+  }
+
+  /* ---- Helpers ---------------------------------------------------------- */
+  const $ = (s, r) => (r || document).querySelector(s);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const allAgents = () => DATA.departments.flatMap((d) =>
+    d.agents.map((a) => Object.assign({ deptId: d.id, deptName: d.name }, a)));
+  const findAgent = (id) => allAgents().find((a) => a.id === id);
+  const findDept = (id) => DATA.departments.find((d) => d.id === id);
+  const subCount = (d) => d.agents.reduce((n, a) => n + (a.subAgents ? a.subAgents.length : 0), 0);
+
+  function fmtDate(s) {
+    const d = new Date(s + "T00:00:00");
+    return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  }
+
+  /* ---- Chip renderers --------------------------------------------------- */
+  const COLOR = {
+    status:     { "Ready": "green", "Needs Review": "amber", "In Progress": "blue" },
+    complexity: { "Low": "green", "Medium": "blue", "High": "amber", "Very High": "red" },
+    level:      { "High": "green", "Medium": "amber", "Low": "slate" },
+    priority:   { "Quick Win": "green", "Strategic": "blue", "Complex": "amber", "Future Phase": "slate" }
+  };
+  const chip = (label, color, dot) =>
+    '<span class="chip chip--' + color + '">' + (dot ? '<span class="chip-dot"></span>' : "") + esc(label) + "</span>";
+  const statusChip = (s) => chip(s, COLOR.status[s] || "slate", true);
+  const cplxChip = (c) => chip(c, COLOR.complexity[c] || "slate");
+  const prioChip = (p) => chip(p, COLOR.priority[p] || "slate");
+  const kindChip = (k) => k === "value-add"
+    ? '<span class="chip chip--gold">Value-Add</span>'
+    : '<span class="chip chip--brand">Core</span>';
+
+  /* ---- Aggregations ----------------------------------------------------- */
+  function deptStats(d) {
+    const agents = d.agents;
+    const subs = subCount(d);
+    const cdist = { "Low": 0, "Medium": 0, "High": 0, "Very High": 0 };
+    let scoreSum = 0;
+    let ready = 0, review = 0, prog = 0;
+    agents.forEach((a) => {
+      cdist[a.complexity] = (cdist[a.complexity] || 0) + 1;
+      scoreSum += CSCORE[a.complexity] || 0;
+      if (a.status === "Ready") ready++;
+      else if (a.status === "Needs Review") review++;
+      else prog++;
+    });
+    const avg = agents.length ? scoreSum / agents.length : 0;
+    // readiness: Ready=100%, In Progress=55%, Needs Review=35%
+    const readiness = agents.length
+      ? Math.round((ready * 100 + prog * 55 + review * 35) / agents.length) : 0;
+    let deptStatus = "In Progress";
+    if (review / Math.max(agents.length, 1) >= 0.4) deptStatus = "Needs Review";
+    else if (ready / Math.max(agents.length, 1) >= 0.6) deptStatus = "Ready";
+    return { count: agents.length, subs, cdist, avg, readiness, ready, review, prog, deptStatus };
+  }
+  function globalStats() {
+    const agents = allAgents();
+    const subs = DATA.departments.reduce((n, d) => n + subCount(d), 0);
+    const high = agents.filter((a) => a.complexity === "High" || a.complexity === "Very High").length;
+    const review = agents.filter((a) => a.status === "Needs Review").length;
+    const ready = agents.filter((a) => a.status === "Ready").length;
+    const prog = agents.filter((a) => a.status === "In Progress").length;
+    const avg = agents.reduce((s, a) => s + (CSCORE[a.complexity] || 0), 0) / Math.max(agents.length, 1);
+    return { total: agents.length, depts: DATA.departments.length, subs, high, review, ready, prog, avg };
+  }
+
+  /* ---- Charts (inline SVG) --------------------------------------------- */
+  function barChart(rows) {
+    const max = Math.max.apply(null, rows.map((r) => r.value).concat([1]));
+    return '<div class="barchart">' + rows.map((r) =>
+      '<div class="barrow" role="button" tabindex="0" data-goto-dept="' + r.id + '">' +
+        '<div class="barrow__label" title="' + esc(r.label) + '">' + esc(r.label) + "</div>" +
+        '<div class="barrow__track"><div class="barrow__fill" style="width:' +
+          ((r.value / max) * 100).toFixed(1) + '%"></div></div>' +
+        '<div class="barrow__val">' + r.value + "</div>" +
+      "</div>").join("") + "</div>";
+  }
+  function donut(segments, centerVal, centerLabel) {
+    const total = segments.reduce((s, x) => s + x.value, 0) || 1;
+    const r = 60, c = 2 * Math.PI * r;
+    let offset = 0;
+    const circles = segments.map((s) => {
+      const len = (s.value / total) * c;
+      const el = '<circle cx="75" cy="75" r="' + r + '" fill="none" stroke="' + s.color +
+        '" stroke-width="20" stroke-dasharray="' + len.toFixed(2) + " " + (c - len).toFixed(2) +
+        '" stroke-dashoffset="' + (-offset).toFixed(2) + '"></circle>';
+      offset += len;
+      return el;
+    }).join("");
+    return '<div class="donut-wrap"><div class="donut">' +
+      '<svg width="150" height="150" viewBox="0 0 150 150">' +
+        '<circle cx="75" cy="75" r="' + r + '" fill="none" stroke="var(--line-2)" stroke-width="20"></circle>' +
+        circles + "</svg>" +
+      '<div class="donut__center"><b>' + centerVal + "</b><span>" + esc(centerLabel) + "</span></div></div>" +
+      '<div class="legend">' + segments.map((s) =>
+        '<div class="legend__item"><span class="legend__sw" style="background:' + s.color + '"></span>' +
+        '<span class="lt">' + esc(s.label) + '</span><span class="lv">' + s.value + "</span></div>").join("") +
+      "</div></div>";
+  }
+  function stackedStatus(g) {
+    const total = g.total || 1;
+    const seg = [
+      { v: g.ready, c: "var(--green)", l: "Ready" },
+      { v: g.prog, c: "var(--blue)", l: "In Progress" },
+      { v: g.review, c: "var(--amber)", l: "Needs Review" }
+    ];
+    return '<div class="stack">' + seg.map((s) =>
+      '<span title="' + s.l + ": " + s.v + '" style="width:' + ((s.v / total) * 100).toFixed(1) +
+      "%;background:" + s.c + '"></span>').join("") + "</div>" +
+      '<div class="legend">' + seg.map((s) =>
+        '<div class="legend__item"><span class="legend__sw" style="background:' + s.c + '"></span>' +
+        '<span class="lt">' + s.l + '</span><span class="lv">' + s.v + " · " +
+        Math.round((s.v / total) * 100) + "%</span></div>").join("") + "</div>";
+  }
+  const CPLX_COLORS = { "Low": "var(--green)", "Medium": "var(--blue)", "High": "var(--amber)", "Very High": "var(--red)" };
+  function cdistBar(cdist) {
+    const total = Object.values(cdist).reduce((a, b) => a + b, 0) || 1;
+    const order = ["Low", "Medium", "High", "Very High"];
+    return '<div class="cdist">' + order.map((k) => cdist[k]
+      ? '<span title="' + k + ": " + cdist[k] + '" style="width:' + ((cdist[k] / total) * 100) +
+        "%;background:" + CPLX_COLORS[k] + '"></span>' : "").join("") + "</div>";
+  }
+
+  /* ---- Sidebar / nav ---------------------------------------------------- */
+  function renderNav() {
+    const g = globalStats();
+    const items = [
+      { id: "overview", label: "Overview", icon: "overview" },
+      { id: "departments", label: "Departments", icon: "dept", count: g.depts },
+      { id: "agents", label: "Agents", icon: "agents", count: g.total },
+      { id: "subagents", label: "Sub-Agents", icon: "sub", count: g.subs },
+      { id: "review", label: "Pending Review", icon: "review", count: g.review }
+    ];
+    const active = (STATE.view === "department" ? "departments" : STATE.view);
+    $("#nav").innerHTML =
+      '<div class="nav__label">Main</div>' +
+      items.map((it) =>
+        '<button class="nav__item' + (active === it.id ? " is-active" : "") + '" data-nav="' + it.id + '">' +
+        icon(it.icon) + "<span>" + it.label + "</span>" +
+        (it.count != null ? '<span class="nav__count">' + it.count + "</span>" : "") + "</button>").join("") +
+      '<div class="nav__label">System</div>' +
+      '<button class="nav__item' + (active === "settings" ? " is-active" : "") + '" data-nav="settings">' +
+        icon("settings") + "<span>Settings</span></button>";
+  }
+
+  /* ---- Header ----------------------------------------------------------- */
+  function renderHeader() {
+    const f = STATE.filters;
+    const activeFilters = f.complexity.length + f.status.length + f.priority.length + f.kind.length;
+    $("#header").innerHTML =
+      '<div class="header__top">' +
+        '<div class="header__titles">' +
+          '<button class="btn btn--icon btn--ghost menu-toggle" data-menu style="margin-bottom:8px">' + icon("menu") + "</button>" +
+          '<div class="eyebrow">UAE Government · Agentic Transformation Programme</div>' +
+          '<h1>Agentic Transformation Dashboard <span class="ar" dir="rtl">لوحة التحوّل الذكي</span></h1>' +
+          '<p class="subtitle">Overview of AI agents designed across departments</p>' +
+          '<div class="header__updated"><span class="dot"></span>Last updated ' + fmtDate("2026-06-22") +
+            " · " + globalStats().total + " agents across " + globalStats().depts + " departments</div>" +
+        "</div>" +
+        '<div class="header__actions">' +
+          '<div class="has-pop">' +
+            '<button class="btn" data-filter-toggle>' + icon("filter") + "Filter" +
+              (activeFilters ? '<span class="badge-dot"></span>' : "") + "</button>" +
+            filterPopover() +
+          "</div>" +
+          '<button class="btn" data-export>' + icon("export") + "Export</button>" +
+          '<button class="btn" data-share>' + icon("link") + "Share</button>" +
+          '<button class="btn btn--primary" data-add>' + icon("plus") + "Add / Update Agent</button>" +
+        "</div>" +
+      "</div>" +
+      '<div class="toolbar">' +
+        '<div class="search">' + icon("search") +
+          '<input id="searchInput" type="search" placeholder="Search agents, sub-agents, departments…" value="' +
+          esc(STATE.search) + '" autocomplete="off" />' +
+        "</div>" +
+        (activeFilters ? '<button class="btn btn--sm btn--ghost" data-clear-filters>Clear ' + activeFilters + " filter" + (activeFilters > 1 ? "s" : "") + "</button>" : "") +
+      "</div>";
+  }
+  function filterPopover() {
+    const groups = [
+      { key: "kind", title: "Type", opts: ["core", "value-add"], labels: { "core": "Core", "value-add": "Value-Add" } },
+      { key: "complexity", title: "Complexity", opts: ["Low", "Medium", "High", "Very High"] },
+      { key: "status", title: "Status", opts: ["Ready", "In Progress", "Needs Review"] },
+      { key: "priority", title: "Priority", opts: ["Quick Win", "Strategic", "Complex", "Future Phase"] }
+    ];
+    return '<div class="popover' + (STATE.filterOpen ? " is-open" : "") + '" id="filterPop">' +
+      groups.map((g) =>
+        '<div class="popover__group"><b>' + g.title + "</b><div class=\"chipset\">" +
+        g.opts.map((o) =>
+          '<button class="chiptog' + (STATE.filters[g.key].includes(o) ? " is-on" : "") +
+          '" data-filter="' + g.key + '" data-val="' + esc(o) + '">' +
+          esc(g.labels ? g.labels[o] : o) + "</button>").join("") + "</div></div>").join("") +
+      '<div class="popover__foot"><button class="btn btn--sm btn--ghost" data-clear-filters>Reset</button>' +
+      '<button class="btn btn--sm btn--primary" data-apply-filters>Done</button></div></div>';
+  }
+
+  /* ---- Filtering logic -------------------------------------------------- */
+  function agentMatches(a) {
+    const f = STATE.filters;
+    if (f.kind.length && !f.kind.includes(a.kind)) return false;
+    if (f.complexity.length && !f.complexity.includes(a.complexity)) return false;
+    if (f.status.length && !f.status.includes(a.status)) return false;
+    if (f.priority.length && !f.priority.includes(a.priority)) return false;
+    if (STATE.search) {
+      const q = STATE.search.toLowerCase();
+      const hay = [a.name, a.purpose, a.deptName, a.process,
+        (a.subAgents || []).map((s) => s.name + " " + s.desc).join(" ")].join(" ").toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  }
+  const hasFilters = () => {
+    const f = STATE.filters;
+    return STATE.search || f.complexity.length || f.status.length || f.priority.length || f.kind.length;
+  };
+
+  /* ====================================================================== */
+  /*  VIEWS                                                                   */
+  /* ====================================================================== */
+
+  function viewOverview() {
+    const g = globalStats();
+    const kpis = [
+      { v: g.total, l: "Total Agents", icon: "agents", cls: "", sub: g.ready + " ready · " + g.prog + " in progress" },
+      { v: g.depts, l: "Departments Covered", icon: "dept", cls: "is-gold", sub: "Across corporate & support functions" },
+      { v: g.subs, l: "Total Sub-Agents", icon: "sub", cls: "is-blue", sub: "Specialised task agents" },
+      { v: g.high, l: "High-Complexity Agents", icon: "bolt", cls: "is-amber", sub: "High & very-high complexity" },
+      { v: g.review, l: "Agents Pending Review", icon: "review", cls: "is-red", sub: "Awaiting leadership decision" },
+      { v: g.avg.toFixed(1), l: "Avg. Complexity Score", icon: "gauge", cls: "is-gold", sub: "Scale 1 (Low) – 4 (Very High)" }
+    ];
+    const kpiHTML = '<div class="kpi-grid">' + kpis.map((k) =>
+      '<div class="kpi"><div class="kpi__icon ' + k.cls + '">' + icon(k.icon) + "</div>" +
+      '<div class="kpi__value">' + k.v + "</div><div class=\"kpi__label\">" + k.l + "</div>" +
+      '<div class="kpi__sub">' + esc(k.sub) + "</div></div>").join("") + "</div>";
+
+    // charts
+    const barRows = DATA.departments.map((d) => ({ id: d.id, label: d.short, value: d.agents.length }))
+      .sort((a, b) => b.value - a.value);
+    const cdistAll = { "Low": 0, "Medium": 0, "High": 0, "Very High": 0 };
+    allAgents().forEach((a) => cdistAll[a.complexity]++);
+    const donutSeg = [
+      { label: "Low", value: cdistAll["Low"], color: CPLX_COLORS["Low"] },
+      { label: "Medium", value: cdistAll["Medium"], color: CPLX_COLORS["Medium"] },
+      { label: "High", value: cdistAll["High"], color: CPLX_COLORS["High"] },
+      { label: "Very High", value: cdistAll["Very High"], color: CPLX_COLORS["Very High"] }
+    ].filter((s) => s.value > 0);
+
+    const charts =
+      '<div class="charts-grid">' +
+        '<div class="card"><div class="card__head"><h3>Agents per Department</h3>' +
+          '<span class="hint">Click a bar to drill in</span></div>' +
+          '<div class="card__body">' + barChart(barRows) + "</div></div>" +
+        '<div class="card"><div class="card__head"><h3>Complexity Distribution</h3></div>' +
+          '<div class="card__body">' + donut(donutSeg, g.total, "agents") + "</div></div>" +
+        '<div class="card"><div class="card__head"><h3>Status Distribution</h3></div>' +
+          '<div class="card__body">' + stackedStatus(g) + "</div></div>" +
+      "</div>";
+
+    // department table
+    const rows = DATA.departments.map((d) => {
+      const s = deptStats(d);
+      return '<tr class="clickable" data-goto-dept="' + d.id + '">' +
+        '<td><div class="flex items-center gap-3">' +
+          '<span class="dept-icon" style="width:34px;height:34px">' + icon(deptIconName(d.id)) + "</span>" +
+          '<div><div class="cell-strong">' + esc(d.name) + "</div>" +
+          '<div class="cell-sub">' + esc(d.focal) + "</div></div></div></td>" +
+        '<td class="td-num cell-strong">' + s.count + "</td>" +
+        '<td class="td-num">' + s.subs + "</td>" +
+        "<td style=\"min-width:160px\">" + cdistBar(s.cdist) +
+          '<div class="cdist-legend">' +
+            '<span><i style="background:var(--green)"></i>L ' + s.cdist["Low"] + "</span>" +
+            '<span><i style="background:var(--blue)"></i>M ' + s.cdist["Medium"] + "</span>" +
+            '<span><i style="background:var(--amber)"></i>H ' + s.cdist["High"] + "</span>" +
+            (s.cdist["Very High"] ? '<span><i style="background:var(--red)"></i>VH ' + s.cdist["Very High"] + "</span>" : "") +
+          "</div></td>" +
+        "<td>" + statusChip(s.deptStatus) + "</td>" +
+        "<td><div class=\"readiness\"><div class=\"readiness__bar\"><div class=\"readiness__fill\" style=\"width:" +
+          s.readiness + "%\"></div></div>" + s.readiness + "%</div></td>" +
+        '<td class="cell-sub nowrap">' + fmtDate(d.lastUpdated) + "</td>" +
+        '<td class="right"><button class="btn btn--sm" data-goto-dept="' + d.id + '">View ' + icon("chevR") + "</button></td>" +
+      "</tr>";
+    }).join("");
+
+    const table =
+      '<div class="section"><div class="section__head"><h3>Department Summary</h3>' +
+        '<span class="hint">' + DATA.departments.length + " departments · " + g.total + " agents · " + g.subs + " sub-agents</span></div>" +
+        '<div class="card"><div class="table-wrap"><table class="tbl"><thead><tr>' +
+          "<th>Department</th><th class=\"th-num\">Main Agents</th><th class=\"th-num\">Sub-Agents</th>" +
+          "<th>Complexity Distribution</th><th>Status</th><th>Readiness</th><th>Last Updated</th><th></th>" +
+        "</tr></thead><tbody>" + rows + "</tbody></table></div></div></div>";
+
+    return '<div class="page">' + kpiHTML +
+      '<div class="section"><div class="section__head"><h3>At a Glance</h3>' +
+        '<span class="hint">Scan in under two minutes</span></div>' + charts + "</div>" +
+      table + "</div>";
+  }
+
+  function viewDepartments() {
+    const cards = DATA.departments.map((d) => {
+      const s = deptStats(d);
+      return '<div class="dept-card" data-goto-dept="' + d.id + '">' +
+        '<div class="dept-card__top">' +
+          '<span class="dept-icon">' + icon(deptIconName(d.id)) + "</span>" +
+          "<div><div class=\"dept-card__name\">" + esc(d.name) +
+            '<span class="ar" dir="rtl">' + esc(d.nameAr) + "</span></div>" +
+          '<div class="dept-card__owner">' + esc(d.focal) + "</div></div>" +
+          '<div class="spacer"></div>' + statusChip(s.deptStatus) +
+        "</div>" +
+        '<div class="dept-card__stats">' +
+          '<div class="mini-stat"><b>' + s.count + "</b><span>Agents</span></div>" +
+          '<div class="mini-stat"><b>' + s.subs + "</b><span>Sub-Agents</span></div>" +
+          '<div class="mini-stat"><b>' + s.avg.toFixed(1) + "</b><span>Avg. Cplx</span></div>" +
+        "</div>" +
+        cdistBar(s.cdist) +
+        '<div class="cdist-legend">' +
+          '<span><i style="background:var(--green)"></i>Low</span>' +
+          '<span><i style="background:var(--blue)"></i>Med</span>' +
+          '<span><i style="background:var(--amber)"></i>High</span>' +
+          (s.cdist["Very High"] ? '<span><i style="background:var(--red)"></i>Very High</span>' : "") +
+        "</div>" +
+        '<div class="dept-card__foot">' +
+          '<div class="readiness"><div class="readiness__bar"><div class="readiness__fill" style="width:' +
+            s.readiness + '%"></div></div>' + s.readiness + "% ready</div>" +
+          '<button class="btn btn--sm">View details ' + icon("chevR") + "</button>" +
+        "</div>" +
+      "</div>";
+    }).join("");
+    return '<div class="page"><div class="page__head"><h2>Departments</h2>' +
+      "<p>AI agent coverage across " + DATA.departments.length + " government functions. Select a department to explore its agents.</p></div>" +
+      '<div class="dept-grid">' + cards + "</div></div>";
+  }
+
+  function viewDepartmentDetail() {
+    const d = findDept(STATE.deptId);
+    if (!d) return viewDepartments();
+    const s = deptStats(d);
+    const crumbs = '<div class="crumbs">' +
+      '<button data-nav="overview">Overview</button><span class="sep">/</span>' +
+      '<button data-nav="departments">Departments</button><span class="sep">/</span>' +
+      '<span class="current">' + esc(d.name) + "</span></div>";
+
+    const hero =
+      '<div class="card"><div class="card__body"><div class="dept-hero">' +
+        '<div class="dept-hero__main">' +
+          '<div class="flex items-center gap-3" style="margin-bottom:8px">' +
+            '<span class="dept-icon">' + icon(deptIconName(d.id)) + "</span>" +
+            "<h2>" + esc(d.name) + ' <span class="ar" dir="rtl">' + esc(d.nameAr) + "</span></h2>" +
+            statusChip(s.deptStatus) +
+          "</div>" +
+          '<p class="dept-hero__desc">' + esc(d.description) + "</p>" +
+          '<div class="dept-hero__meta">' +
+            '<div class="metaitem"><b>Owner</b><span>' + esc(d.owner) + "</span></div>" +
+            '<div class="metaitem"><b>Focal Point</b><span>' + esc(d.focal) + "</span></div>" +
+            '<div class="metaitem"><b>Last Updated</b><span>' + fmtDate(d.lastUpdated) + "</span></div>" +
+          "</div>" +
+        "</div>" +
+        '<div class="dept-hero__stats">' +
+          '<div class="mini-stat"><b>' + s.count + "</b><span>Main Agents</span></div>" +
+          '<div class="mini-stat"><b>' + s.subs + "</b><span>Sub-Agents</span></div>" +
+          '<div class="mini-stat"><b>' + s.avg.toFixed(1) + "</b><span>Overall Complexity</span></div>" +
+          '<div class="mini-stat"><b>' + s.readiness + "%</b><span>Readiness Score</span></div>" +
+        "</div>" +
+      "</div></div></div>";
+
+    const filtered = d.agents.filter((a) => agentMatches(Object.assign({ deptName: d.name }, a)));
+    const agentCards = filtered.length ? filtered.map((a) => agentRow(a, d)).join("") : emptyState();
+
+    return '<div class="page">' + crumbs + hero +
+      '<div class="section"><div class="section__head"><h3>Main Agents</h3>' +
+        '<span class="hint">' + filtered.length + " of " + d.agents.length + " agent" +
+        (d.agents.length > 1 ? "s" : "") + (hasFilters() ? " match filters" : "") + "</span></div>" +
+        '<div class="agent-list">' + agentCards + "</div></div></div>";
+  }
+
+  function agentRow(a, d) {
+    return '<div class="agent-card" data-agent="' + a.id + '">' +
+      '<div class="agent-card__main">' +
+        '<div class="agent-card__title"><h4>' + esc(a.name) + "</h4>" + kindChip(a.kind) +
+          '<span class="chip chip--outline">' + esc(a.tier) + "</span></div>" +
+        '<p class="agent-card__desc">' + esc(a.purpose) + "</p>" +
+        '<div class="agent-card__chips">' +
+          statusChip(a.status) + prioChip(a.priority) + cplxChip(a.complexity) +
+          '<span class="chip chip--outline">Impact: ' + esc(a.impact) + "</span>" +
+          '<span class="chip chip--outline">Feasibility: ' + esc(a.feasibility) + "</span>" +
+        "</div>" +
+      "</div>" +
+      '<div class="agent-card__side">' +
+        '<span class="subcount">' + icon("sub") + "<b>" + (a.subAgents ? a.subAgents.length : 0) + "</b> sub-agents</span>" +
+        '<div class="agent-card__actions">' +
+          '<button class="btn btn--sm" data-agent="' + a.id + '">View ' + icon("chevR") + "</button>" +
+          '<button class="btn btn--sm btn--icon" data-edit="' + a.id + '" title="Edit">' + icon("edit") + "</button>" +
+        "</div>" +
+      "</div>" +
+    "</div>";
+  }
+
+  function viewAgents() {
+    const list = allAgents().filter(agentMatches)
+      .sort((a, b) => (CSCORE[b.complexity] - CSCORE[a.complexity]) || a.name.localeCompare(b.name));
+    const rows = list.length ? list.map((a) =>
+      '<tr class="clickable" data-agent="' + a.id + '">' +
+        '<td><div class="cell-strong">' + esc(a.name) + "</div>" +
+          '<div class="cell-sub">' + esc(a.purpose.slice(0, 78)) + (a.purpose.length > 78 ? "…" : "") + "</div></td>" +
+        "<td>" + esc(a.deptName) + "</td>" +
+        "<td>" + kindChip(a.kind) + "</td>" +
+        "<td>" + cplxChip(a.complexity) + "</td>" +
+        '<td class="cell-sub">' + esc(a.impact) + "</td>" +
+        '<td class="cell-sub">' + esc(a.feasibility) + "</td>" +
+        "<td>" + prioChip(a.priority) + "</td>" +
+        "<td>" + statusChip(a.status) + "</td>" +
+        '<td class="td-num">' + (a.subAgents ? a.subAgents.length : 0) + "</td>" +
+        '<td class="right"><button class="btn btn--sm btn--icon" data-edit="' + a.id + '">' + icon("edit") + "</button></td>" +
+      "</tr>").join("") : '<tr><td colspan="10">' + emptyState() + "</td></tr>";
+    return '<div class="page"><div class="page__head"><h2>All Agents</h2>' +
+      "<p>" + list.length + " agent" + (list.length !== 1 ? "s" : "") +
+      (hasFilters() ? " matching your search and filters" : " across all departments") + ". Sorted by complexity.</p></div>" +
+      '<div class="card"><div class="table-wrap"><table class="tbl"><thead><tr>' +
+        "<th>Agent</th><th>Department</th><th>Type</th><th>Complexity</th><th>Impact</th><th>Feasibility</th>" +
+        "<th>Priority</th><th>Status</th><th class=\"th-num\">Subs</th><th></th>" +
+      "</tr></thead><tbody>" + rows + "</tbody></table></div></div></div>";
+  }
+
+  function viewSubAgents() {
+    let subs = [];
+    DATA.departments.forEach((d) => d.agents.forEach((a) =>
+      (a.subAgents || []).forEach((s) => subs.push(Object.assign({}, s, {
+        parent: a.name, parentId: a.id, deptName: d.name
+      })))));
+    if (STATE.search) {
+      const q = STATE.search.toLowerCase();
+      subs = subs.filter((s) => (s.name + " " + s.desc + " " + s.parent + " " + s.deptName + " " + s.type).toLowerCase().indexOf(q) > -1);
+    }
+    if (STATE.filters.complexity.length) subs = subs.filter((s) => STATE.filters.complexity.includes(s.complexity));
+    if (STATE.filters.status.length) subs = subs.filter((s) => STATE.filters.status.includes(s.status));
+    const rows = subs.length ? subs.map((s) =>
+      '<tr class="clickable" data-agent="' + s.parentId + '">' +
+        '<td class="cell-strong">' + esc(s.name) + "</td>" +
+        '<td class="cell-sub" style="max-width:280px">' + esc(s.desc) + "</td>" +
+        "<td>" + esc(s.parent) + "</td>" +
+        "<td>" + esc(s.deptName) + "</td>" +
+        '<td><span class="chip chip--outline">' + esc(s.type) + "</span></td>" +
+        "<td>" + cplxChip(s.complexity) + "</td>" +
+        '<td class="cell-sub">' + esc(s.deps) + "</td>" +
+        "<td>" + statusChip(s.status) + "</td>" +
+      "</tr>").join("") : '<tr><td colspan="8">' + emptyState() + "</td></tr>";
+    return '<div class="page"><div class="page__head"><h2>Sub-Agents</h2>' +
+      "<p>" + subs.length + " specialised task agent" + (subs.length !== 1 ? "s" : "") +
+      " nested under main agents. Select a row to open its parent agent.</p></div>" +
+      '<div class="card"><div class="table-wrap"><table class="tbl"><thead><tr>' +
+        "<th>Sub-Agent</th><th>Description</th><th>Parent Agent</th><th>Department</th>" +
+        "<th>Task Type</th><th>Complexity</th><th>Dependencies</th><th>Status</th>" +
+      "</tr></thead><tbody>" + rows + "</tbody></table></div></div></div>";
+  }
+
+  function viewReview() {
+    const list = allAgents().filter((a) => a.status === "Needs Review")
+      .filter((a) => !STATE.search || agentMatches(a))
+      .sort((a, b) => CSCORE[b.complexity] - CSCORE[a.complexity]);
+    const byDept = {};
+    list.forEach((a) => { (byDept[a.deptName] = byDept[a.deptName] || []).push(a); });
+    const body = list.length ? Object.keys(byDept).map((dn) =>
+      '<div class="section"><div class="section__head"><h3>' + esc(dn) +
+      '</h3><span class="hint">' + byDept[dn].length + " agent" + (byDept[dn].length > 1 ? "s" : "") + " to review</span></div>" +
+      '<div class="agent-list">' + byDept[dn].map((a) => agentRow(a)).join("") + "</div></div>"
+    ).join("") : '<div class="card"><div class="card__body">' + emptyState("Nothing pending review", "All agents have been reviewed or are in progress.") + "</div></div>";
+    return '<div class="page"><div class="page__head"><h2>Pending Review</h2>' +
+      "<p>Agents flagged for leadership review, update or refinement — highest complexity first.</p></div>" + body + "</div>";
+  }
+
+  function viewSettings() {
+    const g = globalStats();
+    return '<div class="page"><div class="page__head"><h2>Settings</h2>' +
+      "<p>Dashboard configuration and data overview. This prototype uses realistic mock data structured for real data later.</p></div>" +
+      '<div class="set-grid">' +
+        '<div class="card"><div class="card__head"><h3>Programme</h3></div><div class="card__body">' +
+          '<div class="set-row"><div><b>Programme name</b><span>Display title</span></div><span class="muted">Agentic Transformation</span></div>' +
+          '<div class="set-row"><div><b>Audience</b><span>Primary readership</span></div><span class="muted">H.E. & Senior Leadership</span></div>' +
+          '<div class="set-row"><div><b>Data source</b><span>Current dataset</span></div>' + kindChip("core") + '</div>' +
+          '<div class="set-row"><div><b>Last updated</b><span>Dataset date</span></div><span class="muted">' + fmtDate("2026-06-22") + "</span></div>" +
+        "</div></div>" +
+        '<div class="card"><div class="card__head"><h3>Dataset Overview</h3></div><div class="card__body">' +
+          '<div class="set-row"><div><b>Departments</b></div><span class="muted">' + g.depts + "</span></div>" +
+          '<div class="set-row"><div><b>Main agents</b></div><span class="muted">' + g.total + "</span></div>" +
+          '<div class="set-row"><div><b>Sub-agents</b></div><span class="muted">' + g.subs + "</span></div>" +
+          '<div class="set-row"><div><b>Average complexity</b></div><span class="muted">' + g.avg.toFixed(2) + " / 4</span></div>" +
+        "</div></div>" +
+        '<div class="card"><div class="card__head"><h3>Display</h3></div><div class="card__body">' +
+          '<div class="set-row"><div><b>Theme</b><span>Interface appearance</span></div><span class="muted">Light · Government</span></div>' +
+          '<div class="set-row"><div><b>Language</b><span>Primary language</span></div><span class="muted">English (AR labels shown)</span></div>' +
+          '<div class="set-row"><div><b>Accent</b><span>Brand colour</span></div><span class="muted">UAE Green &amp; Gold</span></div>' +
+        "</div></div>" +
+        '<div class="card"><div class="card__head"><h3>Data Actions</h3></div><div class="card__body">' +
+          '<p class="muted" style="margin-bottom:12px">Export the full dataset or reset any in-session edits.</p>' +
+          '<div class="flex gap-2"><button class="btn" data-export>' + icon("export") + "Export dataset</button>" +
+          '<button class="btn btn--danger" data-reset>Reset edits</button></div>' +
+        "</div></div>" +
+      "</div></div>";
+  }
+
+  function emptyState(title, sub) {
+    return '<div class="empty">' + icon("search") +
+      "<b>" + esc(title || "No matching results") + "</b>" +
+      "<div>" + esc(sub || "Try adjusting your search or filters.") + "</div></div>";
+  }
+
+  /* ---- Drawer (agent detail) ------------------------------------------- */
+  function openAgent(id) {
+    const a = findAgent(id);
+    if (!a) return;
+    const score = [
+      { b: "Complexity", el: cplxChip(a.complexity) },
+      { b: "Impact", el: chip(a.impact, COLOR.level[a.impact] || "slate") },
+      { b: "Feasibility", el: chip(a.feasibility, COLOR.level[a.feasibility] || "slate") }
+    ].map((x) => '<div class="score"><b>' + x.b + "</b>" + x.el + "</div>").join("");
+
+    const field = (label, ic, value, strong) =>
+      '<div class="field"><div class="field__label">' + (ic ? icon(ic) : "") + esc(label) + "</div>" +
+      '<div class="field__value' + (strong ? " is-strong" : "") + '">' + value + "</div></div>";
+    const tags = (arr) => '<div class="taglist">' + (arr || []).map((t) => '<span class="tag">' + esc(t) + "</span>").join("") + "</div>";
+
+    const subRows = (a.subAgents || []).map((s) =>
+      "<tr><td><div class=\"sa-name\">" + esc(s.name) + "</div><div class=\"cell-sub\">" + esc(s.desc) + "</div></td>" +
+      '<td><span class="chip chip--outline">' + esc(s.type) + "</span></td>" +
+      "<td>" + cplxChip(s.complexity) + "</td>" +
+      '<td class="cell-sub">' + esc(s.deps) + "</td>" +
+      "<td>" + statusChip(s.status) + "</td></tr>").join("");
+
+    const html =
+      '<div class="drawer__head">' +
+        '<div class="drawer__eyebrow"><span class="drawer__dept">' + esc(a.deptName) + " · " + esc(a.tier) + "</span>" +
+          '<button class="close-x" data-close-drawer>' + icon("close") + "</button></div>" +
+        "<h2>" + esc(a.name) + "</h2>" +
+        '<div class="drawer__chips">' + kindChip(a.kind) + statusChip(a.status) + prioChip(a.priority) + "</div>" +
+      "</div>" +
+      '<div class="drawer__body">' +
+        '<div class="scorebox">' + score + "</div>" +
+        field("Purpose", "target", esc(a.purpose), true) +
+        field("Main Responsibilities", "list", esc(a.responsibilities)) +
+        field("Process Covered", "layers", esc(a.process)) +
+        '<div class="divider"></div>' +
+        field("Inputs Needed", "input", tags(a.inputs)) +
+        field("Systems It Connects To", "link", tags(a.systems)) +
+        field("Outputs Produced", "output", tags(a.outputs)) +
+        field("Autonomy", "pulse", esc(a.autonomy)) +
+        '<div class="divider"></div>' +
+        '<div class="callout callout--risk">' + icon("review") +
+          "<div><b>Risks / Dependencies</b><p>" + esc(a.risks) + "</p></div></div>" +
+        '<div style="height:12px"></div>' +
+        '<div class="callout callout--action">' + icon("flag") +
+          "<div><b>Recommended Next Action</b><p>" + esc(a.nextAction) + "</p></div></div>" +
+        '<div class="divider"></div>' +
+        '<div class="field__label">' + icon("sub") + "Sub-Agents (" + (a.subAgents ? a.subAgents.length : 0) + ")</div>" +
+        '<div class="table-wrap" style="margin-top:8px"><table class="subtbl"><thead><tr>' +
+          "<th>Sub-Agent</th><th>Task Type</th><th>Complexity</th><th>Dependencies</th><th>Status</th>" +
+        "</tr></thead><tbody>" + (subRows || '<tr><td colspan="5" class="muted">No sub-agents defined.</td></tr>') + "</tbody></table></div>" +
+      "</div>" +
+      '<div class="drawer__foot">' +
+        '<button class="btn" data-close-drawer>Close</button>' +
+        '<button class="btn btn--primary" data-edit="' + a.id + '">' + icon("edit") + "Edit / Update</button>" +
+      "</div>";
+
+    const drawer = $("#drawer");
+    drawer.innerHTML = html;
+    drawer.classList.add("is-open");
+    drawer.setAttribute("aria-hidden", "false");
+    $("#scrim").classList.add("is-open");
+    document.body.style.overflow = "hidden";
+  }
+  function closeDrawer() {
+    $("#drawer").classList.remove("is-open");
+    $("#drawer").setAttribute("aria-hidden", "true");
+    $("#scrim").classList.remove("is-open");
+    if (!$("#modalScrim").classList.contains("is-open")) document.body.style.overflow = "";
+  }
+
+  /* ---- Edit modal ------------------------------------------------------- */
+  function openEdit(id) {
+    const a = findAgent(id);
+    if (!a) return;
+    const sel = (name, label, opts, val, col2) =>
+      '<div class="form-field' + (col2 ? " col-2" : "") + '"><label>' + label + "</label><select class=\"select\" name=\"" + name + "\">" +
+      opts.map((o) => '<option value="' + esc(o) + '"' + (o === val ? " selected" : "") + ">" + esc(o) + "</option>").join("") + "</select></div>";
+    const deptOpts = DATA.departments.map((d) =>
+      '<option value="' + d.id + '"' + (d.id === a.deptId ? " selected" : "") + ">" + esc(d.name) + "</option>").join("");
+    const subText = (a.subAgents || []).map((s) => s.name).join("\n");
+
+    const body =
+      '<form id="editForm"><div class="form-grid">' +
+        '<div class="form-field col-2"><label>Agent Name</label><input class="input" name="name" value="' + esc(a.name) + '" required /></div>' +
+        '<div class="form-field col-2"><label>Purpose / Description</label><textarea class="textarea" name="purpose">' + esc(a.purpose) + "</textarea></div>" +
+        '<div class="form-field"><label>Department</label><select class="select" name="deptId">' + deptOpts + "</select></div>" +
+        sel("kind", "Type", ["core", "value-add"], a.kind) +
+        sel("complexity", "Complexity", ["Low", "Medium", "High", "Very High"], a.complexity) +
+        sel("impact", "Impact", ["Low", "Medium", "High"], a.impact) +
+        sel("feasibility", "Feasibility", ["Low", "Medium", "High"], a.feasibility) +
+        sel("priority", "Priority", ["Quick Win", "Strategic", "Complex", "Future Phase"], a.priority) +
+        sel("status", "Status", ["Ready", "In Progress", "Needs Review"], a.status, true) +
+        '<div class="form-field col-2"><label>Sub-Agents (one per line)</label><textarea class="textarea" name="subs">' + esc(subText) + "</textarea></div>" +
+        '<div class="form-field col-2"><label>Recommended Next Action</label><textarea class="textarea" name="nextAction">' + esc(a.nextAction) + "</textarea></div>" +
+        '<div class="form-field col-2"><label>Notes / Risks &amp; Dependencies</label><textarea class="textarea" name="risks">' + esc(a.risks) + "</textarea></div>" +
+      "</div></form>";
+
+    $("#modalScrim").innerHTML =
+      '<div class="modal" role="dialog" aria-modal="true">' +
+        '<div class="modal__head"><div><h3>Edit Agent</h3><p>' + esc(a.deptName) + " · " + esc(a.id) + "</p></div>" +
+          '<button class="close-x" data-close-modal>' + icon("close") + "</button></div>" +
+        '<div class="modal__body">' + body + "</div>" +
+        '<div class="modal__foot"><span class="muted" style="font-size:var(--fs-xs)">Changes are saved for this session only.</span>' +
+          "<div class=\"flex gap-2\"><button class=\"btn\" data-close-modal>Cancel</button>" +
+          '<button class="btn btn--primary" data-save="' + a.id + '">' + icon("check") + "Save changes</button></div></div>" +
+      "</div>";
+    $("#modalScrim").classList.add("is-open");
+    document.body.style.overflow = "hidden";
+    setTimeout(() => { const n = $('input[name="name"]'); if (n) n.focus(); }, 60);
+  }
+  function closeModal() {
+    $("#modalScrim").classList.remove("is-open");
+    $("#modalScrim").innerHTML = "";
+    if (!$("#drawer").classList.contains("is-open")) document.body.style.overflow = "";
+  }
+  function saveEdit(id) {
+    const a = findAgent(id);
+    const form = $("#editForm");
+    if (!a || !form) return;
+    const fd = new FormData(form);
+    const get = (k) => (fd.get(k) || "").toString().trim();
+    const newDept = get("deptId");
+    a.name = get("name") || a.name;
+    a.purpose = get("purpose");
+    a.kind = get("kind");
+    a.complexity = get("complexity");
+    a.impact = get("impact");
+    a.feasibility = get("feasibility");
+    a.priority = get("priority");
+    a.status = get("status");
+    a.nextAction = get("nextAction");
+    a.risks = get("risks");
+    // sub-agents: keep existing where names match, add new, drop removed
+    const lines = get("subs").split("\n").map((s) => s.trim()).filter(Boolean);
+    const existing = a.subAgents || [];
+    a.subAgents = lines.map((nm) => {
+      const prev = existing.find((s) => s.name.toLowerCase() === nm.toLowerCase());
+      return prev || { name: nm, desc: "Newly added sub-agent — pending definition.", complexity: "Medium", type: "Task", deps: "—", status: "In Progress" };
+    });
+    // move department if changed
+    if (newDept && newDept !== a.deptId) {
+      const from = findDept(a.deptId), to = findDept(newDept);
+      const idx = from.agents.findIndex((x) => x.id === id);
+      if (idx > -1) { const [moved] = from.agents.splice(idx, 1); to.agents.push(moved); }
+    }
+    closeModal();
+    closeDrawer();
+    render();
+    toast("“" + a.name + "” updated");
+  }
+
+  /* ---- Export / share --------------------------------------------------- */
+  function exportData() {
+    // CSV of all agents
+    const head = ["Department", "Agent", "Type", "Tier", "Complexity", "Impact", "Feasibility", "Priority", "Status", "Sub-Agents", "Purpose"];
+    const rows = allAgents().map((a) => [a.deptName, a.name, a.kind, a.tier, a.complexity, a.impact,
+      a.feasibility, a.priority, a.status, (a.subAgents || []).length, a.purpose]
+      .map((c) => '"' + String(c).replace(/"/g, '""') + '"').join(","));
+    const csv = head.join(",") + "\n" + rows.join("\n");
+    download("agentic-transformation-agents.csv", csv, "text/csv");
+    toast("Exported " + rows.length + " agents to CSV");
+  }
+  function download(name, content, type) {
+    const blob = new Blob([content], { type: type || "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = name; document.body.appendChild(a); a.click();
+    a.remove(); setTimeout(() => URL.revokeObjectURL(url), 500);
+  }
+  function share() {
+    const url = location.href;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => toast("Dashboard link copied to clipboard"))
+        .catch(() => toast("Copy this link: " + url));
+    } else { toast("Share link: " + url); }
+  }
+
+  /* ---- Toast ------------------------------------------------------------ */
+  function toast(msg) {
+    const t = document.createElement("div");
+    t.className = "toast";
+    t.innerHTML = icon("check") + "<span>" + esc(msg) + "</span>";
+    $("#toasts").appendChild(t);
+    setTimeout(() => { t.style.opacity = "0"; t.style.transition = "opacity .3s"; setTimeout(() => t.remove(), 320); }, 2600);
+  }
+
+  /* ---- Router / render -------------------------------------------------- */
+  function parseHash() {
+    const h = location.hash.replace(/^#\/?/, "");
+    const parts = h.split("/");
+    if (parts[0] === "department" && parts[1]) { STATE.view = "department"; STATE.deptId = parts[1]; return; }
+    const valid = ["overview", "departments", "agents", "subagents", "review", "settings"];
+    STATE.view = valid.includes(parts[0]) ? parts[0] : "overview";
+  }
+  function go(view, deptId) {
+    if (view === "department" && deptId) location.hash = "#/department/" + deptId;
+    else location.hash = "#/" + view;
+  }
+  function render() {
+    renderNav();
+    renderHeader();
+    const v = STATE.view;
+    const map = {
+      overview: viewOverview, departments: viewDepartments, department: viewDepartmentDetail,
+      agents: viewAgents, subagents: viewSubAgents, review: viewReview, settings: viewSettings
+    };
+    $("#view").innerHTML = (map[v] || viewOverview)();
+    window.scrollTo({ top: 0 });
+  }
+
+  /* ---- Events (delegated) ---------------------------------------------- */
+  document.addEventListener("click", function (e) {
+    const t = e.target.closest("[data-nav],[data-goto-dept],[data-agent],[data-edit],[data-save]," +
+      "[data-close-drawer],[data-close-modal],[data-add],[data-export],[data-share],[data-reset]," +
+      "[data-filter-toggle],[data-filter],[data-apply-filters],[data-clear-filters],[data-menu]");
+    if (!t) {
+      // close filter popover on outside click
+      if (STATE.filterOpen && !e.target.closest(".has-pop")) { STATE.filterOpen = false; renderHeader(); }
+      return;
+    }
+    if (t.dataset.nav) { STATE.filterOpen = false; closeSidebarMobile(); go(t.dataset.nav); }
+    else if (t.dataset.gotoDept) { go("department", t.dataset.gotoDept); }
+    else if (t.dataset.agent) { openAgent(t.dataset.agent); }
+    else if (t.dataset.edit) { e.stopPropagation(); openEdit(t.dataset.edit); }
+    else if (t.dataset.save) { saveEdit(t.dataset.save); }
+    else if (t.hasAttribute("data-close-drawer")) { closeDrawer(); }
+    else if (t.hasAttribute("data-close-modal")) { closeModal(); }
+    else if (t.hasAttribute("data-add")) { addAgentFlow(); }
+    else if (t.hasAttribute("data-export")) { exportData(); }
+    else if (t.hasAttribute("data-share")) { share(); }
+    else if (t.hasAttribute("data-reset")) { resetEdits(); }
+    else if (t.hasAttribute("data-menu")) { toggleSidebarMobile(); }
+    else if (t.hasAttribute("data-filter-toggle")) { STATE.filterOpen = !STATE.filterOpen; renderHeader(); }
+    else if (t.dataset.filter) { toggleFilter(t.dataset.filter, t.dataset.val); }
+    else if (t.hasAttribute("data-apply-filters")) { STATE.filterOpen = false; renderHeader(); render(); }
+    else if (t.hasAttribute("data-clear-filters")) { clearFilters(); }
+  });
+
+  // keyboard: bars/rows accessible, Escape closes overlays
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      if ($("#modalScrim").classList.contains("is-open")) return closeModal();
+      if ($("#drawer").classList.contains("is-open")) return closeDrawer();
+      if (STATE.filterOpen) { STATE.filterOpen = false; renderHeader(); }
+    }
+    if (e.key === "Enter" || e.key === " ") {
+      const el = e.target.closest("[data-goto-dept].barrow");
+      if (el) { e.preventDefault(); go("department", el.dataset.gotoDept); }
+    }
+  });
+
+  $("#scrim").addEventListener("click", closeDrawer);
+  document.addEventListener("click", function (e) {
+    if (e.target.id === "modalScrim") closeModal();
+  });
+
+  // search (debounced-ish)
+  let searchTimer;
+  document.addEventListener("input", function (e) {
+    if (e.target.id === "searchInput") {
+      STATE.search = e.target.value;
+      clearTimeout(searchTimer);
+      const pos = e.target.selectionStart;
+      searchTimer = setTimeout(() => {
+        renderBody();
+        const inp = $("#searchInput");
+        if (inp) { inp.focus(); try { inp.setSelectionRange(pos, pos); } catch (x) {} }
+      }, 160);
+    }
+  });
+  function renderBody() {
+    // re-render only the view body + nav counts, keep header/search focus
+    renderNav();
+    const map = {
+      overview: viewOverview, departments: viewDepartments, department: viewDepartmentDetail,
+      agents: viewAgents, subagents: viewSubAgents, review: viewReview, settings: viewSettings
+    };
+    $("#view").innerHTML = (map[STATE.view] || viewOverview)();
+  }
+
+  function toggleFilter(key, val) {
+    const arr = STATE.filters[key];
+    const i = arr.indexOf(val);
+    if (i > -1) arr.splice(i, 1); else arr.push(val);
+    renderHeader(); render();
+  }
+  function clearFilters() {
+    STATE.filters = { complexity: [], status: [], priority: [], kind: [] };
+    STATE.search = ""; STATE.filterOpen = false;
+    renderHeader(); render();
+  }
+  function resetEdits() {
+    const fresh = JSON.parse(JSON.stringify(window.DASHBOARD_DATA));
+    DATA.departments = fresh.departments;
+    render(); toast("Session edits reset to original data");
+  }
+  function addAgentFlow() {
+    // open edit modal pre-seeded with a new agent in the current (or first) department
+    const dId = STATE.deptId || DATA.departments[0].id;
+    const dept = findDept(dId);
+    const newAgent = {
+      id: "new-" + Date.now(), name: "New Agent", kind: "core", tier: "New · To be classified",
+      purpose: "", responsibilities: "", process: "", inputs: [], systems: [], outputs: [],
+      complexity: "Medium", impact: "Medium", feasibility: "Medium",
+      status: "In Progress", priority: "Strategic", autonomy: "To be defined",
+      risks: "", nextAction: "", subAgents: []
+    };
+    dept.agents.push(newAgent);
+    render();
+    openEdit(newAgent.id);
+    toast("New agent added to " + dept.name + " — fill in the details");
+  }
+
+  // mobile sidebar
+  function toggleSidebarMobile() { $("#sidebar").classList.toggle("is-open"); }
+  function closeSidebarMobile() { $("#sidebar").classList.remove("is-open"); }
+
+  window.addEventListener("hashchange", function () { parseHash(); render(); });
+
+  /* ---- Boot ------------------------------------------------------------- */
+  parseHash();
+  render();
+})();
