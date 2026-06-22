@@ -18,6 +18,7 @@ const COMPLEXITY_SCORE = { "Low": 1, "Medium": 2, "High": 3, "Very High": 4 };
 
 /* -- HR: Tier A — Employee-facing -------------------------------------------- */
 const HR_AGENTS = [
+  /* -- Tier A — Employee-facing -------------------------------------------- */
   {
     id: "hr-01",
     name: "HR Virtual Assistant",
@@ -37,7 +38,7 @@ const HR_AGENTS = [
       { name: "Policy & Eligibility Q&A", desc: "Answers policy, entitlement and eligibility questions from the knowledge base.", complexity: "Medium", type: "Conversational", deps: "Policy KB", status: "Ready" },
       { name: "Self-Service Guide", desc: "Walks employees step-by-step through the 15 ESS actions.", complexity: "Low", type: "Conversational", deps: "Oracle (read)", status: "Ready" },
       { name: "Inquiry Triage & Logging", desc: "Classifies, logs and routes Employee Relations inquiries across channels.", complexity: "Medium", type: "Orchestration", deps: "Multi-channel intake", status: "In Progress" },
-      { name: "Escalation Summariser", desc: "Packages complaints and sensitive cases with context for a human owner.", complexity: "Medium", type: "Drafting", deps: "Agent 1 context", status: "Ready" }
+      { name: "Escalation Summariser", desc: "Packages complaints and sensitive cases with context for a human owner.", complexity: "Medium", type: "Drafting", deps: "Agent context", status: "Ready" }
     ]
   },
   {
@@ -61,7 +62,7 @@ const HR_AGENTS = [
     ]
   },
 
-  /* -- HR: Tier B — Document & Compliance ----------------------------------- */
+  /* -- Tier B — Document & Compliance -------------------------------------- */
   {
     id: "hr-03",
     name: "Document Intelligence & Validation Agent",
@@ -69,7 +70,7 @@ const HR_AGENTS = [
     tier: "Tier B · Document & Compliance",
     purpose: "Reads, classifies and validates every document candidates and employees submit — the single most reused capability in the ecosystem.",
     responsibilities: "OCR and extract fields; check completeness, validity, expiry and name/number match for medical/birth/Hajj certificates, EID/passport/visa, IBAN & bank letters, expense receipts, school invoices and dependent documents; flag exceptions with reasons.",
-    process: "Onboarding verification; Leave doc validation; Bank Account Change; Education & Air-Ticket claims; Dependent Acknowledgement; Personal Info Update.",
+    process: "Onboarding document verification; Leave doc validation; Bank Account Change; Education & Air-Ticket claims; Dependent Acknowledgement; Personal Info Update.",
     inputs: ["Uploaded documents", "Oracle reference data", "ICP data", "Per-document-type rules"],
     systems: ["Oracle", "MOCA App uploads", "ICP", "SharePoint"],
     outputs: ["Validation verdict (valid / invalid / needs-info)", "Extracted fields", "Exception report"],
@@ -106,7 +107,7 @@ const HR_AGENTS = [
     ]
   },
 
-  /* -- HR: Tier C — Workflow Orchestration ---------------------------------- */
+  /* -- Tier C — Workflow Orchestration ------------------------------------- */
   {
     id: "hr-05",
     name: "Onboarding Orchestration Agent",
@@ -131,32 +132,11 @@ const HR_AGENTS = [
   },
   {
     id: "hr-06",
-    name: "Leave & Attendance Assistant Agent",
-    kind: "core",
-    tier: "Tier C · Workflow Orchestration",
-    purpose: "Makes leave, permission and attendance handling rules-aware and self-explaining for both employees and HR.",
-    responsibilities: "Guide leave-type selection and balance checks; enforce prerequisites; explain the exact approval chain for the leave type and entity from the matrix; coordinate document validation with Document Intelligence; assist HR with leave-on-behalf; triage permission and attendance-justification requests.",
-    process: "ESS Leave, Permission, Attendance Justification; HR-SS Leave on Behalf.",
-    inputs: ["Leave Approval Matrix (Employees + Outsourced)", "Oracle balances", "Leave-type document rules"],
-    systems: ["Oracle", "MOCA App"],
-    outputs: ["Guided request", "Chain explanation", "Balance/eligibility check", "Leave-on-behalf draft"],
-    complexity: "Medium", impact: "High", feasibility: "High",
-    status: "In Progress", priority: "Strategic", autonomy: "Medium — guides and pre-validates; humans approve",
-    risks: "Low. Approvers per the matrix decide; HR validates documents.",
-    nextAction: "Digitise the Leave Approval Matrix (Employees + Outsourced Staff) as a machine-readable rule set, then progress to Phase 2 build.",
-    subAgents: [
-      { name: "Leave-Type Selector", desc: "Guides selection and checks balance and eligibility.", complexity: "Medium", type: "Conversational", deps: "Oracle balances", status: "In Progress" },
-      { name: "Approval-Chain Explainer", desc: "Explains the exact chain from the matrix by type and entity.", complexity: "Medium", type: "Conversational", deps: "Leave Matrix", status: "In Progress" },
-      { name: "Leave-on-Behalf Drafter", desc: "Assists HR with leave-on-behalf entries.", complexity: "Low", type: "Drafting", deps: "Oracle", status: "Ready" }
-    ]
-  },
-  {
-    id: "hr-07",
     name: "Offboarding & Clearance Orchestration Agent",
     kind: "core",
     tier: "Tier C · Workflow Orchestration",
     purpose: "Drives a clean, fast, leak-free exit and a complete archive.",
-    responsibilities: "Sequence the offboarding notification; open and route Station Clearance (Line Manager, then IT, Admin, Finance and HR in parallel); chase departments; escalate blockers as settlement recoveries; coordinate insurance cancellation, GPSSA exit, experience letter, decrees and the final EOS archive.",
+    responsibilities: "Sequence the offboarding notification; open and route Station Clearance (Line Manager first, then IT, Admin, Finance and HR in parallel); chase departments; escalate blockers as settlement recoveries; coordinate insurance cancellation, GPSSA exit, experience letter, decrees and the final EOS archive.",
     process: "EOS Offboarding Notification, Station Clearance, Post-Departure Cleanup; supports Final Settlement.",
     inputs: ["Approved resignation/termination", "Clearance form", "Asset list"],
     systems: ["Oracle", "Email", "SharePoint", "Nextcare", "GPSSA"],
@@ -172,9 +152,9 @@ const HR_AGENTS = [
     ]
   },
 
-  /* -- HR: Tier D — Drafting & Decisions ------------------------------------ */
+  /* -- Tier D — Drafting & Decisions --------------------------------------- */
   {
-    id: "hr-08",
+    id: "hr-07",
     name: "Decree & Decision Drafting Agent",
     kind: "core",
     tier: "Tier D · Drafting & Decisions",
@@ -195,9 +175,9 @@ const HR_AGENTS = [
     ]
   },
 
-  /* -- HR: Tier E — Payroll & Entitlements ---------------------------------- */
+  /* -- Tier E — Payroll & Entitlements ------------------------------------- */
   {
-    id: "hr-09",
+    id: "hr-08",
     name: "Payroll Validation & Reconciliation Agent",
     kind: "core",
     tier: "Tier E · Payroll & Entitlements",
@@ -218,7 +198,7 @@ const HR_AGENTS = [
     ]
   },
   {
-    id: "hr-10",
+    id: "hr-09",
     name: "Entitlements & Settlement Calculation Agent",
     kind: "core",
     tier: "Tier E · Payroll & Entitlements",
@@ -239,7 +219,7 @@ const HR_AGENTS = [
     ]
   },
   {
-    id: "hr-11",
+    id: "hr-10",
     name: "Off-Cycle Payment Coordination Agent",
     kind: "core",
     tier: "Tier E · Payroll & Entitlements",
@@ -260,9 +240,9 @@ const HR_AGENTS = [
     ]
   },
 
-  /* -- HR: Tier F — Insight & Oversight ------------------------------------- */
+  /* -- Tier F — Insight & Oversight ---------------------------------------- */
   {
-    id: "hr-12",
+    id: "hr-11",
     name: "HR Analytics & Reporting Agent",
     kind: "core",
     tier: "Tier F · Insight & Oversight",
@@ -283,13 +263,13 @@ const HR_AGENTS = [
     ]
   },
   {
-    id: "hr-13",
+    id: "hr-12",
     name: "Approvals & Follow-up Agent",
     kind: "core",
     tier: "Tier F · Insight & Oversight",
     purpose: "Makes the approval layer — the single biggest source of elapsed time across every process — transparent and fast, without ever making the decision.",
     responsibilities: "Detect when an approval is due and push a decision-ready notification to the approver on MOCA Smart or email with a summary, validated documents and a recommendation; answer follow-up questions in-thread; capture the decision and write it back to Oracle; track all pending approvals; nudge on SLA breach; surface bottlenecks.",
-    process: "Every approval-bearing step across all six domains (leave matrix chains, Change Pay, Termination, EOS, Expense, OT, Per-Diem, Recoveries, Clearance).",
+    process: "Every approval-bearing step across all seven domains (leave matrix chains, Change Pay, Termination, EOS, Expense, OT, Per-Diem, Recoveries, Clearance).",
     inputs: ["Oracle approval queues", "Leave Approval Matrix", "SLA targets"],
     systems: ["Oracle", "MOCA App", "Email"],
     outputs: ["Decision-ready notifications", "Answered approver questions", "Captured decisions", "SLA & bottleneck reports"],
@@ -304,7 +284,141 @@ const HR_AGENTS = [
     ]
   },
 
-  /* -- HR: Recommended value-add agents (Enhance phase) --------------------- */
+  /* -- Tier G — Leave & Attendance ----------------------------------------- */
+  {
+    id: "hr-13",
+    name: "Leave & Attendance Assistant",
+    kind: "core",
+    tier: "Tier G · Leave & Attendance",
+    purpose: "One capable agent for leave end to end — guiding the request, resolving the right approval chain, and handling the remote-work and document-heavy types — for both employees and HR.",
+    responsibilities: "Guide selection across the ~20 leave types and run balance, eligibility and prerequisite checks; resolve and explain the exact approval chain from the matrix, including up-to-six-level entity-specific chains, FYI recipients and special rules; handle the Remote-Work variants and the document-heavy types (Maternity, Sick, Hajj, Escort, Examination, Scholarship, Sabbatical) by validating required documents with Document Intelligence and routing each correctly; assist HR with leave-on-behalf.",
+    process: "All ESS/HR-SS leave types (Employee + OTS matrices), Permission, Remote Work and special/document-heavy leave.",
+    inputs: ["Leave Approval Matrix (multi-level, entity overrides, FYI, special rules)", "Oracle balances", "Per-type document and eligibility rules"],
+    systems: ["Oracle", "MOCA App", "SharePoint"],
+    outputs: ["Guided, eligibility-checked request", "Full chain resolved", "Documents validated and routed"],
+    complexity: "Medium", impact: "High", feasibility: "High",
+    status: "In Progress", priority: "Strategic", autonomy: "Medium — guides, resolves the chain, validates and routes; humans approve",
+    risks: "Low — the named matrix approvers decide; HR validates documents.",
+    nextAction: "Digitise the full Leave Approval Matrix (multi-level, entity overrides, FYI, special rules) as a machine-readable rule set, then progress to Phase 2 build.",
+    subAgents: [
+      { name: "Leave-Type Selector", desc: "Guides selection across ~20 types and checks balance and eligibility.", complexity: "Medium", type: "Conversational", deps: "Oracle balances", status: "In Progress" },
+      { name: "Approval-Chain Resolver", desc: "Resolves and explains the exact multi-level chain, FYI and special rules.", complexity: "High", type: "Orchestration", deps: "Leave Matrix", status: "In Progress" },
+      { name: "Remote-Work & Special-Leave Handler", desc: "Handles remote-work variants and document-heavy leave with validation.", complexity: "Medium", type: "Validation", deps: "Agent 3", status: "In Progress" },
+      { name: "Leave-on-Behalf Drafter", desc: "Assists HR with leave-on-behalf entries.", complexity: "Low", type: "Drafting", deps: "Oracle", status: "Ready" }
+    ]
+  },
+  {
+    id: "hr-14",
+    name: "Attendance, Justification & Violations Agent",
+    kind: "core",
+    tier: "Tier G · Leave & Attendance",
+    purpose: "Runs the attendance-justification and violations cycle that today consumes HR Operations, from first notice to year-end resolution.",
+    responsibilities: "Open the attendance-violations sheet (year-to-date, employees and outsourced); email each employee their violations with a justify-in-Oracle call to action; send weekly reminders to those still unjustified; identify repeat or old unresolved cases and escalate to the HR Director; at year-end, feed the leave carry-over, run the offset against balance / free days, and surface no-balance cases for the HR-Director decision; coordinate outsourced cases through the agencies.",
+    process: "ESS Attendance Justification; HR-SS Attendance Violations Management and Outsource (via Agency).",
+    inputs: ["Auto-exported attendance / violations data", "Leave balances and free days", "Agency map"],
+    systems: ["Oracle", "MOCA App", "Email"],
+    outputs: ["Justification drives", "Weekly reminders", "Escalation packs", "Year-end offsets", "Agency coordination"],
+    complexity: "Medium", impact: "High", feasibility: "High",
+    status: "In Progress", priority: "Strategic", autonomy: "High for notifying, reminding and offsetting; the HR Director decides penalties",
+    risks: "Low — opens, notifies, reminds, offsets and escalates; the HR Director decides escalations and penalties.",
+    nextAction: "Confirm the auto-export of violations data and the agency map, then schedule for Phase 2.",
+    subAgents: [
+      { name: "Violations Sheet Opener", desc: "Opens the year-to-date violations sheet for employees and outsourced staff.", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "In Progress" },
+      { name: "Justification Notifier", desc: "Emails violations with a justify-in-Oracle CTA and weekly reminders.", complexity: "Low", type: "Conversational", deps: "Email", status: "In Progress" },
+      { name: "Repeat-Case Escalator", desc: "Identifies repeat / old unresolved cases and escalates to the HR Director.", complexity: "Medium", type: "Monitoring", deps: "—", status: "Needs Review" },
+      { name: "Year-End Offset Runner", desc: "Feeds carry-over, offsets against balance/free days, surfaces no-balance cases.", complexity: "Medium", type: "Validation", deps: "Oracle", status: "In Progress" }
+    ]
+  },
+
+  /* -- Tier H — Performance Management -------------------------------------- */
+  {
+    id: "hr-15",
+    name: "Performance Cycle & Review Agent",
+    kind: "core",
+    tier: "Tier H · Performance Management",
+    purpose: "Runs the whole performance cycle — setup, initiation, the mid-year and annual rounds, and consolidation — so reviews happen on time and produce a clean, calibration-ready picture.",
+    responsibilities: "Build the cycle population with eligibility rules (exclude probationers; apply permanency cut-offs); run test and official initiation with system emails and announcements; produce completion reports and chase pending employees and managers; drive the mid-year self-update and the annual self-rating and manager scoring with return loops; route Sector-Head and HR confirmation; consolidate ratings and flag outliers for calibration; support the Executive-Director review sessions and retain their reports.",
+    process: "Performance Management — cycle setup, initiation, monitoring, Mid-Year, Annual, Executive Director Reviews, consolidation and calibration.",
+    inputs: ["Performance calendar", "Population/permanency data", "Objectives and ratings", "Review templates"],
+    systems: ["Oracle", "Performance system", "MOCA App", "Email"],
+    outputs: ["On-time cycles", "Live completion dashboards", "Consolidated ratings", "Calibration flags", "Retained ED reports"],
+    complexity: "Medium", impact: "High", feasibility: "High",
+    status: "Needs Review", priority: "Strategic", autonomy: "High for running and consolidating; no rating or calibration decision",
+    risks: "Low — runs the cycle and consolidates; managers and reviewers score, HR and leadership calibrate and confirm. The agent never rates.",
+    nextAction: "Confirm the performance calendar and eligibility/permanency rules with HR, then schedule for Phase 2.",
+    subAgents: [
+      { name: "Cycle Population Builder", desc: "Builds the cycle population applying eligibility and permanency rules.", complexity: "Medium", type: "Validation", deps: "Oracle", status: "Needs Review" },
+      { name: "Round Driver & Chaser", desc: "Runs mid-year and annual rounds with return loops and chases pending.", complexity: "Medium", type: "Orchestration", deps: "Performance system", status: "In Progress" },
+      { name: "Rating Consolidator", desc: "Consolidates ratings and flags outliers for calibration.", complexity: "Medium", type: "Reporting", deps: "—", status: "Needs Review" }
+    ]
+  },
+  {
+    id: "hr-16",
+    name: "Objective-Setting & SMART-Quality Agent",
+    kind: "core",
+    tier: "Tier H · Performance Management",
+    purpose: "Helps every employee set good objectives and gets them approved cleanly — turning a slow, quality-variable step into a fast, guided one.",
+    responsibilities: "Guide employees to enter objectives within the rules (minimum 4, maximum 10; total weight 100%; each 5%–30%) and the required competencies (core for all; leadership competencies for Grade 4.1+ and acting heads); run an on-the-spot SMART-framework and job-relevance quality check and suggest improvements; manage the return-for-adjustment loop; route Line-Manager → Sector-Head → HR confirmation and lock.",
+    process: "Performance Management — Objective Setting (and the late-joiner goal-setting that occurs at annual review).",
+    inputs: ["Objective and competency rules", "Grade data", "Employee's role profile"],
+    systems: ["Oracle", "Performance system", "MOCA App"],
+    outputs: ["Well-formed, rule-compliant objectives", "Quality feedback", "Clean approval-to-lock flow"],
+    complexity: "Medium", impact: "High", feasibility: "High",
+    status: "In Progress", priority: "Strategic", autonomy: "High for guidance, quality-check and routing; humans approve",
+    risks: "Low — guides, quality-checks and routes; Line Manager, Sector Head and HR approve.",
+    nextAction: "Codify the objective and competency rules; build alongside the Performance Cycle agent in Phase 2.",
+    subAgents: [
+      { name: "Objective Rule Guide", desc: "Guides entry within rules (4–10 objectives, weights 100%, 5–30%) and competencies.", complexity: "Medium", type: "Conversational", deps: "Performance system", status: "In Progress" },
+      { name: "SMART Quality Checker", desc: "Runs an on-the-spot SMART and job-relevance check and suggests improvements.", complexity: "Medium", type: "Validation", deps: "—", status: "In Progress" },
+      { name: "Approval Router", desc: "Routes Line-Manager → Sector-Head → HR confirmation and lock.", complexity: "Low", type: "Orchestration", deps: "Oracle", status: "Ready" }
+    ]
+  },
+
+  /* -- Tier I — Contract & Mobility ---------------------------------------- */
+  {
+    id: "hr-17",
+    name: "Contract Renewal Agent",
+    kind: "core",
+    tier: "Tier I · Contract & Mobility",
+    purpose: "Makes sure no contract lapses unnoticed and each renewal or non-renewal — permanent or outsourced — is handled correctly and on time.",
+    responsibilities: "For permanent staff, extract the year-end expiring list by entity, share each Sector Head's sheet with the 2-year performance, track confirmations, and handle renewal/non-renewal (with the 3-month notice and the auto-extend-if-unconfirmed rule); for outsourced staff, act on the automatic 90/60-day notifications, coordinate with each entity's responsible person and the agency, and on non-renewal instruct the agency to notify the employee one month before expiry.",
+    process: "HR-SS Contract Renewal — Permanent and Outsource.",
+    inputs: ["Contract end-dates", "2-year performance", "Entity/Sector-Head and entity/agency maps", "Notice and auto-extend rules"],
+    systems: ["Oracle", "Email", "SharePoint"],
+    outputs: ["Sorted expiry sheets", "Routed confirmations", "Timely renewals and notices", "Agency coordination", "Safety-net auto-extension"],
+    complexity: "Low", impact: "High", feasibility: "High",
+    status: "In Progress", priority: "Strategic", autonomy: "Medium — extracts, routes and tracks; humans decide and notify",
+    risks: "Low — extracts, routes, tracks and applies timing rules; Sector Heads decide and HR holds the sensitive conversations.",
+    nextAction: "Confirm the notice and auto-extend rules and the entity/agency maps, then schedule for Phase 2.",
+    subAgents: [
+      { name: "Expiry List Extractor", desc: "Extracts the year-end expiring list by entity (permanent + outsourced).", complexity: "Low", type: "Reporting", deps: "Oracle", status: "In Progress" },
+      { name: "Sector-Head Router", desc: "Shares each Sector Head's sheet with 2-year performance and tracks confirmations.", complexity: "Low", type: "Orchestration", deps: "Email", status: "In Progress" },
+      { name: "Notice & Auto-Extend Timer", desc: "Applies 3-month notice, 90/60-day OTS notifications and the auto-extend rule.", complexity: "Medium", type: "Monitoring", deps: "—", status: "Needs Review" }
+    ]
+  },
+  {
+    id: "hr-18",
+    name: "Staff Mobility & Assignments Agent",
+    kind: "core",
+    tier: "Tier I · Contract & Mobility",
+    purpose: "Prepares and orchestrates the internal and cross-entity assignment changes — acting, secondment, delegation, loaning and borrowing — so each is budgeted, decreed, approved and time-bound correctly.",
+    responsibilities: "For paid acting, prepare the budget study for Sector-Head confirmation then draft the Entity-Head decree; for non-paid acting, secondment and delegation, draft from standard templates; for loaning, confirm salary/benefit coverage and obtain Sector-Head approval and the Entity-Head decree; for borrowing, send the official letter to the source entity, capture its confirming decree and prepare the requester's; apply and track period/extension rules (acting up to 1 year + 6 months), store decrees in Oracle Memo & Decrees, and reverse arrangements cleanly on completion.",
+    process: "HR-SS Acting (Paid & Non-Paid), Secondment, Delegation, Loaning, Borrowing.",
+    inputs: ["The request", "Budget data", "Salary-coverage terms", "Decree templates", "Period/extension rules", "Approval matrix"],
+    systems: ["Oracle (Memo & Decrees)", "Email", "SharePoint"],
+    outputs: ["Budget studies", "Drafted decrees", "Official letters", "Routed approvals", "Period tracking and clean closure"],
+    complexity: "Medium", impact: "Medium", feasibility: "High",
+    status: "In Progress", priority: "Strategic", autonomy: "Medium — studies, drafts and orchestrates; humans decide and sign",
+    risks: "Medium — decree- and budget-bearing. Sector Heads and Entity Heads approve and sign; entities confirm.",
+    nextAction: "Assemble the assignment decree templates and period/extension rules, then schedule for Phase 2.",
+    subAgents: [
+      { name: "Budget-Study & Decree Drafter", desc: "Prepares the budget study and drafts acting/secondment/delegation decrees.", complexity: "Medium", type: "Drafting", deps: "Templates", status: "In Progress" },
+      { name: "Loan/Borrow Coordinator", desc: "Confirms salary coverage and exchanges official letters and decrees across entities.", complexity: "Medium", type: "Orchestration", deps: "Email", status: "In Progress" },
+      { name: "Period & Reversal Tracker", desc: "Tracks acting/extension limits and reverses arrangements cleanly on completion.", complexity: "Medium", type: "Monitoring", deps: "Oracle", status: "In Progress" }
+    ]
+  },
+
+  /* -- Recommended value-add agents (Enhance phase) ------------------------ */
   {
     id: "hr-va-a",
     name: "Onboarding Concierge",
@@ -388,26 +502,6 @@ const HR_AGENTS = [
   },
   {
     id: "hr-va-e",
-    name: "Sentiment & Service-Feedback",
-    kind: "value-add",
-    tier: "Value-add · Insight",
-    purpose: "Turns every HR interaction into a chance to learn, by capturing how the service felt and where it can improve.",
-    responsibilities: "Gather lightweight feedback after key moments (onboarding, leave, claims, letters, EOS); detect themes and dissatisfaction; summarise sentiment and pain points for HR leadership; close the loop with employees on what changed.",
-    process: "Cross-cutting — wraps every employee-facing service.",
-    inputs: ["Post-interaction feedback", "Service-event data"],
-    systems: ["MOCA App", "Email", "BI / analytics layer"],
-    outputs: ["Sentiment dashboards", "Theme summaries", "An improvement backlog"],
-    complexity: "Low", impact: "Medium", feasibility: "High",
-    status: "In Progress", priority: "Future Phase", autonomy: "High — listening and reporting only",
-    risks: "Low — listens and reports; HR leadership decides what to act on.",
-    nextAction: "Enhance phase. Define the feedback moments and the leadership reporting cadence.",
-    subAgents: [
-      { name: "Feedback Collector", desc: "Gathers lightweight feedback after key service moments.", complexity: "Low", type: "Conversational", deps: "Service events", status: "In Progress" },
-      { name: "Theme & Sentiment Analyser", desc: "Detects themes and summarises sentiment for leadership.", complexity: "Medium", type: "Reporting", deps: "BI layer", status: "In Progress" }
-    ]
-  },
-  {
-    id: "hr-va-f",
     name: "Leadership Briefing & Decision-Support",
     kind: "value-add",
     tier: "Value-add · Leadership",
@@ -428,13 +522,13 @@ const HR_AGENTS = [
     ]
   },
   {
-    id: "hr-va-g",
+    id: "hr-va-f",
     name: "Audit-Readiness & Remediation",
     kind: "value-add",
     tier: "Value-add · Audit Readiness",
     purpose: "Gets HR audit-ready ahead of the audit team — fixing the clear issues and flagging the rest before the audit team checks.",
-    responsibilities: "Continuously check data, transactions, approvals and documents against the audit checklist; identify the findings the audit team would raise; auto-correct clear, rule-deterministic issues within scope and write the fix back; package judgmental items as a prioritised remediation list; produce a pre-audit readiness report and track every issue to closure.",
-    process: "Cross-cutting — readiness across all six domains, ahead of each audit cycle.",
+    responsibilities: "Continuously check data, transactions, approvals and documents against the audit checklist; identify findings the audit team would raise; auto-correct clear, rule-deterministic issues within scope and write the fix back; package judgmental items as a prioritised remediation list; produce a pre-audit readiness report and track every issue to closure.",
+    process: "Cross-cutting — readiness across all seven domains, ahead of each audit cycle.",
     inputs: ["Audit criteria / checklist", "Oracle records", "Transaction and approval logs", "Document archive", "Compliance rules"],
     systems: ["Oracle (read + scoped write to fix)", "SharePoint", "ICP (validate)"],
     outputs: ["Pre-audit readiness report", "Auto-corrected clean-up", "Prioritised remediation list", "Issue-to-closure tracking"],
@@ -449,27 +543,7 @@ const HR_AGENTS = [
     ]
   },
   {
-    id: "hr-va-h",
-    name: "Task & Workload Manager",
-    kind: "value-add",
-    tier: "Value-add · Productivity",
-    purpose: "A coordinator that makes sure nothing falls through the cracks, turning every open item across HR into a tracked, owned and prioritised task.",
-    responsibilities: "Capture tasks arising from processes, requests, approvals and exceptions; assign or suggest an owner; prioritise by urgency and SLA; track progress and chase what is ageing; balance workload across the team; give each officer a clear daily worklist.",
-    process: "Cross-cutting — sits over every process that generates follow-up work.",
-    inputs: ["Open items from all agents and processes", "SLA targets", "Team roles and capacity"],
-    systems: ["Oracle (read)", "MOCA App", "Email", "Task / board layer"],
-    outputs: ["A live task board", "Personal daily worklists", "Ageing / at-risk alerts", "Workload-balance view"],
-    complexity: "Medium", impact: "High", feasibility: "High",
-    status: "In Progress", priority: "Future Phase", autonomy: "High for tracking and reminding; people own the work",
-    risks: "Low — organises, prioritises and reminds; officers do the work and decide.",
-    nextAction: "Strong early Enhance candidate — fund early to make HR workload visible and fair.",
-    subAgents: [
-      { name: "Task Capturer & Assigner", desc: "Captures open items and suggests an owner and priority.", complexity: "Medium", type: "Orchestration", deps: "All agents", status: "In Progress" },
-      { name: "Ageing Chaser", desc: "Tracks progress and chases ageing or at-risk items.", complexity: "Low", type: "Monitoring", deps: "SLA targets", status: "In Progress" }
-    ]
-  },
-  {
-    id: "hr-va-i",
+    id: "hr-va-g",
     name: "Policy, Decree & Memo Author",
     kind: "value-add",
     tier: "Value-add · Policy / Legal",
@@ -489,7 +563,7 @@ const HR_AGENTS = [
     ]
   },
   {
-    id: "hr-va-j",
+    id: "hr-va-h",
     name: "Bilingual Call-Centre (Voice)",
     kind: "value-add",
     tier: "Value-add · Employee Support",
@@ -1050,7 +1124,7 @@ const COMMS_AGENTS = [
 const DEPARTMENTS = [
   {
     id: "hr", name: "Human Resources", short: "HR", nameAr: "الموارد البشرية",
-    description: "Agentifying the full HR landscape — 6 operating domains, 53 sub-processes and ~230 documented steps across a 9-entity government operating model. Agents wrap the human-judgment layer that sits on top of Oracle HCM.",
+    description: "Agentifying the full HR landscape — 7 operating domains and 84 sub-processes across a 9-entity government operating model, now including Performance Management, Contract Renewal and Staff Mobility. 18 core agents (nine tiers) plus 8 recommended value-add agents wrap the human-judgment layer on top of Oracle HCM.",
     owner: "Total Experience Team — Corporate Support Services",
     focal: "Aisha Al Mansoori · Director, HR Transformation",
     lastUpdated: "2026-06-22",
