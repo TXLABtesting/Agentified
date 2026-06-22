@@ -8,29 +8,30 @@
 /* ---- Design tokens ------------------------------------------------------- */
 :root {
   /* Brand */
-  --brand:        #0A4B3E;   /* deep UAE green — official, calm */
-  --brand-600:    #0C5A4A;
-  --brand-700:    #083C32;
-  --brand-tint:   #E8F1EE;
+  --brand:        #5E4326;   /* deep official brown — formal, premium */
+  --brand-600:    #74552F;   /* lighter brown (hover / gradient end) */
+  --brand-700:    #3C2A16;   /* espresso (sidebar) */
+  --brand-tint:   #F1EADF;   /* warm sand tint (chip / active backgrounds) */
   --gold:         #B68A35;   /* restrained gold accent (sovereign detail) */
+  --gold-ink:     #785A1D;   /* darker gold for text on light surfaces */
   --gold-soft:    #F3ECDC;
 
   /* Ink / neutrals */
   --ink:          #14181F;
-  --ink-2:        #3C4350;
-  --ink-3:        #697586;
-  --line:         #E6E9ED;
-  --line-2:       #EFF1F4;
-  --bg:           #F4F6F8;
+  --ink-2:        #383F4B;
+  --ink-3:        #5A6470;   /* darkened for AA contrast on white */
+  --line:         #E5E7EB;
+  --line-2:       #EEF0F3;
+  --bg:           #F5F5F2;
   --surface:      #FFFFFF;
-  --surface-2:    #FAFBFC;
+  --surface-2:    #FAFAF7;
 
-  /* Semantic — the only green in the system is the government green (--brand) */
-  --green:        #0A4B3E;  --green-bg:  #E8F1EE;
-  --amber:        #9A6A12;  --amber-bg:  #FBF1DD;
-  --blue:         #1F5FB0;  --blue-bg:   #E8F0FB;
-  --red:          #B23B3B;  --red-bg:    #FBEAEA;
-  --slate:        #54607A;  --slate-bg:  #EEF1F6;
+  /* Semantic — the single brand colour is the official brown (--brand) */
+  --green:        #5E4326;  --green-bg:  #F1EADF;
+  --amber:        #835910;  --amber-bg:  #FAEFD8;
+  --blue:         #1A559E;  --blue-bg:   #E7EFFA;
+  --red:          #A02E2E;  --red-bg:    #FAE7E7;
+  --slate:        #4C5870;  --slate-bg:  #EDF0F5;
 
   /* Type scale */
   --fs-display: 30px;
@@ -85,7 +86,7 @@ a { color: inherit; text-decoration: none; }
 /* ---- Sidebar ------------------------------------------------------------- */
 .sidebar {
   background: var(--brand-700);
-  color: #DCE6E2;
+  color: #EBE2D2;
   position: sticky; top: 0; height: 100vh;
   display: flex; flex-direction: column;
   border-right: 1px solid rgba(255,255,255,.06);
@@ -103,36 +104,37 @@ a { color: inherit; text-decoration: none; }
 .brand-mark svg { width: 22px; height: 22px; }
 .brand-text { display: flex; flex-direction: column; line-height: 1.2; }
 .brand-text b { color: #fff; font-size: var(--fs-h3); letter-spacing: .2px; }
-.brand-text span { color: #8FB3A8; font-size: var(--fs-2xs); letter-spacing: .3px; }
+.brand-text span { color: #C2A878; font-size: var(--fs-2xs); letter-spacing: .3px; }
 
 .nav { padding: var(--sp-4) var(--sp-3); flex: 1; overflow-y: auto; }
 .nav__label {
-  color: #6E938A; font-size: var(--fs-2xs); font-weight: 600;
+  color: #B49869; font-size: var(--fs-2xs); font-weight: 700;
   text-transform: uppercase; letter-spacing: .8px;
   padding: var(--sp-2) var(--sp-3); margin-top: var(--sp-3);
 }
 .nav__item {
   display: flex; align-items: center; gap: var(--sp-3);
   padding: 10px var(--sp-3); border-radius: var(--r-sm);
-  color: #C2D2CC; font-size: var(--fs-body); font-weight: 500;
+  color: #E3D8C5; font-size: var(--fs-body); font-weight: 500;
   margin-bottom: 2px; border: none; background: transparent; width: 100%; text-align: left;
   transition: background .15s, color .15s;
 }
-.nav__item svg { width: 18px; height: 18px; flex: none; opacity: .9; }
-.nav__item:hover { background: rgba(255,255,255,.06); color: #fff; }
+.nav__item svg { width: 18px; height: 18px; flex: none; opacity: .92; }
+.nav__item:hover { background: rgba(255,255,255,.08); color: #fff; }
 .nav__item.is-active { background: var(--brand); color: #fff; box-shadow: inset 3px 0 0 var(--gold); }
+.nav__item.is-active svg { opacity: 1; }
 .nav__item .nav__count {
-  margin-left: auto; font-size: var(--fs-2xs); font-weight: 600;
-  background: rgba(255,255,255,.12); color: #DCE6E2;
+  margin-left: auto; font-size: var(--fs-2xs); font-weight: 700;
+  background: rgba(255,255,255,.14); color: #EBE2D2;
   padding: 1px 8px; border-radius: var(--r-full);
 }
-.nav__item.is-active .nav__count { background: rgba(255,255,255,.2); color: #fff; }
+.nav__item.is-active .nav__count { background: rgba(255,255,255,.22); color: #fff; }
 
 .sidebar__foot {
   padding: var(--sp-4) var(--sp-5); border-top: 1px solid rgba(255,255,255,.08);
-  font-size: var(--fs-2xs); color: #7FA095;
+  font-size: var(--fs-2xs); color: #B49869;
 }
-.sidebar__foot b { color: #C2D2CC; display: block; font-weight: 600; }
+.sidebar__foot b { color: #E3D8C5; display: block; font-weight: 600; }
 
 /* ---- Main + header ------------------------------------------------------- */
 .main { min-width: 0; display: flex; flex-direction: column; }
@@ -145,7 +147,7 @@ a { color: inherit; text-decoration: none; }
 .header__titles { flex: 1; min-width: 240px; }
 .eyebrow {
   display: inline-flex; align-items: center; gap: 6px;
-  color: var(--gold); font-size: var(--fs-2xs); font-weight: 700;
+  color: var(--gold-ink); font-size: var(--fs-2xs); font-weight: 700;
   letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px;
 }
 .eyebrow::before { content:""; width: 14px; height: 2px; background: var(--gold); border-radius: 2px; }
@@ -383,7 +385,7 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
 .drawer.is-open { transform: translateX(0); }
 .drawer__head { padding: var(--sp-5) var(--sp-6); border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--surface); z-index: 2; }
 .drawer__eyebrow { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); margin-bottom: 10px; }
-.drawer__dept { font-size: var(--fs-2xs); font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: .8px; }
+.drawer__dept { font-size: var(--fs-2xs); font-weight: 700; color: var(--gold-ink); text-transform: uppercase; letter-spacing: .8px; }
 .drawer__head h2 { font-size: var(--fs-h1); font-weight: 700; letter-spacing: -.2px; }
 .drawer__chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
 .drawer__body { padding: var(--sp-5) var(--sp-6) var(--sp-10); overflow-y: auto; flex: 1; }

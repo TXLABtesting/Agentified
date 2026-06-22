@@ -558,7 +558,7 @@
         '<div class="card"><div class="card__head"><h3>Display</h3></div><div class="card__body">' +
           '<div class="set-row"><div><b>Theme</b><span>Interface appearance</span></div><span class="muted">Light · Government</span></div>' +
           '<div class="set-row"><div><b>Language</b><span>Primary language</span></div><span class="muted">English (AR labels shown)</span></div>' +
-          '<div class="set-row"><div><b>Accent</b><span>Brand colour</span></div><span class="muted">UAE Green &amp; Gold</span></div>' +
+          '<div class="set-row"><div><b>Accent</b><span>Brand colour</span></div><span class="muted">Official Brown &amp; Gold</span></div>' +
         "</div></div>" +
         '<div class="card"><div class="card__head"><h3>Data Actions</h3></div><div class="card__body">' +
           '<p class="muted" style="margin-bottom:12px">Export the full dataset or reset any in-session edits.</p>' +
