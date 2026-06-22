@@ -7,9 +7,23 @@ restrained colour, strong spacing, clear hierarchy, accessible contrast,
 rounded cards and soft elevation — so it reads as an official UAE government
 internal transformation tool rather than a generic SaaS dashboard.
 
-## Run it
+## View it online (GitHub Pages)
 
-It is a static prototype — no build step, no backend.
+This is a static site, so GitHub Pages serves it directly. One-time setup
+(needs repo admin): **Settings → Pages → Source: "Deploy from a branch" →
+Branch: `claude/nice-allen-uqtnf6` → folder `/ (root)` → Save**. After ~1 minute
+the dashboard is live at:
+
+```
+https://txlabtesting.github.io/agentified/
+```
+
+It re-deploys automatically on every push. (A `.nojekyll` file is included so
+all assets are served as-is.)
+
+## Run it locally
+
+No build step, no backend.
 
 ```bash
 # from the project root
@@ -40,7 +54,34 @@ Or simply open `index.html` in a browser.
 | **Agents** | Every agent across departments in one filterable, complexity-sorted table. |
 | **Sub-Agents** | Every sub-agent with parent, task type, complexity, dependencies and status. |
 | **Pending Review** | Agents flagged *Needs Review*, grouped by department, highest complexity first. |
+| **Agent Assistant** | A chat tester to query the agent inventory in plain language. |
 | **Settings** | Dataset overview and data actions (export, reset edits). |
+
+## Agent Assistant (chat tester)
+
+A conversational assistant (under **Tools → Agent Assistant**) to quickly test
+and explore the agent list. It is **grounded in the live dataset** — including
+any in-session edits — so it always reflects exactly what is loaded. Ask things
+like:
+
+- *How many agents do we have?* · *Which department has the most agents?*
+- *Which agents need review?* · *Show high-complexity agents*
+- *Tell me about the Payroll Validation agent* (opens a profile + drawer link)
+- *What sub-agents are under Onboarding Orchestration?*
+- *Which departments are ready?* · *List the value-add agents*
+
+It runs entirely client-side — no API key — so it works on the published link.
+
+**API-ready:** the engine lives in [`assets/js/assistant.js`](assets/js/assistant.js)
+behind a clean seam. To swap in a real LLM later, stand up a small serverless
+function that calls the Claude API (key stays server-side), then set:
+
+```js
+Assistant.config.mode = "api";
+Assistant.config.endpoint = "/api/chat"; // returns { answer: "<html|text>" }
+```
+
+The grounded engine remains as an automatic offline fallback.
 
 ## Interactions
 

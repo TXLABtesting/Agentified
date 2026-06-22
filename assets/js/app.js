@@ -14,8 +14,11 @@
     deptId: null,
     search: "",
     filters: { complexity: [], status: [], priority: [], kind: [] },
-    filterOpen: false
+    filterOpen: false,
+    chat: []
   };
+  /* expose live (edit-aware) data to the assistant engine */
+  window.getDashboardData = function () { return DATA; };
 
   /* ---- Icon set (inline SVG, 24x24 stroke) ------------------------------ */
   const I = {
@@ -49,7 +52,10 @@
     shield:    'M12 2l8 4v6c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-4z',
     gauge:     'M12 14a2 2 0 100-4 2 2 0 000 4zm0-10a10 10 0 00-9 14h18A10 10 0 0012 4zm0 0v2m6.5 4.5l-1.4 1.4',
     list:      'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
-    menu:      'M3 6h18M3 12h18M3 18h18'
+    menu:      'M3 6h18M3 12h18M3 18h18',
+    chat:      'M21 11.5a8.4 8.4 0 01-8.5 8.5 8.4 8.4 0 01-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 01-.9-3.8A8.5 8.5 0 0112.5 3a8.4 8.4 0 018.5 8.5z',
+    send:      'M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z',
+    spark:     'M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17l-1.9-5.1L4.5 10l5.6-1.4L12 3z'
   };
   function icon(name, cls) {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
@@ -200,6 +206,9 @@
         '<button class="nav__item' + (active === it.id ? " is-active" : "") + '" data-nav="' + it.id + '">' +
         icon(it.icon) + "<span>" + it.label + "</span>" +
         (it.count != null ? '<span class="nav__count">' + it.count + "</span>" : "") + "</button>").join("") +
+      '<div class="nav__label">Tools</div>' +
+      '<button class="nav__item' + (active === "assistant" ? " is-active" : "") + '" data-nav="assistant">' +
+        icon("chat") + "<span>Agent Assistant</span></button>" +
       '<div class="nav__label">System</div>' +
       '<button class="nav__item' + (active === "settings" ? " is-active" : "") + '" data-nav="settings">' +
         icon("settings") + "<span>Settings</span></button>";
@@ -565,6 +574,76 @@
       "<div>" + esc(sub || "Try adjusting your search or filters.") + "</div></div>";
   }
 
+  /* ---- Agent Assistant (chat tester) ----------------------------------- */
+  function viewAssistant() {
+    const g = globalStats();
+    const apiMode = window.Assistant && window.Assistant.config.mode === "api";
+    return '<div class="page"><div class="page__head"><h2>Agent Assistant</h2>' +
+      "<p>Test the agent inventory in plain language. Grounded in the live dataset — " +
+      g.total + " agents, " + g.subs + " sub-agents across " + g.depts + " departments." +
+      (apiMode ? " · <b>API mode</b>" : " · Built-in mode") + "</p></div>" +
+      '<div class="card chat-wrap">' +
+        '<div class="chat-bar-top">' +
+          '<span class="chat-bot-id">' + icon("spark") + " Agent Assistant</span>" +
+          '<span class="muted" style="font-size:var(--fs-xs)">Answers reflect your current (incl. edited) data</span>' +
+          '<button class="btn btn--sm btn--ghost" data-chat-clear style="margin-left:auto">Clear</button>' +
+        "</div>" +
+        '<div class="chat-scroll" id="chatScroll">' + chatMessagesHTML() + "</div>" +
+        '<div class="chat-foot">' +
+          (STATE.chat.length <= 1 ? suggestChipsHTML() : "") +
+          '<form class="chat-input-row" id="chatForm" autocomplete="off">' +
+            '<input class="chat-input" id="chatInput" placeholder="Ask about agents, departments, complexity, what needs review…" />' +
+            '<button class="btn btn--primary chat-send" type="submit" aria-label="Send">' + icon("send") + "</button>" +
+          "</form>" +
+        "</div>" +
+      "</div></div>";
+  }
+  function suggestChipsHTML() {
+    const s = (window.Assistant && window.Assistant.suggestions()) || [];
+    return '<div class="chat-suggest">' + s.map((x) =>
+      '<button class="chat-chip" data-suggest="' + esc(x) + '">' + esc(x) + "</button>").join("") + "</div>";
+  }
+  function chatMessagesHTML() {
+    if (!STATE.chat.length) {
+      return '<div class="msg msg--bot"><div class="msg__avatar">' + icon("spark") + "</div>" +
+        '<div class="msg__bubble"><p>I’m the <b>Agent Assistant</b>. Ask me anything about the agent inventory ' +
+        "— counts, a department, a specific agent, complexity, or what needs review.</p></div></div>";
+    }
+    return STATE.chat.map((m) => {
+      if (m.role === "user")
+        return '<div class="msg msg--user"><div class="msg__bubble">' + esc(m.text) + "</div></div>";
+      if (m.typing)
+        return '<div class="msg msg--bot"><div class="msg__avatar">' + icon("spark") + "</div>" +
+          '<div class="msg__bubble"><span class="typing"><i></i><i></i><i></i></span></div></div>';
+      return '<div class="msg msg--bot"><div class="msg__avatar">' + icon("spark") + "</div>" +
+        '<div class="msg__bubble">' + m.html + "</div></div>";
+    }).join("");
+  }
+  function renderChat() {
+    const sc = $("#chatScroll");
+    if (!sc) return;
+    sc.innerHTML = chatMessagesHTML();
+    sc.scrollTop = sc.scrollHeight;
+    // hide suggestions once a conversation starts
+    const foot = sc.parentElement.querySelector(".chat-suggest");
+    if (foot && STATE.chat.length > 1) foot.classList.add("hide");
+  }
+  function sendChat(text) {
+    text = (text || "").trim();
+    if (!text) return;
+    STATE.chat.push({ role: "user", text: text });
+    STATE.chat.push({ role: "bot", typing: true });
+    renderChat();
+    const inp = $("#chatInput"); if (inp) inp.value = "";
+    window.Assistant.ask(text).then((ans) => {
+      // replace the trailing typing placeholder
+      for (let i = STATE.chat.length - 1; i >= 0; i--) {
+        if (STATE.chat[i].typing) { STATE.chat[i] = { role: "bot", html: ans.html }; break; }
+      }
+      renderChat();
+    });
+  }
+
   /* ---- Drawer (agent detail) ------------------------------------------- */
   function openAgent(id) {
     const a = findAgent(id);
@@ -756,7 +835,7 @@
     const h = location.hash.replace(/^#\/?/, "");
     const parts = h.split("/");
     if (parts[0] === "department" && parts[1]) { STATE.view = "department"; STATE.deptId = parts[1]; return; }
-    const valid = ["overview", "departments", "agents", "subagents", "review", "settings"];
+    const valid = ["overview", "departments", "agents", "subagents", "review", "assistant", "settings"];
     STATE.view = valid.includes(parts[0]) ? parts[0] : "overview";
   }
   function go(view, deptId) {
@@ -769,23 +848,27 @@
     const v = STATE.view;
     const map = {
       overview: viewOverview, departments: viewDepartments, department: viewDepartmentDetail,
-      agents: viewAgents, subagents: viewSubAgents, review: viewReview, settings: viewSettings
+      agents: viewAgents, subagents: viewSubAgents, review: viewReview, assistant: viewAssistant, settings: viewSettings
     };
     $("#view").innerHTML = (map[v] || viewOverview)();
     window.scrollTo({ top: 0 });
+    if (v === "assistant") { const sc = $("#chatScroll"); if (sc) sc.scrollTop = sc.scrollHeight; setTimeout(focusChat, 40); }
   }
 
   /* ---- Events (delegated) ---------------------------------------------- */
   document.addEventListener("click", function (e) {
     const t = e.target.closest("[data-nav],[data-goto-dept],[data-agent],[data-edit],[data-save]," +
       "[data-close-drawer],[data-close-modal],[data-add],[data-export],[data-share],[data-reset]," +
-      "[data-filter-toggle],[data-filter],[data-apply-filters],[data-clear-filters],[data-menu]");
+      "[data-filter-toggle],[data-filter],[data-apply-filters],[data-clear-filters],[data-menu]," +
+      "[data-suggest],[data-chat-clear]");
     if (!t) {
       // close filter popover on outside click
       if (STATE.filterOpen && !e.target.closest(".has-pop")) { STATE.filterOpen = false; renderHeader(); }
       return;
     }
     if (t.dataset.nav) { STATE.filterOpen = false; closeSidebarMobile(); go(t.dataset.nav); }
+    else if (t.dataset.suggest) { sendChat(t.dataset.suggest); }
+    else if (t.hasAttribute("data-chat-clear")) { STATE.chat = []; renderBody(); setTimeout(focusChat, 30); }
     else if (t.dataset.gotoDept) { go("department", t.dataset.gotoDept); }
     else if (t.dataset.agent) { openAgent(t.dataset.agent); }
     else if (t.dataset.edit) { e.stopPropagation(); openEdit(t.dataset.edit); }
@@ -821,6 +904,16 @@
     if (e.target.id === "modalScrim") closeModal();
   });
 
+  // chat submit
+  document.addEventListener("submit", function (e) {
+    if (e.target.id === "chatForm") {
+      e.preventDefault();
+      const inp = $("#chatInput");
+      if (inp) sendChat(inp.value);
+    }
+  });
+  function focusChat() { const i = $("#chatInput"); if (i) i.focus(); }
+
   // search (debounced-ish)
   let searchTimer;
   document.addEventListener("input", function (e) {
@@ -840,7 +933,7 @@
     renderNav();
     const map = {
       overview: viewOverview, departments: viewDepartments, department: viewDepartmentDetail,
-      agents: viewAgents, subagents: viewSubAgents, review: viewReview, settings: viewSettings
+      agents: viewAgents, subagents: viewSubAgents, review: viewReview, assistant: viewAssistant, settings: viewSettings
     };
     $("#view").innerHTML = (map[STATE.view] || viewOverview)();
   }
