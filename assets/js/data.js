@@ -585,6 +585,32 @@ const HR_AGENTS = [
   }
 ];
 
+/* -- HR agent-to-agent collaboration ("speaks to") ------------------------ */
+const HR_TALKS = {
+  "hr-01": ["hr-12", "hr-13", "hr-02"],        // Virtual Assistant -> Approvals, Leave, Letters
+  "hr-02": ["hr-03"],                            // Letters -> Document Intelligence
+  "hr-05": ["hr-03", "hr-04", "hr-12"],         // Onboarding -> Doc Intel, Compliance, Approvals
+  "hr-06": ["hr-09", "hr-03", "hr-12"],         // Offboarding -> Settlement, Doc Intel, Approvals
+  "hr-07": ["hr-12"],                            // Decree Drafting -> Approvals
+  "hr-08": ["hr-10", "hr-12"],                  // Payroll Validation -> Off-cycle, Approvals
+  "hr-09": ["hr-08", "hr-12"],                  // Settlement -> Payroll, Approvals
+  "hr-10": ["hr-12"],                            // Off-cycle -> Approvals
+  "hr-13": ["hr-03", "hr-12"],                  // Leave -> Doc Intel, Approvals
+  "hr-14": ["hr-12"],                            // Attendance/Violations -> Approvals
+  "hr-15": ["hr-16", "hr-12"],                  // Performance Cycle -> Objectives, Approvals
+  "hr-16": ["hr-15"],                            // Objectives -> Performance Cycle
+  "hr-17": ["hr-15", "hr-12"],                  // Contract Renewal -> Performance, Approvals
+  "hr-18": ["hr-07", "hr-12"],                  // Staff Mobility -> Decree Drafting, Approvals
+  "hr-va-a": ["hr-05"],                          // Onboarding Concierge -> Onboarding
+  "hr-va-c": ["hr-01"],                          // Knowledge-Capture -> Virtual Assistant
+  "hr-va-d": ["hr-12", "hr-13"],               // Manager Companion -> Approvals, Leave
+  "hr-va-e": ["hr-11", "hr-12", "hr-04"],      // Leadership Briefing -> Analytics, Approvals, Compliance
+  "hr-va-f": ["hr-04"],                          // Audit-Readiness -> Compliance
+  "hr-va-g": ["hr-07"],                          // Policy/Decree Author -> Decree Drafting
+  "hr-va-h": ["hr-01"]                           // Call-Centre -> Virtual Assistant
+};
+HR_AGENTS.forEach((a) => { if (HR_TALKS[a.id]) a.talksTo = HR_TALKS[a.id]; });
+
 /* -- Other departments: realistic mock data ------------------------------- */
 const PROCUREMENT_AGENTS = [
   {

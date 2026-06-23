@@ -580,6 +580,7 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
 .mm-svg { position: absolute; top: 0; left: 0; pointer-events: none; }
 .mm-link { fill: none; stroke: #D8CFC0; stroke-width: 1.6; }
 .mm-link--d0 { stroke: var(--brand); opacity: .45; stroke-width: 2; }
+.mm-clink { fill: none; stroke: var(--gold-ink); stroke-width: 1.5; stroke-dasharray: 5 4; opacity: .7; }
 
 .mm-node { position: absolute; transform: translateY(-50%); box-sizing: border-box; display: flex; align-items: center; gap: 10px; }
 .mm-tx { min-width: 0; }
@@ -610,11 +611,28 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
 .mm-team .mm-tx b { font-size: var(--fs-xs); color: var(--brand-700); }
 
 /* main agent = team member card */
-.mm-member { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--slate);
+.mm-member { display: block; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--slate);
   border-radius: var(--r-md); padding: 9px 12px; cursor: pointer; box-shadow: var(--sh-1);
   transition: box-shadow .15s, transform .12s; }
 .mm-member:hover { box-shadow: var(--sh-2); transform: translate(2px, -50%); z-index: 2; }
+.mm-member__top { display: flex; align-items: center; gap: 10px; }
+.mm-member .mm-tx { flex: 1; min-width: 0; }
 .mm-member .mm-tx b { font-size: 12.5px; color: var(--ink); }
+
+/* system dependency chips (Oracle, Email, ICP, …) */
+.mm-sys { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+.mm-syschip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px 2px 5px;
+  border-radius: var(--r-full); font-size: 10px; font-weight: 600;
+  background: var(--surface-2); border: 1px solid var(--line); color: var(--ink-2); }
+.mm-syschip svg { width: 12px; height: 12px; }
+.mm-sys--oracle { background: var(--brand-tint); border-color: #E2D5C0; color: var(--brand-700); }
+.mm-sys--email { background: var(--blue-bg); border-color: #CFE0F4; color: var(--blue); }
+.mm-sys--icp { background: var(--amber-bg); border-color: #EBDCBB; color: var(--amber); }
+.mm-sys--moca { background: var(--green-bg); border-color: #CFE6D7; color: var(--green); }
+
+.mm-leg-arrow svg, .mm-leg-sys svg { width: 14px; height: 14px; }
+.mm-leg-arrow svg { color: var(--gold-ink); }
+.mm-leg-sys svg { color: var(--brand); }
 
 /* sub-agent = report chip */
 .mm-rep { background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--r-full);

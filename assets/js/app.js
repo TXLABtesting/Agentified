@@ -17,7 +17,8 @@
     filterOpen: false,
     chat: [],
     mindDept: "hr",
-    mindSubs: true
+    mindSubs: true,
+    mindLinks: true
   };
   /* expose live (edit-aware) data to the assistant engine */
   window.getDashboardData = function () { return DATA; };
@@ -58,7 +59,12 @@
     chat:      'M21 11.5a8.4 8.4 0 01-8.5 8.5 8.4 8.4 0 01-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 01-.9-3.8A8.5 8.5 0 0112.5 3a8.4 8.4 0 018.5 8.5z',
     send:      'M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z',
     spark:     'M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17l-1.9-5.1L4.5 10l5.6-1.4L12 3z',
-    mindmap:   'M18 8a3 3 0 100-6 3 3 0 000 6zM6 15a3 3 0 100-6 3 3 0 000 6zM18 22a3 3 0 100-6 3 3 0 000 6zM8.6 13.5l6.8 4M15.4 6.5l-6.8 4'
+    mindmap:   'M18 8a3 3 0 100-6 3 3 0 000 6zM6 15a3 3 0 100-6 3 3 0 000 6zM18 22a3 3 0 100-6 3 3 0 000 6zM8.6 13.5l6.8 4M15.4 6.5l-6.8 4',
+    db:        'M12 3c4.4 0 8 1.3 8 3s-3.6 3-8 3-8-1.3-8-3 3.6-3 8-3zM4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6',
+    mail:      'M4 5h16a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V7a2 2 0 012-2zM2 7l10 6 10-6',
+    app:       'M7 2h10a2 2 0 012 2v16a2 2 0 01-2 2H7a2 2 0 01-2-2V4a2 2 0 012-2zM10 18h4',
+    idcard:    'M3 5h18a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V6a1 1 0 011-1zM7 10a2 2 0 100 4 2 2 0 000-4zM13 10h5M13 14h5M4.5 17a3 3 0 015 0',
+    folder:    'M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z'
   };
   function icon(name, cls) {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
@@ -561,6 +567,29 @@
     "In Progress": ["var(--blue)", "var(--blue-bg)"],
     "Needs Review": ["var(--amber)", "var(--amber-bg)"]
   };
+  // canonical external systems an agent may depend on (order = match priority)
+  const SYSREG = [
+    { key: "oracle", label: "Oracle", icon: "db", re: /oracle/i },
+    { key: "email", label: "Email", icon: "mail", re: /email|emanasa/i },
+    { key: "moca", label: "MOCA App", icon: "app", re: /moca/i },
+    { key: "icp", label: "ICP", icon: "idcard", re: /\bicp\b/i },
+    { key: "sharepoint", label: "SharePoint", icon: "folder", re: /sharepoint|archive/i },
+    { key: "gpssa", label: "GPSSA", icon: "shield", re: /gpssa/i },
+    { key: "nextcare", label: "Nextcare", icon: "shield", re: /nextcare/i },
+    { key: "fahr", label: "FAHR", icon: "doc", re: /fahr|iloe/i },
+    { key: "whatsapp", label: "WhatsApp", icon: "chat", re: /whatsapp|hotline|telephony/i },
+    { key: "bi", label: "BI / Analytics", icon: "pulse", re: /\bbi\b|analytics layer|performance system/i },
+    { key: "itad", label: "IT / Directory", icon: "cpu", re: /it\/ad|directory|identity/i }
+  ];
+  function systemsFor(a) {
+    const out = [], seen = {};
+    (a.systems || []).forEach((s) => {
+      const m = SYSREG.find((x) => x.re.test(s));
+      const e = m || { key: "other", label: s, icon: "link" };
+      if (!seen[e.key]) { seen[e.key] = 1; out.push(e); }
+    });
+    return out;
+  }
   function roleFromTier(t) { if (!t) return "Agent"; const p = t.split("·"); return (p[p.length - 1] || t).trim(); }
   function initials(name) {
     const skip = { "hr": 1, "and": 1, "agent": 1, "&": 1, "the": 1, "of": 1 };
@@ -585,17 +614,20 @@
         meta: d.agents.length + " agents" + (subs ? " · " + subCount(d) + " sub-agents" : "") + " · 1 orchestrator",
         children: d.agents.map((a) => ({
           type: "agent", id: a.id, label: a.name, status: a.status, complexity: a.complexity, kind: a.kind, tier: a.tier,
+          systems: a.systems, talksTo: a.talksTo,
           children: subs ? (a.subAgents || []).map((s) => ({ type: "sub", parentId: a.id, label: s.name, status: s.status, complexity: s.complexity })) : []
         })) };
     }
 
-    // recursive layout: leaves get equal slots; parents centre on their children
-    const links = [], nodes = [];
+    // recursive layout: leaves get a slot sized to their card; parents centre on children
+    const links = [], nodes = [], byId = {};
+    const slotH = (n) => n.type === "sub" ? 58 : n.type === "agent" ? 120 : n.type === "dept" ? 72 : 70;
     let cursor = MM.pad;
     (function layout(node, depth) {
       node.x = MM.col[depth]; node.w = MM.width[depth]; node.depth = depth;
+      if (node.id) byId[node.id] = node;
       if (!node.children || !node.children.length) {
-        node.y = cursor + MM.rowH / 2; cursor += MM.rowH;
+        const h = slotH(node); node.y = cursor + h / 2; cursor += h;
       } else {
         node.children.forEach((c) => layout(c, depth + 1));
         node.y = (node.children[0].y + node.children[node.children.length - 1].y) / 2;
@@ -611,6 +643,21 @@
       const x1 = p.x + p.w, x2 = c.x, mx = (x1 + x2) / 2;
       return '<path class="mm-link mm-link--d' + p.depth + '" d="M' + x1 + ',' + p.y + ' C' + mx + ',' + p.y + ' ' + mx + ',' + c.y + ' ' + x2 + ',' + c.y + '"/>';
     }).join("");
+
+    // agent-to-agent "speaks to" links (department mode only), arcing on the left
+    let collabPaths = "", collabCount = 0;
+    if (!isAll && STATE.mindLinks) {
+      nodes.forEach((n) => {
+        if (n.type !== "agent" || !n.talksTo) return;
+        n.talksTo.forEach((tid) => {
+          const t = byId[tid]; if (!t) return;
+          collabCount++;
+          const x = n.x, cx = n.x - 52 - Math.min(40, Math.abs(n.y - t.y) / 8);
+          collabPaths += '<path class="mm-clink" marker-end="url(#mm-arrow)" d="M' + x + ',' + n.y +
+            ' C' + cx + ',' + n.y + ' ' + cx + ',' + t.y + ' ' + (t.x - 3) + ',' + t.y + '"/>';
+        });
+      });
+    }
 
     const nodeHtml = nodes.map((n) => {
       const pos = 'left:' + n.x + 'px;top:' + n.y + 'px;width:' + n.w + 'px';
@@ -628,12 +675,18 @@
       }
       if (n.type === "agent") {
         const tint = STATUS_TINT[n.status] || ["var(--slate)", "var(--slate-bg)"];
+        const sys = isAll ? [] : systemsFor(n);
+        const sysRow = sys.length ? '<div class="mm-sys">' + sys.map((x) =>
+          '<span class="mm-syschip mm-sys--' + x.key + '" title="Connects to ' + esc(x.label) + '">' +
+          icon(x.icon) + "<span>" + esc(x.label) + "</span></span>").join("") + "</div>" : "";
         return '<div class="mm-node mm-member" data-agent="' + n.id + '" title="' + esc(n.label) +
           '" style="' + pos + ";border-left-color:" + tint[0] + '">' +
-          '<span class="mm-av" style="color:' + tint[0] + ";background:" + tint[1] + '">' + icon("cpu") + "</span>" +
-          '<div class="mm-tx"><b>' + esc(n.label) + "</b>" +
-          '<span class="mm-role"><i class="mm-dot" style="background:' + tint[0] + '"></i>' +
-          esc(roleFromTier(n.tier)) + " · " + esc(n.complexity) + "</span></div></div>";
+          '<div class="mm-member__top">' +
+            '<span class="mm-av" style="color:' + tint[0] + ";background:" + tint[1] + '">' + icon("cpu") + "</span>" +
+            '<div class="mm-tx"><b>' + esc(n.label) + "</b>" +
+            '<span class="mm-role"><i class="mm-dot" style="background:' + tint[0] + '"></i>' +
+            esc(roleFromTier(n.tier)) + " · " + esc(n.complexity) + "</span></div>" +
+          "</div>" + sysRow + "</div>";
       }
       // sub-agent = junior member chip
       return '<div class="mm-node mm-rep" data-agent="' + n.parentId + '" title="' + esc(n.label) +
@@ -647,23 +700,37 @@
 
     const controls =
       '<div class="mm-controls"><div class="mm-pills">' + pills + "</div>" +
-      (isAll ? "" : '<button class="btn btn--sm' + (STATE.mindSubs ? " btn--primary" : "") + '" data-mindsubs>' +
-        icon("sub") + (STATE.mindSubs ? "Hide sub-agents" : "Show sub-agents") + "</button>") + "</div>";
+      '<div class="flex gap-2">' +
+      (isAll ? "" :
+        '<button class="btn btn--sm' + (STATE.mindLinks ? " btn--primary" : "") + '" data-mindlinks>' +
+          icon("mindmap") + (STATE.mindLinks ? "Hide agent links" : "Show agent links") + "</button>" +
+        '<button class="btn btn--sm' + (STATE.mindSubs ? " btn--primary" : "") + '" data-mindsubs>' +
+          icon("sub") + (STATE.mindSubs ? "Hide sub-agents" : "Show sub-agents") + "</button>") +
+      "</div></div>";
 
     const legend =
       '<div class="mm-legend">' +
         '<span><i style="background:var(--green)"></i>Ready</span>' +
         '<span><i style="background:var(--blue)"></i>In progress</span>' +
         '<span><i style="background:var(--amber)"></i>Needs review</span>' +
+        (isAll ? "" : '<span class="mm-leg-arrow">' + icon("mindmap") + "Speaks to another agent</span>" +
+          '<span class="mm-leg-sys">' + icon("db") + "Needs a system (e.g. Oracle, Email)</span>") +
         '<span class="muted">Click any member to open its agent</span>' +
       "</div>";
 
+    const desc = isAll ? "Showing every department and its agents."
+      : "Showing the " + esc((findDept(STATE.mindDept) || {}).name || "") + " team — agents that need each other speak directly" +
+        (STATE.mindLinks && collabCount ? " (" + collabCount + " links)" : "") +
+        ", and each card shows the systems it relies on.";
+
     return '<div class="page"><div class="page__head"><h2>Agent team</h2>' +
-      "<p>The agents as a team — the orchestrator leads, main agents report to it, and each agent has its own sub-agents. " +
-      (isAll ? "Showing every department and its agents." : "Showing the " + esc((findDept(STATE.mindDept) || {}).name || "") + " team" + (STATE.mindSubs ? " and each agent's sub-agents." : ".")) + "</p></div>" +
+      "<p>The agents as a team — the orchestrator leads, agents collaborate, and each card shows what it connects to. " + desc + "</p></div>" +
       controls + legend +
       '<div class="mm-canvas"><div class="mm-inner" style="width:' + maxRight + "px;height:" + totalH + 'px">' +
-        '<svg class="mm-svg" width="' + maxRight + '" height="' + totalH + '">' + paths + "</svg>" +
+        '<svg class="mm-svg" width="' + maxRight + '" height="' + totalH + '">' +
+          '<defs><marker id="mm-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">' +
+            '<path d="M0,0 L10,5 L0,10 z" fill="var(--gold-ink)"/></marker></defs>' +
+          paths + collabPaths + "</svg>" +
         nodeHtml +
       "</div></div></div>";
   }
@@ -990,7 +1057,7 @@
     const t = e.target.closest("[data-nav],[data-goto-dept],[data-agent],[data-edit],[data-save]," +
       "[data-close-drawer],[data-close-modal],[data-add],[data-export],[data-share],[data-reset]," +
       "[data-filter-toggle],[data-filter],[data-apply-filters],[data-clear-filters],[data-menu]," +
-      "[data-suggest],[data-chat-clear],[data-mind],[data-mindsubs]");
+      "[data-suggest],[data-chat-clear],[data-mind],[data-mindsubs],[data-mindlinks]");
     if (!t) {
       // close filter popover on outside click
       if (STATE.filterOpen && !e.target.closest(".has-pop")) { STATE.filterOpen = false; renderHeader(); }
@@ -999,6 +1066,7 @@
     if (t.dataset.nav) { STATE.filterOpen = false; closeSidebarMobile(); go(t.dataset.nav); }
     else if (t.dataset.mind) { STATE.mindDept = t.dataset.mind; renderBody(); }
     else if (t.hasAttribute("data-mindsubs")) { STATE.mindSubs = !STATE.mindSubs; renderBody(); }
+    else if (t.hasAttribute("data-mindlinks")) { STATE.mindLinks = !STATE.mindLinks; renderBody(); }
     else if (t.dataset.suggest) { sendChat(t.dataset.suggest); }
     else if (t.hasAttribute("data-chat-clear")) { STATE.chat = []; renderBody(); setTimeout(focusChat, 30); }
     else if (t.dataset.gotoDept) { go("department", t.dataset.gotoDept); }
