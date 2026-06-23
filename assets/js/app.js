@@ -617,10 +617,15 @@
     const isAll = STATE.mindDept === "all";
     let root;
     if (isAll) {
+      const subs = STATE.mindSubs;
       root = { type: "root", label: "Agentic Transformation", meta: g.depts + " departments · " + g.total + " agents",
-        children: DATA.departments.map((d) => ({
+        children: DATA.departments.filter((d) => d.agents.length).map((d) => ({
           type: "dept", id: d.id, label: d.name, meta: d.agents.length + " agents",
-          children: d.agents.map((a) => ({ type: "agent", id: a.id, label: a.name, status: a.status, complexity: a.complexity, children: [] }))
+          children: d.agents.map((a) => ({
+            type: "agent", id: a.id, label: a.name, status: a.status, complexity: a.complexity, kind: a.kind, tier: a.tier,
+            systems: a.systems, talksTo: a.talksTo,
+            children: subs ? (a.subAgents || []).map((s) => ({ type: "sub", parentId: a.id, label: s.name, status: s.status, complexity: s.complexity })) : []
+          }))
         })) };
     } else {
       const d = findDept(STATE.mindDept) || DATA.departments[0];
@@ -737,9 +742,9 @@
       '<div class="flex gap-2">' +
       (isAll ? "" :
         '<button class="btn btn--sm' + (STATE.mindLinks ? " btn--primary" : "") + '" data-mindlinks>' +
-          icon("mindmap") + (STATE.mindLinks ? "Hide agent links" : "Show agent links") + "</button>" +
+          icon("mindmap") + (STATE.mindLinks ? "Hide agent links" : "Show agent links") + "</button>") +
         '<button class="btn btn--sm' + (STATE.mindSubs ? " btn--primary" : "") + '" data-mindsubs>' +
-          icon("sub") + (STATE.mindSubs ? "Hide sub-agents" : "Show sub-agents") + "</button>") +
+          icon("sub") + (STATE.mindSubs ? "Hide sub-agents" : "Show sub-agents") + "</button>" +
         '<button class="btn btn--sm" data-mindfull>' + icon(STATE.mindFull ? "shrink" : "expand") +
           (STATE.mindFull ? "Exit full screen" : "Full screen") + "</button>" +
       "</div></div>";
