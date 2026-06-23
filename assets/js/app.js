@@ -405,61 +405,68 @@
     const d = findDept(STATE.deptId);
     if (!d) return viewDepartments();
     const s = deptStats(d);
-    const crumbs = '<div class="crumbs">' +
-      '<button data-nav="overview">Overview</button><span class="sep">/</span>' +
-      '<button data-nav="departments">Departments</button><span class="sep">/</span>' +
-      '<span class="current">' + esc(d.name) + "</span></div>";
+    const back = '<button class="backlink" data-nav="departments">' + icon("chevL") + "Back to departments</button>";
 
     const hero =
-      '<div class="card"><div class="card__body"><div class="dept-hero">' +
-        '<div class="dept-hero__main">' +
-          '<div class="flex items-center gap-3" style="margin-bottom:8px">' +
-            '<span class="dept-icon">' + icon(deptIconName(d.id)) + "</span>" +
-            "<h2>" + esc(d.name) + ' <span class="ar" dir="rtl">' + esc(d.nameAr) + "</span></h2>" +
-            statusChip(s.deptStatus) +
+      '<div class="card"><div class="card__body">' +
+        '<div class="dept-hero">' +
+          '<div class="dept-hero__main">' +
+            '<div class="dept-hero__head">' +
+              '<span class="dept-icon dept-icon--lg">' + icon(deptIconName(d.id)) + "</span>" +
+              "<div>" +
+                '<div class="flex items-center gap-3" style="flex-wrap:wrap">' +
+                  "<h2>" + esc(d.name) + ' <span class="ar" dir="rtl">' + esc(d.nameAr) + "</span></h2>" +
+                  statusChip(s.deptStatus) +
+                "</div>" +
+                '<p class="dept-hero__desc">' + esc(d.description) + "</p>" +
+                '<div class="dept-hero__meta">' +
+                  '<span class="metaitem">' + icon("user") + esc(d.focal) + "</span>" +
+                  '<span class="metaitem">' + icon("calendar") + "<b>Updated</b> " + fmtDate(d.lastUpdated) + "</span>" +
+                "</div>" +
+              "</div>" +
+            "</div>" +
           "</div>" +
-          '<p class="dept-hero__desc">' + esc(d.description) + "</p>" +
-          '<div class="dept-hero__meta">' +
-            '<div class="metaitem"><b>Owner</b><span>' + esc(d.owner) + "</span></div>" +
-            '<div class="metaitem"><b>Focal Point</b><span>' + esc(d.focal) + "</span></div>" +
-            '<div class="metaitem"><b>Last Updated</b><span>' + fmtDate(d.lastUpdated) + "</span></div>" +
+          '<div class="dept-hero__stats">' +
+            '<div class="mini-stat"><b>' + s.count + "</b><span>Main agents</span></div>" +
+            '<div class="mini-stat"><b>' + s.subs + "</b><span>Sub-agents</span></div>" +
+            '<div class="mini-stat"><b>' + s.avg.toFixed(1) + "</b><span>Avg complexity</span></div>" +
+            '<div class="mini-stat"><b>' + s.review + "</b><span>Needs review</span></div>" +
           "</div>" +
         "</div>" +
-        '<div class="dept-hero__stats">' +
-          '<div class="mini-stat"><b>' + s.count + "</b><span>Main Agents</span></div>" +
-          '<div class="mini-stat"><b>' + s.subs + "</b><span>Sub-Agents</span></div>" +
-          '<div class="mini-stat"><b>' + s.avg.toFixed(1) + "</b><span>Overall Complexity</span></div>" +
-          '<div class="mini-stat"><b>' + s.readiness + "%</b><span>Readiness Score</span></div>" +
+        '<div class="dept-readiness">' +
+          '<div class="dept-readiness__top"><span>Department readiness</span><b>' + s.readiness + "%</b></div>" +
+          '<div class="readiness-track"><i style="width:' + s.readiness + '%"></i></div>' +
         "</div>" +
-      "</div></div></div>";
+      "</div></div>";
 
     const filtered = d.agents.filter((a) => agentMatches(Object.assign({ deptName: d.name }, a)));
     const agentCards = filtered.length ? filtered.map((a) => agentRow(a, d)).join("") : emptyState();
 
-    return '<div class="page">' + crumbs + hero +
-      '<div class="section"><div class="section__head"><h3>Main Agents</h3>' +
-        '<span class="hint">' + filtered.length + " of " + d.agents.length + " agent" +
-        (d.agents.length > 1 ? "s" : "") + (hasFilters() ? " match filters" : "") + "</span></div>" +
-        '<div class="agent-list">' + agentCards + "</div></div></div>";
+    return '<div class="page">' + back + hero +
+      '<div class="section"><div class="section__head"><h3>Main agents</h3>' +
+        '<span class="hint">' + filtered.length + (hasFilters() && filtered.length !== d.agents.length ? " of " + d.agents.length : "") +
+        " agent" + (filtered.length !== 1 ? "s" : "") + " · " + s.subs + " sub-agents</span></div>" +
+        '<div class="agent-grid">' + agentCards + "</div></div></div>";
   }
 
-  function agentRow(a, d) {
-    return '<div class="agent-card" data-agent="' + a.id + '">' +
-      '<div class="agent-card__main">' +
-        '<div class="agent-card__title"><h4>' + esc(a.name) + "</h4>" + kindChip(a.kind) +
-          '<span class="chip chip--outline">' + esc(a.tier) + "</span></div>" +
-        '<p class="agent-card__desc">' + esc(a.purpose) + "</p>" +
-        '<div class="agent-card__chips">' +
-          statusChip(a.status) + prioChip(a.priority) + cplxChip(a.complexity) +
-          '<span class="chip chip--outline">Impact: ' + esc(a.impact) + "</span>" +
-          '<span class="chip chip--outline">Feasibility: ' + esc(a.feasibility) + "</span>" +
-        "</div>" +
+  function levelChip(level, kind) { return chip(level + " " + kind, COLOR.level[level] || "slate"); }
+
+  function agentRow(a) {
+    return '<div class="acard" data-agent="' + a.id + '">' +
+      '<div class="acard__head"><h4>' + esc(a.name) + "</h4>" + statusChip(a.status) + "</div>" +
+      '<p class="acard__desc">' + esc(a.purpose) + "</p>" +
+      '<div class="acard__process">' + icon("layers") + esc(a.process.split(";")[0].split("—")[0].trim().slice(0, 60)) + "</div>" +
+      '<div class="acard__chips">' +
+        chip(a.complexity + " complexity", COLOR.complexity[a.complexity] || "slate") +
+        levelChip(a.impact, "impact") +
+        levelChip(a.feasibility, "feasibility") +
+        prioChip(a.priority) +
       "</div>" +
-      '<div class="agent-card__side">' +
+      '<div class="acard__foot">' +
         '<span class="subcount">' + icon("sub") + "<b>" + (a.subAgents ? a.subAgents.length : 0) + "</b> sub-agents</span>" +
-        '<div class="agent-card__actions">' +
-          '<button class="btn btn--sm" data-agent="' + a.id + '">View ' + icon("chevR") + "</button>" +
+        '<div class="acard__actions">' +
           '<button class="btn btn--sm btn--icon" data-edit="' + a.id + '" title="Edit">' + icon("edit") + "</button>" +
+          '<button class="btn btn--sm btn--primary" data-agent="' + a.id + '">View details ' + icon("chevR") + "</button>" +
         "</div>" +
       "</div>" +
     "</div>";
@@ -532,7 +539,7 @@
     const body = list.length ? Object.keys(byDept).map((dn) =>
       '<div class="section"><div class="section__head"><h3>' + esc(dn) +
       '</h3><span class="hint">' + byDept[dn].length + " agent" + (byDept[dn].length > 1 ? "s" : "") + " to review</span></div>" +
-      '<div class="agent-list">' + byDept[dn].map((a) => agentRow(a)).join("") + "</div></div>"
+      '<div class="agent-grid">' + byDept[dn].map((a) => agentRow(a)).join("") + "</div></div>"
     ).join("") : '<div class="card"><div class="card__body">' + emptyState("Nothing pending review", "All agents have been reviewed or are in progress.") + "</div></div>";
     return '<div class="page"><div class="page__head"><h2>Pending Review</h2>' +
       "<p>Agents flagged for leadership review, update or refinement — highest complexity first.</p></div>" + body + "</div>";
