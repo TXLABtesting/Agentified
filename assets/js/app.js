@@ -132,7 +132,8 @@
     const readiness = agents.length
       ? Math.round((ready * 100 + prog * 55 + review * 35) / agents.length) : 0;
     let deptStatus = "In Progress";
-    if (review / Math.max(agents.length, 1) >= 0.4) deptStatus = "Needs Review";
+    if (!agents.length) deptStatus = "Awaiting";
+    else if (review / Math.max(agents.length, 1) >= 0.4) deptStatus = "Needs Review";
     else if (ready / Math.max(agents.length, 1) >= 0.6) deptStatus = "Ready";
     return { count: agents.length, subs, cdist, avg, readiness, ready, review, prog, deptStatus };
   }
@@ -460,7 +461,8 @@
       "</div></div>";
 
     const filtered = d.agents.filter((a) => agentMatches(Object.assign({ deptName: d.name }, a)));
-    const agentCards = filtered.length ? filtered.map((a) => agentRow(a, d)).join("") : emptyState();
+    const agentCards = filtered.length ? filtered.map((a) => agentRow(a, d)).join("")
+      : (d.agents.length === 0 ? emptyState("Awaiting this department's blueprint", "Agents will appear here once " + esc(d.name) + "'s details are provided.") : emptyState());
 
     return '<div class="page">' + back + hero +
       '<div class="section"><div class="section__head"><h3>Main agents</h3>' +
@@ -1082,6 +1084,7 @@
     else location.hash = "#/" + view;
   }
   function render() {
+    if ($("#drawer").classList.contains("is-open")) closeDrawer();
     if (STATE.view !== "mindmap" && STATE.mindFull) { STATE.mindFull = false; document.body.style.overflow = ""; }
     renderNav();
     renderHeader();

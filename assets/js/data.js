@@ -611,608 +611,886 @@ const HR_TALKS = {
 };
 HR_AGENTS.forEach((a) => { if (HR_TALKS[a.id]) a.talksTo = HR_TALKS[a.id]; });
 
-/* -- Other departments: realistic mock data ------------------------------- */
+/* -- Procurement & Finance and Knowledge & Content: from live blueprints --- */
 const PROCUREMENT_AGENTS = [
   {
-    id: "pr-01", name: "Procurement Request Orchestrator", kind: "core", tier: "Source-to-Contract",
-    purpose: "Coordinates purchase requests from intake to approved purchase order across requesting departments, budget owners and vendors.",
-    responsibilities: "Capture and validate purchase requests; check budget availability; route through the approval chain; convert approved requests into purchase orders; chase pending steps.",
-    process: "Purchase Request, Budget Check, PR-to-PO conversion.",
-    inputs: ["Purchase request", "Budget data", "Catalogue", "Approval matrix"],
-    systems: ["ERP", "Budget system", "Email"],
-    outputs: ["Validated PR", "Routed approvals", "Purchase order"],
-    complexity: "High", impact: "High", feasibility: "Medium",
-    status: "Needs Review", priority: "Strategic", autonomy: "Medium — orchestrates and drafts; humans approve",
-    risks: "Medium — touches budget commitments; approvals stay human.",
-    nextAction: "Confirm budget-system integration and approval matrix before build.",
-    subAgents: [
-      { name: "Budget Checker", desc: "Verifies budget availability before routing.", complexity: "Medium", type: "Validation", deps: "Budget system", status: "Needs Review" },
-      { name: "PR-to-PO Converter", desc: "Converts approved requests into purchase orders.", complexity: "Medium", type: "Orchestration", deps: "ERP", status: "In Progress" },
-      { name: "Approval Chaser", desc: "Chases pending approvals through the chain.", complexity: "Low", type: "Monitoring", deps: "Email", status: "Ready" }
-    ]
+    id: "pr-a1", name: "Vendor Registration Validation Agent", kind: "core", tier: "Tier 1 — Intake & Coordination",
+    purpose: "Validate prospective-supplier self-registrations against authoritative government sources — not just the uploaded documents — and shepherd them to Chief approval, so the two-person Vendor Relations team stops doing manual cross-checks and conflict-of-interest emails.",
+    responsibilities: "Reads the 4-page Oracle Prospective Supplier Registration and verifies it live against NER (the Ministry of Economy's National Economic Register) — company name, trade licence, activities, status and the owners/shareholders — and traces ownership where an owner is itself a company (who ultimately owns the owning companies); verifies owner identity and details via ICP (the federal identity authority); automatically screens owners/shareholders against the organisation's employee records (Oracle HR) to detect conflicts of interest; on a conflict, routes to Legal to prepare the required legal decree/declaration; checks TRN/VAT, document expiry and completeness; drafts the Chief approval form (overview, activities, certificates, ownership & COI findings, category recommendation); on Chief approval, completes registration and applies the category in Oracle.",
+    process: "P2P 1.2.5.a (Vendor Registration), incl. 1.2.5.a.4 review, 1.2.5.a.6 COI check, 1.2.5.a.7 Legal — ~22–25 requests/month, SLA 1 day",
+    inputs: ["Vendor-submitted Oracle registration + attachments", "NER company", "licence", "activity & ownership data", "ICP owner identity & details", "Oracle HR employee records"],
+    systems: ["Oracle iSupplier/Supplier registration", "NER (Ministry of Economy)", "ICP (identity authority)", "Oracle HR", "Email", "Legal mailbox"],
+    outputs: ["Source-verified registration", "beneficial-ownership trace", "automated COI result", "Legal decree/declaration request (if conflict)", "completed approval form", "registered & categorised vendor in Oracle"],
+    complexity: "Medium", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on source verification, ownership tracing & COI screening; escalate confirmed conflicts to Legal and the category/approval to the Chief",
+    risks: "Chief (Sector Head of CSS) approves; Legal prepares the decree/declaration and, with HR, decides confirmed conflict cases", nextAction: "", subAgents: []
   },
   {
-    id: "pr-02", name: "Vendor Onboarding & Compliance Agent", kind: "core", tier: "Vendor Management",
-    purpose: "Validates and onboards new vendors and keeps registration, licences and compliance current.",
-    responsibilities: "Verify trade licence, VAT and bank details; run sanctions and conflict checks; track licence expiry; maintain the vendor master.",
-    process: "Vendor Registration, Compliance Re-check.",
-    inputs: ["Vendor documents", "Sanctions lists", "Trade-licence registry"],
-    systems: ["ERP", "Vendor portal", "External registries"],
-    outputs: ["Verified vendor record", "Compliance verdict", "Expiry alerts"],
-    complexity: "Medium", impact: "High", feasibility: "High",
-    status: "Ready", priority: "Quick Win", autonomy: "Medium — verifies; a human approves onboarding",
-    risks: "Low — recommends; procurement approves vendor activation.",
-    nextAction: "Approve as a quick win; connect external trade-licence and sanctions sources.",
-    subAgents: [
-      { name: "Licence & VAT Validator", desc: "Verifies trade licence, VAT and bank details.", complexity: "Medium", type: "Validation", deps: "Registries", status: "Ready" },
-      { name: "Sanctions Screener", desc: "Runs sanctions and conflict-of-interest checks.", complexity: "Medium", type: "Validation", deps: "Sanctions lists", status: "Ready" },
-      { name: "Expiry Monitor", desc: "Tracks licence and document expiry and nudges renewal.", complexity: "Low", type: "Monitoring", deps: "Vendor portal", status: "Ready" }
-    ]
-  },
-  {
-    id: "pr-03", name: "Tender & Bid Evaluation Assistant", kind: "core", tier: "Sourcing",
-    purpose: "Supports fair, fast and well-documented evaluation of tenders and bids.",
-    responsibilities: "Compile bids; check completeness against the RFP; build a normalised comparison; draft an evaluation summary for the committee; never scores subjectively.",
-    process: "Tender Publication, Bid Receipt, Technical & Commercial Evaluation.",
-    inputs: ["RFP", "Submitted bids", "Evaluation criteria"],
-    systems: ["e-Tendering portal", "ERP"],
-    outputs: ["Bid comparison matrix", "Completeness report", "Evaluation summary draft"],
-    complexity: "High", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Complex", autonomy: "Low — prepares; the committee decides",
-    risks: "Medium — evaluation must stay with the committee; agent only prepares and compares.",
-    nextAction: "Pilot on low-value tenders with strict committee oversight.",
-    subAgents: [
-      { name: "Completeness Checker", desc: "Checks each bid against RFP requirements.", complexity: "Medium", type: "Validation", deps: "RFP", status: "In Progress" },
-      { name: "Comparison Builder", desc: "Builds a normalised technical/commercial comparison.", complexity: "High", type: "Reporting", deps: "Bids", status: "In Progress" }
-    ]
-  },
-  {
-    id: "pr-04", name: "Contract Lifecycle Monitor", kind: "core", tier: "Contract Management",
-    purpose: "Tracks contracts through their lifecycle and surfaces renewals, obligations and milestones before they lapse.",
-    responsibilities: "Track contract dates, milestones and SLAs; alert on upcoming renewals and expiry; flag unmet obligations; maintain the contract register.",
-    process: "Contract Award, Renewal, Obligation Tracking.",
-    inputs: ["Contract register", "Milestone schedule", "SLA terms"],
-    systems: ["CLM system", "ERP", "Email"],
-    outputs: ["Renewal alerts", "Obligation flags", "Contract dashboard"],
-    complexity: "Medium", impact: "Medium", feasibility: "High",
-    status: "Ready", priority: "Quick Win", autonomy: "High for monitoring; no record changes",
-    risks: "Low — alerts only.",
-    nextAction: "Approve as a quick win once the contract register is digitised.",
-    subAgents: [
-      { name: "Renewal Sentinel", desc: "Alerts on upcoming renewals and expiry.", complexity: "Low", type: "Monitoring", deps: "CLM", status: "Ready" },
-      { name: "Obligation Tracker", desc: "Flags unmet milestones and SLA obligations.", complexity: "Medium", type: "Monitoring", deps: "SLA terms", status: "Ready" }
-    ]
-  },
-  {
-    id: "pr-05", name: "Spend Analytics & Savings Agent", kind: "value-add", tier: "Insight",
-    purpose: "Turns procurement data into spend visibility, savings opportunities and category insight.",
-    responsibilities: "Analyse spend by category and vendor; detect maverick spend and duplication; surface consolidation and savings opportunities; answer ad-hoc questions.",
-    process: "Cross-cutting — spend analysis and reporting.",
-    inputs: ["PO and invoice data", "Category taxonomy"],
-    systems: ["ERP", "BI layer"],
-    outputs: ["Spend dashboards", "Savings opportunities", "Anomaly flags"],
+    id: "pr-a2", name: "Work Confirmation Coordinator Agent", kind: "core", tier: "Tier 1 — Intake & Coordination",
+    purpose: "Make sure Work Confirmations (GRNs) are created and approved on time, removing the email chasing that today blocks invoicing and inflates accruals.",
+    responsibilities: "Watches approved POs with delivery due/passed but no WC; nudges Vendor, PM or Asset Team to create the WC; validates WC quantity/amount against the PO line/milestone; packages penalty-waiver requests with the calculated penalty for the right approver; coordinates with Procurement to raise a WC on the vendor's behalf when none exists.",
+    process: "P2P 1.4 (Work Confirmation) + 1.8.8–1.8.10 (missing-WC follow-up)",
+    inputs: ["Approved PO/RO/CO data", "delivery dates", "milestone/pay-item schedule", "WC-pending report", "penalty calculation"],
+    systems: ["Oracle Purchasing/iSupplier", "Email"],
+    outputs: ["Created/approved WC", "penalty-waiver package", "coordination trail"],
     complexity: "Low", impact: "High", feasibility: "High",
-    status: "Ready", priority: "Quick Win", autonomy: "High — read-only and reporting",
-    risks: "Low — read-only.",
-    nextAction: "Approve as a quick win; agree the core spend metrics.",
-    subAgents: [
-      { name: "Spend Categoriser", desc: "Classifies spend by category and vendor.", complexity: "Low", type: "Reporting", deps: "BI layer", status: "Ready" },
-      { name: "Savings Finder", desc: "Surfaces consolidation and savings opportunities.", complexity: "Medium", type: "Reporting", deps: "—", status: "In Progress" }
-    ]
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on chasing & validation; escalate any penalty or waiver decision",
+    risks: "PM / Respective Head / Sector Head approve WC; penalty waiver per threshold (Sector Head/Chief ≤100k, Entity Head >100k)", nextAction: "", subAgents: []
+  },
+  {
+    id: "pr-a4", name: "Vendor Evaluation Agent", kind: "core", tier: "Tier 1 — Intake & Coordination",
+    purpose: "Close out the vendor evaluations Oracle auto-issues, and give the Chief a monthly vendor-performance picture without manual report building.",
+    responsibilities: "Monitors evaluations Oracle issues once delivery date is reached and WC approved; chases PMs (email + Oracle reminder) to complete them; flags scores below 60% / negative feedback for inactivation review; compiles the monthly performance report (total/active/inactive/awarded vendors, contracts, payments, per category) for the Chief.",
+    process: "P2P Vendor Evaluation 1.0–1.4",
+    inputs: ["Approved WC + delivery date", "evaluation status", "Oracle vendor master", "master performance report"],
+    systems: ["Oracle", "Email"],
+    outputs: ["Completed evaluations", "inactivation flags", "monthly Chief performance report"],
+    complexity: "Low", impact: "Medium", feasibility: "High",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on chasing & report generation; escalate inactivation decisions",
+    risks: "PM completes evaluation; Procurement + Chief advise on inactivation", nextAction: "", subAgents: []
+  },
+  {
+    id: "pr-a6", name: "Travel Request & Quote Agent", kind: "core", tier: "Tier 1 — Intake & Coordination",
+    purpose: "Run the business-mission lifecycle glue — merging requests, validating completeness, gathering quotes, and coordinating HR/Finance — so the Travel Team coordinates by exception.",
+    responsibilities: "Merges individual requests into a travel request; validates passports attached, dates and traveller/guest details; approaches agents and enters ≥3 quotes with a recommendation; routes trip and quote approvals; coordinates HR per-diem/leave creation and Finance payment dates; recalculates per-diem deltas on trip changes; prepares PO/RO line splits by cost category.",
+    process: "Business Mission 2.1–2.11 (full travel lifecycle)",
+    inputs: ["Traveller details", "passports", "mission dates/purpose", "agent quotes", "grade/per-diem policy", "PA balance"],
+    systems: ["Oracle Business Mission & Purchasing", "Email"],
+    outputs: ["Consolidated travel request", "≥3 quotes + recommendation", "per-diem/leave coordination", "PO/RO draft"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on merge/validation/quote entry; escalate quote selection & cost-add approvals",
+    risks: "Sector/Entity Head trip approval; Chief & Budget Entity Head quote approval; HR per-diem validation", nextAction: "", subAgents: []
+  },
+  {
+    id: "pr-a31", name: "Supplier Experience Agent", kind: "core", tier: "Tier 1 — Intake & Coordination",
+    purpose: "Be the supplier's single point of contact so vendors never have to learn or navigate the portal — the agent gives them the information they need, asks them for exactly what the organisation requires, handles the system work on their behalf, keeps them updated, and gathers their feedback.",
+    responsibilities: "Interacts with the supplier directly (chat, email or voice via V12): gives them all the information they need; proactively asks them for exactly the documents, data, clarifications and quotes the organisation requires at each step, and chases whatever is missing; collects what they provide and enters or pre-fills it in Oracle on their behalf — registration, quotations, work confirmations, invoices and SOA responses; keeps them updated on status at every step; and captures their feedback. The supplier experiences a helpful assistant; the portal work happens behind the scenes.",
+    process: "P2P 1.2.5.a (registration), 1.2.7–1.2.13 (RFQ/quote), 1.4 (vendor WC), 1.5 (invoice), 2.2–2.5 (SOA) — reframed so the supplier deals with the agent, not the system",
+    inputs: ["Supplier contact & profile", "what the organisation requires at each step", "RFQ/PO/invoice data", "status", "feedback"],
+    systems: ["Oracle iSupplier (operated on the supplier's behalf)", "Email/chat/voice (with V12)", "the concierge (V1)"],
+    outputs: ["Complete", "correct submissions handled for the supplier", "proactive status updates", "requested documents gathered", "captured feedback", "fewer rejections"],
+    complexity: "Medium", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on information, requests, status & on-behalf handling; the supplier confirms key submissions; escalate genuine exceptions",
+    risks: "Vendor Relations / Buyer / AP step in only on genuine exceptions; the supplier confirms key submissions", nextAction: "", subAgents: []
+  },
+  {
+    id: "pr-a32", name: "Requisition & SOW Co-pilot (with cost estimation)", kind: "core", tier: "Tier 1 — Intake & Coordination",
+    purpose: "Turn the offline, unguided pre-requisition step into guided AI authoring: help requesters and PMs write a complete Scope of Work / TOR and requisition, recommend specifications, and estimate cost from prior POs, contracts, quotes and proposals already in the system.",
+    responsibilities: "Guides the PM through a complete SOW/TOR (objectives, deliverables, specifications, timeline, acceptance criteria) and drafts it from the stated business need; recommends category, UOM and specifications drawn from similar past requisitions; estimates a realistic cost/range from historical POs, contracts, awarded quotes and proposals in Oracle, and checks it against budget availability; pre-fills the requisition header (project, programme, SME, delivery and contract dates) ready for the requester to review and submit.",
+    process: "P2P 1.1.0 (pre-requisition / SOW — today offline & unguided), 1.1.1–1.1.4 (requisition entry)",
+    inputs: ["Business need", "historical POs/contracts/quotes/proposals", "category & price history", "budget availability", "COA"],
+    systems: ["Oracle iProcurement (read history + draft)", "Word", "Email"],
+    outputs: ["Drafted SOW/TOR", "recommended specs & category", "estimated cost/range", "pre-filled requisition"],
+    complexity: "Medium", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on drafting, recommendation & estimation; the human reviews before submission",
+    risks: "Requester/PM reviews & submits; the Budget Gate approves", nextAction: "", subAgents: []
+  },
+  {
+    id: "pr-a8", name: "Sourcing, Bid Evaluation & Benchmarking Agent", kind: "core", tier: "Tier 2 — Validation & Execution",
+    purpose: "Compile the RFQ/RFP, then evaluate and benchmark the proposals that come back — against each other, the cost estimate, previous bids and the market — so buyers spend their time on judgement, not on assembly or spreadsheet comparison.",
+    responsibilities: "Monitors the requisition pool; assembles negotiation details (title, dates, supplier list, scoring criteria, T&Cs); enters surrogate quotations for offline suppliers; receives and normalises the submitted proposals into a like-for-like comparison matrix; benchmarks each proposal against the SOW cost estimate (A32), against previous/old bids for similar items, and against market price references — flagging outliers, padding and unrealistic lines; consolidates technical scores and merges them with the commercial evaluation; ranks suppliers; flags one-bid and cost-difference scenarios with the required justification; drafts the award recommendation for the approval workflow; and hands material commercial gaps to the Negotiation agent (V11).",
+    process: "P2P 1.2 (RFQ/RFP), incl. 1.2.13 surrogate, 1.2.15–17 one-bid, 12.2.22–23 cost difference, 1.2.24 award",
+    inputs: ["Approved PR lines", "supplier base", "submitted proposals/quotes", "the SOW cost estimate", "previous bids & awarded prices", "market price references"],
+    systems: ["Oracle Sourcing/Negotiations", "historical bid/award data", "market price references", "Email"],
+    outputs: ["Configured RFQ", "surrogate quotes", "a like-for-like proposal comparison & benchmark (vs estimate", "old bids & market)", "combined evaluation & ranking", "drafted award recommendation"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on assembly, proposal comparison & benchmarking; escalate all award and one-bid decisions",
+    risks: "Scoring team scores; Procurement/Exec Director/Sector/Entity/Chief approve the award; PM justifies non-lowest", nextAction: "", subAgents: []
+  },
+  {
+    id: "pr-a9", name: "Contract Drafting & Signature Agent", kind: "core", tier: "Tier 2 — Validation & Execution",
+    purpose: "Draft bilingual (AR/EN) contracts and amendments from approved data, prior contracts and templates, then drive the GovSign signature flow and keep Oracle in step — so Legal reviews a complete draft instead of starting from a blank page.",
+    responsibilities: "Assembles the contract/amendment draft from the awarded PO/PA/CO data, the matching template and similar prior contracts; recommends clauses and flags missing or non-standard terms for Legal; prepares the bilingual (AR/EN) document; routes it to GovSign for vendor and authorised-signatory signature; tracks status; attaches the signed PDF to the Oracle PA/CO/amendment record; tracks LOA dispatch; registers BG/Performance Bond receipt for the monitor.",
+    process: "P2P 1.3.1a (contract drafting & signature), 1.2.27 (LOA), 3 (amendment/variation)",
+    inputs: ["Awarded PO/PA/CO data", "contract templates", "prior contracts & clauses", "GovSign status"],
+    systems: ["GovSign (external)", "Oracle Purchasing", "Word→PDF", "Email"],
+    outputs: ["Drafted bilingual contract/amendment", "clause recommendations", "signed PDF attached in Oracle", "LOA dispatched", "BG logged"],
+    complexity: "Medium", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on drafting, routing, status tracking & attachment; escalate clause/legal judgement and signature",
+    risks: "Legal reviews & approves the draft and any clause change; authorised signatory & vendor sign via GovSign", nextAction: "", subAgents: []
+  },
+  {
+    id: "pr-a10", name: "Budget Gate (PR/PO Approval) Agent", kind: "core", tier: "Tier 2 — Validation & Execution",
+    purpose: "Perform the Budget Team's finance review of PRs and POs — code validation and fund availability — and clear clean cases within delegated authority.",
+    responsibilities: "On each PR/PO/CO/RO notification, reviews approval history and attached quotations, validates and (where needed) amends the GL code combination by requestor/department/expense nature, verifies budget availability against the approved annual budget; recommends approve/reject/reassign/request-info; auto-approves only fully compliant, in-budget, deterministic cases within delegated limits.",
+    process: "Budgeting — PR/PO approval 1.1–1.8, 2.1–2.4",
+    inputs: ["PR/PO data", "quotations", "code combination", "approved budget & availability", "COA"],
+    systems: ["Oracle (Notifications", "iProcurement/Purchasing)"],
+    outputs: ["Validated/amended code combination", "approve/reject recommendation or auto-approval (clean cases)"],
+    complexity: "Medium", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Suggest first; earn Act-and-notify for clean in-budget cases only; always escalate overruns/amendments",
+    risks: "Budget Team owns the decision; out-of-budget/non-standard cases escalate", nextAction: "", subAgents: []
+  },
+  {
+    id: "pr-a29", name: "Bank Guarantee & Bond Monitor Agent", kind: "core", tier: "Tier 4 — Monitoring & Governance",
+    purpose: "Replace the manual BG/Performance-Bond expiry tracker with an always-on monitor that never misses a renewal or release.",
+    responsibilities: "Registers BG/Performance Bond details on receipt (amount, validity, issuing UAE bank); maintains the expiry tracker; alerts Finance ahead of expiry to renew or release; at contract end/closure, drafts the signed BG-release letter to the issuing bank for the authorised signatory.",
+    process: "P2P 1.3.7 (BG/Bond verification), 4 (BG release)",
+    inputs: ["Signed contract/PO", "BG/Bond document", "contract closure/completion trigger"],
+    systems: ["Manual tracker→digital", "Email (signed letter)"],
+    outputs: ["BG register & expiry tracker", "pre-expiry alerts", "drafted release letter"],
+    complexity: "Low", impact: "Medium", feasibility: "High",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on tracking & alerts; escalate verification & the signed release",
+    risks: "Finance verifies authenticity; authorised signatory signs the release letter", nextAction: "", subAgents: []
+  },
+  {
+    id: "pr-v1", name: "Vendor & Customer Experience Concierge", kind: "value-add", tier: "Value-add",
+    purpose: "Give every vendor and customer one place to ask anything and receive proactive status, in Arabic or English, across registration, RFQ, PO, work confirmation, invoice, payment, BG and AR collection.",
+    responsibilities: "Answers status and “what do I do next” questions on demand; pushes proactive updates (payment scheduled, invoice on hold and why, BG expiring, registration approved); routes genuine issues to the right team with full context; operates in Arabic and English.",
+    process: "",
+    inputs: ["Vendor/customer identity", "their transactions across Oracle", "payment & approval status", "BG tracker"],
+    systems: ["Oracle (read)", "iSupplier/customer channels", "Email/portal", "chat"],
+    outputs: ["Answered queries", "proactive status notifications", "well-routed issues", "a satisfaction signal"],
+    complexity: "Medium", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on answering & proactive updates; escalate genuine issues — never alters records",
+    risks: "AP/AR/vendor-relations handle escalated issues; the concierge never changes financial data", nextAction: "", subAgents: []
+  },
+  {
+    id: "pr-v5", name: "Feedback & Sentiment Agent", kind: "value-add", tier: "Value-add",
+    purpose: "Continuously gather and analyse feedback and sentiment from both sides of every service and convert it into prioritised improvements.",
+    responsibilities: "Collects lightweight feedback after key moments (onboarding, payment, approval); analyses sentiment and themes; ranks an improvement backlog; reports a satisfaction pulse; closes the loop with respondents.",
+    process: "",
+    inputs: ["Feedback responses", "interaction outcomes", "sentiment signals"],
+    systems: ["Email/portal/survey", "the agent ecosystem", "dashboards"],
+    outputs: ["A satisfaction pulse", "a prioritised improvement backlog", "closed-loop responses"],
+    complexity: "Medium", impact: "Medium", feasibility: "High",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on collection & analysis; humans own the improvement decisions",
+    risks: "Process owners act on the backlog; management reviews the pulse", nextAction: "", subAgents: []
+  },
+  {
+    id: "pr-v9", name: "Quality Assurance & Self-Audit Agent", kind: "value-add", tier: "Value-add",
+    purpose: "Independently review completed work — human and agent — for correctness and completeness, and flag anything that needs fixing before it is relied on.",
+    responsibilities: "Re-checks journals (balanced, valid combinations), invoice coding, reconciliation tie-outs, registrations and documents, and report-to-source consistency; compares against the rules and the authoritative source; flags errors, omissions and inconsistencies together with the fix; samples and reviews agent actions as part of governance.",
+    process: "",
+    inputs: ["Completed transactions/journals/reconciliations/reports", "the rules", "the source data", "agent action logs"],
+    systems: ["Oracle (read)", "the agent ecosystem", "the audit spine"],
+    outputs: ["QA findings with the correction", "error-rate trends", "agent-action review"],
+    complexity: "Medium", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on review & flagging; humans correct and approve",
+    risks: "Reviewers/approvers decide on flagged items; the agent reviews and recommends, never overrides", nextAction: "", subAgents: []
+  },
+  {
+    id: "pr-v10", name: "Obligations & Deadlines Radar", kind: "value-add", tier: "Value-add",
+    purpose: "Be the department's authoritative “what must be done and by when” radar, surfacing obligations proactively to the right people before they fall due.",
+    responsibilities: "Maintains a consolidated obligations & compliance calendar (statutory, regulatory, close, contractual, SLA, recurring); tracks status and ownership; surfaces what's due, due soon and overdue; feeds the Next-Best-Action Coach and warns leads and management; never lets a required action go unflagged.",
+    process: "",
+    inputs: ["Statutory & regulatory deadlines", "the close calendar", "contract/BG dates", "SLAs", "recurring obligations", "status"],
+    systems: ["Oracle (read)", "the agent ecosystem", "calendar", "Email"],
+    outputs: ["A live obligations calendar", "due/overdue alerts", "ownership & status", "a feed to personal worklists"],
+    complexity: "Medium", impact: "High", feasibility: "High",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on surfacing & tracking; the owner performs the action",
+    risks: "Owners action the items; the radar surfaces and tracks — it does not perform the task", nextAction: "", subAgents: []
+  },
+  {
+    id: "pr-v11", name: "Negotiation & Quote-Optimization Agent", kind: "value-add", tier: "Value-add",
+    purpose: "Bring structured, data-driven negotiation to sourcing and travel — benchmark, strategise, counter-offer and close routine commercial gaps — while every binding commitment stays a human decision.",
+    responsibilities: "Benchmarks quotes against prior POs, contracts and awarded prices and the SOW cost estimate (A32); identifies negotiation levers (price, payment terms, delivery, scope); drafts counter-offers and talking points using negotiation playbooks; conducts routine clarification and price exchanges with suppliers and travel agents — in writing or, through the Contact-Centre agent (V12), by phone in Arabic or English — within delegated limits; handles the surrogate-quote and one-bid context; recommends accept / push / re-tender; never commits beyond its authority.",
+    process: "",
+    inputs: ["Quotes/proposals", "historical prices", "the cost estimate", "scope", "payment & delivery terms", "delegated thresholds"],
+    systems: ["Oracle Sourcing/Negotiations", "Email/chat", "travel-agent channels"],
+    outputs: ["Benchmarked quotes", "negotiation strategy & counter-offers", "a recommended position", "savings achieved"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on benchmarking, strategy & routine counter-offers within limits; escalate binding terms, award and one-bid",
+    risks: "Buyer / PM / travel team approve final terms; award and binding commitments stay human", nextAction: "", subAgents: []
+  },
+  {
+    id: "pr-v12", name: "Conversational Contact-Centre Agent (voice & chat)", kind: "value-add", tier: "Value-add",
+    purpose: "Provide a natural bilingual voice and chat channel so the department can call and be called — to answer, to follow up, and to negotiate routine terms — in real time, with seamless human handoff for anything sensitive or binding.",
+    responsibilities: "Handles inbound voice/chat and places outbound calls in Arabic or English: invoice follow-up (status, missing/incorrect data, request a revised copy, payment timing) with A3; proposal and quote follow-up, clarification and surrogate-quote gathering with A8; AR collection reminders with A11; vendor-evaluation, work-confirmation and SOA follow-ups. Voices the Negotiation agent's (V11) benchmarked position and counter-offers, captures the vendor's reply, and closes routine gaps within delegated limits. Authenticates the caller; answers from the source systems via the concierge (V1); logs outcomes and call feedback; warm-transfers binding terms or anything sensitive to a human with full context; never commits beyond authority or shares restricted data.",
+    process: "",
+    inputs: ["Caller identity", "their transactions", "the negotiation position (from V11)", "scripts & policies", "the voice/chat channel"],
+    systems: ["Telephony/chat platform (AR/EN)", "Oracle (read", "via V1)", "CRM/JIRA logs", "Email"],
+    outputs: ["Handled & placed calls/chats in AR/EN", "invoice & proposal follow-up outcomes", "routine terms negotiated", "recordings & transcripts", "sentiment", "warm handoffs"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on answering, outbound follow-up & routine voice negotiation within limits; warm-transfer binding terms or anything sensitive to a human",
+    risks: "Staff take warm transfers; sensitive or binding matters are human; the agent assists, negotiates within limits, and logs", nextAction: "", subAgents: []
   }
 ];
 
 const FINANCE_AGENTS = [
   {
-    id: "fi-01", name: "Invoice Processing & Matching Agent", kind: "core", tier: "Accounts Payable",
-    purpose: "Automates invoice intake, three-way matching and exception handling for accounts payable.",
-    responsibilities: "Extract invoice data; match against PO and goods receipt; flag mismatches; route clean invoices for payment scheduling; never releases payment.",
-    process: "Invoice Receipt, Three-Way Match, Payment Scheduling.",
-    inputs: ["Invoice", "Purchase order", "Goods receipt"],
-    systems: ["ERP", "AP system"],
-    outputs: ["Matched invoice", "Exception report", "Payment-ready batch"],
+    id: "fi-a3", name: "Invoice Intake & Matching Agent", kind: "core", tier: "Tier 1 — Intake & Coordination",
+    purpose: "Turn the email→JIRA→iSupplier invoice scramble into a clean, validated intake, and resolve the exceptions Oracle's three-way match throws.",
+    responsibilities: "Captures invoices arriving by email, logs receipt date in the AP mailbox and JIRA, uploads to iSupplier; for PO invoices lets Oracle run the three-way match and works only the holds/exceptions; for non-PO/memo/utility invoices validates header data and requests the GL code combination from Budget; chases vendors for revised copies on exceptions; flags prepayments and credit notes for the accountant.",
+    process: "P2P 1.5.1–1.5.5 (Invoicing), 1.7 (vendor invoice follow-up)",
+    inputs: ["Vendor invoice (email/iSupplier)", "PO & receipt/WC", "JIRA ticket", "AP mailbox", "budget code combinations"],
+    systems: ["Email", "JIRA AP portal", "Oracle Payables/iSupplier"],
+    outputs: ["Logged & uploaded invoice", "matched/validated invoice or documented exception", "vendor follow-up"],
     complexity: "Medium", impact: "High", feasibility: "High",
-    status: "Ready", priority: "Quick Win", autonomy: "Medium — matches and recommends; humans release payment",
-    risks: "Medium — prepares the batch; releasing funds is always human.",
-    nextAction: "Approve as a quick win; segregate preparation from payment release.",
-    subAgents: [
-      { name: "Invoice Extractor", desc: "Reads and extracts invoice fields via OCR.", complexity: "Medium", type: "Validation", deps: "AP system", status: "Ready" },
-      { name: "Three-Way Matcher", desc: "Matches invoice against PO and goods receipt.", complexity: "Medium", type: "Validation", deps: "ERP", status: "Ready" },
-      { name: "Exception Router", desc: "Flags mismatches and routes them for review.", complexity: "Low", type: "Orchestration", deps: "—", status: "Ready" }
-    ]
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on intake, logging, matching & clean validation; escalate held/exception invoices",
+    risks: "Payables Accountant validates exceptions; approver per invoice type", nextAction: "", subAgents: []
   },
   {
-    id: "fi-02", name: "Budget Monitoring & Variance Agent", kind: "core", tier: "Financial Planning",
-    purpose: "Continuously tracks budget consumption and explains variance before overruns occur.",
-    responsibilities: "Track actuals vs budget by cost centre; flag overruns and unusual variance; produce period reports; answer budget questions.",
-    process: "Budget Tracking, Variance Analysis, Period Reporting.",
-    inputs: ["Budget", "Actuals", "Commitments"],
-    systems: ["ERP", "BI layer"],
-    outputs: ["Variance reports", "Overrun alerts", "Budget dashboards"],
-    complexity: "Medium", impact: "High", feasibility: "High",
-    status: "Ready", priority: "Quick Win", autonomy: "High — read-only and reporting",
-    risks: "Low — read-only.",
-    nextAction: "Approve as a quick win; agree variance thresholds.",
-    subAgents: [
-      { name: "Actuals-vs-Budget Tracker", desc: "Tracks consumption by cost centre.", complexity: "Medium", type: "Monitoring", deps: "ERP", status: "Ready" },
-      { name: "Overrun Alerter", desc: "Flags overruns and unusual variance.", complexity: "Low", type: "Monitoring", deps: "Thresholds", status: "Ready" }
-    ]
-  },
-  {
-    id: "fi-03", name: "Financial Reporting & Close Assistant", kind: "core", tier: "Reporting & Close",
-    purpose: "Accelerates the period-end close and the production of standard financial reports.",
-    responsibilities: "Run close checklists; reconcile sub-ledgers; draft standard statements; flag unreconciled items; never finalises the ledger.",
-    process: "Month-End Close, Reconciliation, Statement Drafting.",
-    inputs: ["Trial balance", "Sub-ledgers", "Close checklist"],
-    systems: ["ERP", "Reporting tool"],
-    outputs: ["Reconciliation status", "Draft statements", "Exception list"],
-    complexity: "High", impact: "High", feasibility: "Medium",
-    status: "Needs Review", priority: "Complex", autonomy: "Medium — prepares; Finance approves the close",
-    risks: "High — close integrity must stay human-controlled.",
-    nextAction: "Sequence behind a governed close process; pilot on reconciliation first.",
-    subAgents: [
-      { name: "Reconciler", desc: "Reconciles sub-ledgers and flags unmatched items.", complexity: "High", type: "Validation", deps: "ERP", status: "Needs Review" },
-      { name: "Statement Drafter", desc: "Drafts standard financial statements.", complexity: "Medium", type: "Drafting", deps: "Trial balance", status: "In Progress" }
-    ]
-  },
-  {
-    id: "fi-04", name: "Treasury & Cash-Flow Forecast Agent", kind: "value-add", tier: "Treasury",
-    purpose: "Gives Finance a forward view of cash position and liquidity needs.",
-    responsibilities: "Forecast cash inflows and outflows; flag liquidity risks; model scenarios; surface idle balances.",
-    process: "Cash-Flow Forecasting, Liquidity Monitoring.",
-    inputs: ["Bank balances", "Receivables/payables schedule"],
-    systems: ["ERP", "Banking feeds", "BI layer"],
-    outputs: ["Cash-flow forecast", "Liquidity alerts", "Scenario views"],
-    complexity: "High", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Future Phase", autonomy: "High for forecasting; treasury decides",
-    risks: "Medium — forecasting accuracy depends on clean data feeds.",
-    nextAction: "Enhance phase; secure stable banking feeds first.",
-    subAgents: [
-      { name: "Flow Forecaster", desc: "Forecasts inflows and outflows.", complexity: "High", type: "Reporting", deps: "Banking feeds", status: "In Progress" },
-      { name: "Liquidity Watcher", desc: "Flags liquidity risk and idle balances.", complexity: "Medium", type: "Monitoring", deps: "—", status: "In Progress" }
-    ]
-  },
-  {
-    id: "fi-05", name: "Expense Audit & Fraud-Signal Agent", kind: "value-add", tier: "Controls",
-    purpose: "Continuously screens expenses for policy breaches and fraud signals before payment.",
-    responsibilities: "Check expense claims against policy; detect duplicates and outliers; flag fraud signals; package findings for review.",
-    process: "Expense Claim Review, Anomaly Detection.",
-    inputs: ["Expense claims", "Policy rules", "Historical patterns"],
-    systems: ["ERP", "Expense system"],
-    outputs: ["Policy-breach flags", "Fraud-signal report", "Audit trail"],
-    complexity: "Medium", impact: "High", feasibility: "High",
-    status: "In Progress", priority: "Future Phase", autonomy: "High for screening; humans adjudicate",
-    risks: "Low — flags only; humans adjudicate findings.",
-    nextAction: "Strong Enhance candidate; codify expense policy as rules.",
-    subAgents: [
-      { name: "Policy Screener", desc: "Checks claims against expense policy.", complexity: "Medium", type: "Validation", deps: "Policy rules", status: "In Progress" },
-      { name: "Anomaly Detector", desc: "Detects duplicates, outliers and fraud signals.", complexity: "Medium", type: "Monitoring", deps: "Patterns", status: "Needs Review" }
-    ]
-  }
-];
-
-const IT_AGENTS = [
-  {
-    id: "it-01", name: "IT Service Desk Assistant", kind: "core", tier: "Service Management",
-    purpose: "First-line response for IT support requests, with guided resolution and clean routing for complex tickets.",
-    responsibilities: "Answer common IT questions; guide self-service resets and how-tos; triage and route tickets; auto-resolve known issues within scope.",
-    process: "Incident Intake, Triage, Self-Service Resolution.",
-    inputs: ["Knowledge base", "Ticket", "Asset/user data"],
-    systems: ["ITSM platform", "Identity system"],
-    outputs: ["Resolved tickets", "Routed escalations", "Self-service guidance"],
-    complexity: "Medium", impact: "High", feasibility: "High",
-    status: "Ready", priority: "Quick Win", autonomy: "High for guidance; scoped auto-resolution",
-    risks: "Low — known fixes only; complex issues routed to engineers.",
-    nextAction: "Approve as a quick win; curate the IT knowledge base.",
-    subAgents: [
-      { name: "Ticket Triager", desc: "Classifies and routes incoming tickets.", complexity: "Medium", type: "Orchestration", deps: "ITSM", status: "Ready" },
-      { name: "Self-Service Resolver", desc: "Guides resets and resolves known issues.", complexity: "Low", type: "Conversational", deps: "Knowledge base", status: "Ready" }
-    ]
-  },
-  {
-    id: "it-02", name: "Access & Identity Provisioning Agent", kind: "core", tier: "Identity & Access",
-    purpose: "Coordinates joiner/mover/leaver access provisioning against role-based entitlements.",
-    responsibilities: "Provision and de-provision accounts per role; enforce least privilege; coordinate with onboarding/offboarding; flag orphaned accounts.",
-    process: "Joiner/Mover/Leaver Access, Entitlement Review.",
-    inputs: ["Role-based entitlement matrix", "HR triggers", "Directory data"],
-    systems: ["Identity system", "Directory", "ITSM"],
-    outputs: ["Provisioned access", "De-provisioning actions", "Orphaned-account flags"],
-    complexity: "High", impact: "High", feasibility: "Medium",
-    status: "Needs Review", priority: "Strategic", autonomy: "Medium — prepares; security approves privileged grants",
-    risks: "Medium — access is security-sensitive; privileged grants stay human-approved.",
-    nextAction: "Define the role-based entitlement matrix and segregation-of-duties rules.",
-    subAgents: [
-      { name: "Joiner/Leaver Provisioner", desc: "Provisions and de-provisions access on HR triggers.", complexity: "High", type: "Orchestration", deps: "Identity system", status: "Needs Review" },
-      { name: "Orphan Account Auditor", desc: "Flags orphaned and over-privileged accounts.", complexity: "Medium", type: "Monitoring", deps: "Directory", status: "In Progress" }
-    ]
-  },
-  {
-    id: "it-03", name: "Security Threat-Monitoring Agent", kind: "core", tier: "Cyber Security",
-    purpose: "Continuously monitors security telemetry and surfaces prioritised threats for the SOC.",
-    responsibilities: "Correlate alerts; suppress noise; prioritise true incidents; draft incident summaries; never auto-remediates production without approval.",
-    process: "Alert Triage, Incident Prioritisation.",
-    inputs: ["SIEM telemetry", "Threat intel", "Asset inventory"],
-    systems: ["SIEM", "SOAR", "Ticketing"],
-    outputs: ["Prioritised incidents", "Incident summaries", "Suppression of false positives"],
-    complexity: "Very High", impact: "High", feasibility: "Medium",
-    status: "Needs Review", priority: "Complex", autonomy: "Medium — triages and recommends; SOC decides response",
-    risks: "High — security-critical; response actions stay human-approved.",
-    nextAction: "Pilot in detection-only mode alongside the SOC before any automated response.",
-    subAgents: [
-      { name: "Alert Correlator", desc: "Correlates telemetry and suppresses noise.", complexity: "High", type: "Monitoring", deps: "SIEM", status: "Needs Review" },
-      { name: "Incident Prioritiser", desc: "Ranks true incidents and drafts summaries.", complexity: "High", type: "Reporting", deps: "Threat intel", status: "In Progress" }
-    ]
-  },
-  {
-    id: "it-04", name: "Asset & Licence Management Agent", kind: "core", tier: "Asset Management",
-    purpose: "Keeps the hardware and software asset and licence inventory accurate and optimised.",
-    responsibilities: "Track assets and licences; reconcile usage; flag expiry and under/over-licensing; surface reclaim opportunities.",
-    process: "Asset Tracking, Licence Reconciliation.",
-    inputs: ["Asset inventory", "Licence entitlements", "Usage telemetry"],
-    systems: ["CMDB", "SAM tool"],
-    outputs: ["Reconciled inventory", "Expiry alerts", "Reclaim opportunities"],
-    complexity: "Low", impact: "Medium", feasibility: "High",
-    status: "Ready", priority: "Quick Win", autonomy: "High — read-only and reporting",
-    risks: "Low — reporting only.",
-    nextAction: "Approve as a quick win.",
-    subAgents: [
-      { name: "Licence Reconciler", desc: "Reconciles licence usage against entitlements.", complexity: "Low", type: "Validation", deps: "SAM tool", status: "Ready" },
-      { name: "Reclaim Finder", desc: "Surfaces unused licences and reclaim opportunities.", complexity: "Low", type: "Reporting", deps: "—", status: "Ready" }
-    ]
-  },
-  {
-    id: "it-05", name: "Change & Release Coordination Agent", kind: "value-add", tier: "Change Management",
-    purpose: "Coordinates change requests and releases with risk-aware scheduling and clear approvals.",
-    responsibilities: "Capture change requests; assess risk and conflicts; schedule change windows; assemble CAB packages; track post-release verification.",
-    process: "Change Request, CAB, Release Scheduling.",
-    inputs: ["Change requests", "Maintenance windows", "Dependency map"],
-    systems: ["ITSM", "Release pipeline"],
-    outputs: ["Risk-assessed schedule", "CAB package", "Post-release status"],
+    id: "fi-a5", name: "Customer Onboarding & Billing Agent", kind: "core", tier: "Tier 1 — Intake & Coordination",
+    purpose: "Validate customer registrations and draft AR invoices from project/PM billing requests, leaving the AR accountant to review rather than key.",
+    responsibilities: "Intakes customer registration requests, validates Trade Licence & TRN, drafts the Oracle customer/site/bill-to setup; intakes billing requests from the project office/PM (e.g. a project such as WGS, with contract/PO attached), drafts the receivables invoice (transaction type, dates, line, revenue amortisation rule, tax, attachments); routes to the MoCA Champion for approval.",
+    process: "AR 5.1 (Customer Registration), 5.2 (Billing), 5.3 (Credit Memo)",
+    inputs: ["Customer email + Trade Licence/TRN", "project billing-request email", "contract/PO", "pricing", "chart of accounts"],
+    systems: ["Oracle Receivables", "Email"],
+    outputs: ["Validated customer record", "drafted AR invoice/credit memo", "dispatch to customer"],
     complexity: "Medium", impact: "Medium", feasibility: "High",
-    status: "In Progress", priority: "Future Phase", autonomy: "Medium — prepares; CAB approves",
-    risks: "Low — prepares and schedules; CAB approves changes.",
-    nextAction: "Enhance phase once core IT agents are live.",
-    subAgents: [
-      { name: "Risk & Conflict Assessor", desc: "Assesses change risk and scheduling conflicts.", complexity: "Medium", type: "Validation", deps: "Dependency map", status: "In Progress" },
-      { name: "CAB Packager", desc: "Assembles the change-advisory-board package.", complexity: "Low", type: "Drafting", deps: "ITSM", status: "In Progress" }
-    ]
-  }
-];
-
-const LEGAL_AGENTS = [
-  {
-    id: "lg-01", name: "Contract Review & Clause Agent", kind: "core", tier: "Contracts",
-    purpose: "Accelerates contract review by checking clauses against the approved playbook and flagging risks.",
-    responsibilities: "Compare clauses against the standard playbook; flag non-standard and risky terms; suggest fallback language; summarise for the lawyer; never approves a contract.",
-    process: "Contract Intake, Clause Review, Risk Flagging.",
-    inputs: ["Draft contract", "Clause playbook", "Risk rules"],
-    systems: ["CLM system", "Document store"],
-    outputs: ["Clause-risk report", "Suggested fallbacks", "Review summary"],
-    complexity: "High", impact: "High", feasibility: "Medium",
-    status: "Needs Review", priority: "Strategic", autonomy: "Low — recommends; a lawyer decides",
-    risks: "Medium — legal judgment stays with the lawyer; agent only reviews and suggests.",
-    nextAction: "Codify the clause playbook; pilot on standard contract types.",
-    subAgents: [
-      { name: "Playbook Comparator", desc: "Compares clauses against the approved playbook.", complexity: "High", type: "Validation", deps: "Playbook", status: "Needs Review" },
-      { name: "Fallback Suggester", desc: "Suggests fallback language for non-standard terms.", complexity: "Medium", type: "Drafting", deps: "Risk rules", status: "In Progress" }
-    ]
+    status: "In Progress", priority: "Strategic", autonomy: "Suggest → Act-and-notify on draft & validation; escalate approval and any pricing judgement",
+    risks: "MoCA Champion approves invoice/credit memo (locks the record)", nextAction: "", subAgents: []
   },
   {
-    id: "lg-02", name: "Regulatory Compliance Tracker", kind: "core", tier: "Compliance",
-    purpose: "Monitors regulatory changes and maps obligations to owners across the organisation.",
-    responsibilities: "Track new and amended regulations; assess applicability; map obligations to owners; flag deadlines; maintain the compliance register.",
-    process: "Regulatory Watch, Obligation Mapping.",
-    inputs: ["Regulatory sources", "Obligation register", "Org mapping"],
-    systems: ["GRC platform", "External legal feeds"],
-    outputs: ["Change alerts", "Obligation mapping", "Deadline flags"],
+    id: "fi-a7", name: "Smart Enquiries & Project-Cost Agent", kind: "core", tier: "Tier 1 — Intake & Coordination",
+    purpose: "Answer routine budget enquiries and assemble first-pass project cost evaluations, freeing the Budget Team for genuine analysis.",
+    responsibilities: "Logs and triages inbound enquiries; drafts accurate responses from budget data, policies and history; routes cross-functional questions; for new projects, assembles scope/timeline/cost workings, checks budget availability against existing & forecast commitments, and drafts the cost-evaluation recommendation.",
+    process: "Budgeting — Smart Enquiries 1–6; Project Cost Evaluation 1–6",
+    inputs: ["Enquiry (email/portal)", "budget data", "policies", "historical records", "commitment reports"],
+    systems: ["Email/SharePoint", "Excel", "Oracle (read)"],
+    outputs: ["Logged enquiry + drafted validated response", "project cost evaluation & recommendation"],
+    complexity: "Medium", impact: "Medium", feasibility: "High",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on logging, triage and routine documented responses; escalate novel or policy-sensitive answers and project cost limits",
+    risks: "Budget Team validates responses; management decides project cost limits", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-a11", name: "AR Collections & Receipts Agent", kind: "core", tier: "Tier 2 — Validation & Execution",
+    purpose: "Create and apply receipts from bank confirmations and run disciplined, aging-based collections follow-up.",
+    responsibilities: "Creates standard receipts from bank statements/confirmation emails (receipt method→bank/entity), applies them to open invoices, handles unidentified/unapplied states and reversals on request; from the aging report, sends reminders and logs call feedback; shares SWIFT copies for paid-but-outstanding items.",
+    process: "AR 5.4 (Receipts & application), 5.5 (Customer follow-up)",
+    inputs: ["Bank statement/confirmation", "open invoices", "aging report", "customer contacts"],
+    systems: ["Oracle Receivables", "Email/Phone log"],
+    outputs: ["Created/applied receipts", "updated AR ledger", "reminder + call log", "follow-up trail"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on receipt creation/application for matched items & reminders; escalate reversals/disputes",
+    risks: "AR Accountant reviews; reversals & disputed items confirmed by accountant", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-a12", name: "Payments Orchestration Agent", kind: "core", tier: "Tier 2 — Validation & Execution",
+    purpose: "Assemble and shepherd payment batches with strict maker-checker discipline — without ever being the final disburser.",
+    responsibilities: "Selects the correct project/entity bank account, assembles single/batch payments from approved invoices, supports the maker step, runs the encryption program and files output, lodges to the bank portal (or rides the H2H real-time interface once live), and tracks bank-mandate approvals; surfaces anomalies via the existing duplicate-check dashboard.",
+    process: "P2P 1.6 (Payment process incl. encryption, upload, bank approvals)",
+    inputs: ["Approved invoices", "project→bank mapping", "payment screen", "encryption program", "bank portal"],
+    systems: ["Oracle Payments", "Bank Portal/H2H", "PowerBI duplicate-check"],
+    outputs: ["Bank-selected payment batch", "encrypted file", "lodged payment request", "status tracking"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Suggest/assist only on batching & file prep; humans retain maker-checker & bank disbursement",
+    risks: "Payables Manager is checker; bank-mandate approvers disburse — agent never finalises", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-a13", name: "Fixed Assets Lifecycle Agent", kind: "core", tier: "Tier 2 — Validation & Execution",
+    purpose: "Run the Oracle-FA judgement layer on top of the automated SPAN integration — mass-additions prep, reconciliation, and memo drafting.",
+    responsibilities: "Reviews mass-addition lines, corrects category/type and sets queue to POST, verifies created assets; reconciles SPAN↔Oracle interface results and the FA register to TB/GL; tracks CIP build-up and capitalisation; drafts retirement and inter-entity transfer memos and reconciliations; supports physical count and the FA disclosure note.",
+    process: "Fixed Assets 7.1–7.7 (additions, CIP, retirement, depreciation, transfer, count, reporting)",
+    inputs: ["SPAN-interfaced mass additions", "PO/asset flags", "FA register", "TB/GL", "management memos"],
+    systems: ["Oracle FA", "SPAN (via IT-managed API)", "Excel", "Web ADI"],
+    outputs: ["Prepared/posted mass additions", "FA–TB reconciliation", "retirement/transfer memos", "FA disclosure"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on mass-addition prep & reconciliation; escalate retirements/transfers/disposals",
+    risks: "FA Accountant posts; management approves retirement/transfer; committee does physical count", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-a14", name: "Payroll Processing & Reconciliation Agent", kind: "core", tier: "Tier 2 — Validation & Execution",
+    purpose: "Validate and assemble the payroll run and its allowances, and reconcile the payroll sub-ledger to GL — leaving Finance Head to approve.",
+    responsibilities: "Takes HR payroll data, applies deductions (pension, loans, absence) and variable inputs, calculates net pay and the current-vs-prior variance; computes policy-bound allowances (education, air ticket, car, housing, overtime, per-diem, leave salary) and end-of-service gratuity & GPSSA pension; validates iExpense claims against policy; drafts and posts payroll journals and reconciles sub-ledger to GL; supports period close.",
+    process: "Payroll 2.1–2.13 (salaries, allowances, gratuity, pension, overtime, per-diem, claims, closing)",
+    inputs: ["HR payroll & leave data", "deduction schedules", "attendance", "policy rates", "iExpense claims", "GL"],
+    systems: ["Oracle HR/EBS GL", "Bank Portal", "Oracle iExpense", "Excel"],
+    outputs: ["Validated payroll register & variance", "allowance/gratuity/pension calcs", "posted JEs & GL reconciliation"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on calculation, validation & reconciliation; escalate approvals & bank transfer",
+    risks: "Finance Head approves payroll & variance; management approves allowances/gratuity; bank transfer per mandate", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-a15", name: "Accruals & Open-Contract Analyst Agent", kind: "core", tier: "Tier 3 — Reconciliation, Reporting & Closing",
+    purpose: "Build period accruals and the open-contract picture from the Oracle reports the AP team consolidates by hand today.",
+    responsibilities: "Extracts Commitment, Contract/PO, Line-Level and WC reports and consolidates them by contract/PO number; assesses each contract (billed vs remaining, WC status, WC>billed, non-PO SOA items); builds accrual entries and the per-entity accrual report; categorises open contracts (Finally Closed/Fully Paid/Under Process/Ongoing/Approved) and routes follow-ups to vendors, PMs, Procurement and IT; drafts the accrual memo for management.",
+    process: "P2P 1.8 (accruals), 1.9 (open-contract analysis) — also reused by R2R 1.1.24",
+    inputs: ["Commitment/Contract-PO/Line-Level/WC reports", "vendor SOAs", "invoice & payment status"],
+    systems: ["Oracle (reports)", "Excel"],
+    outputs: ["Consolidated analysis", "accrual entries & report", "open-contract categorisation", "follow-up actions", "draft memo"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "High for monitoring; humans confirm applicability",
-    risks: "Medium — applicability judgments confirmed by Legal.",
-    nextAction: "Connect external legal feeds and the obligation register.",
-    subAgents: [
-      { name: "Regulatory Watcher", desc: "Tracks new and amended regulations.", complexity: "Medium", type: "Monitoring", deps: "Legal feeds", status: "In Progress" },
-      { name: "Obligation Mapper", desc: "Maps obligations to owners and deadlines.", complexity: "Medium", type: "Orchestration", deps: "Org mapping", status: "In Progress" }
-    ]
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on consolidation, categorisation & follow-up; escalate accrual posting & memo approval",
+    risks: "Reviewer verifies entity allocation & codes; management approves the accrual memo", nextAction: "", subAgents: []
   },
   {
-    id: "lg-03", name: "Legal Research & Memo Assistant", kind: "core", tier: "Advisory",
-    purpose: "Speeds legal research and the drafting of memos grounded in internal precedent and external law.",
-    responsibilities: "Search precedent and regulations; summarise relevant authority; draft memos with citations; flag gaps; never gives final legal opinion.",
-    process: "Legal Research, Memo Drafting.",
-    inputs: ["Research question", "Precedent archive", "Regulation library"],
-    systems: ["Knowledge base", "Legal databases"],
-    outputs: ["Research summary", "Cited memo draft", "Authority list"],
+    id: "fi-a16", name: "Vendor Reconciliation (SOA) Agent", kind: "core", tier: "Tier 3 — Reconciliation, Reporting & Closing",
+    purpose: "Run the monthly vendor SOA cycle end-to-end except the human judgement on disputed items.",
+    responsibilities: "Performs spend analysis and vendor categorisation (Critical/Strategic/Tactical/Adhoc/Inactive); sends monthly SOA request emails with the template; matches the returned SOA to Oracle by invoice/amount/date/PO; identifies differences and routes them (vendor for copies, Procurement for contracts, PM for WC); books straightforward items; replies to the vendor with the reconciled status.",
+    process: "P2P 2 (Vendor Reconciliation 2.1–2.5)",
+    inputs: ["GL trade-payable", "vendor master", "vendor SOA", "invoice/CO-PO reports", "SWIFT copies"],
+    systems: ["Oracle Payables", "Email/Excel"],
+    outputs: ["Vendor categorisation", "SOA requests", "reconciled line items", "resolved differences", "reconciled reply"],
+    complexity: "Medium", impact: "Medium", feasibility: "High",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on requests, matching & status reply; escalate disputed/unmatched items",
+    risks: "AP Accountant resolves disputes; Procurement/PM support", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-a17", name: "AR Reconciliation & Reporting Agent", kind: "core", tier: "Tier 3 — Reconciliation, Reporting & Closing",
+    purpose: "Reconcile AR sub-ledger to GL and produce the suite of AR reports the team builds manually each period.",
+    responsibilities: "Extracts GL/TB, runs completeness and account mapping, reconciles the AR control account to the sub-ledger, investigates variances and drafts adjustments; builds Collection, MOF, Non-MOF, Interest, Consolidated and Liquidity reports across ~11 entities by matching bank receipts to invoices.",
+    process: "AR 5.6 (Reconciliation), 5.7 (Reporting)",
+    inputs: ["GL dump/TB", "AR sub-ledger/aging", "bank statements", "interest rates", "entity list"],
+    systems: ["Oracle Receivables", "Excel/Bank"],
+    outputs: ["Reconciliation file & adjustments", "full AR report suite", "management submission pack"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on reconciliation & report build; escalate adjustment posting & sign-off",
+    risks: "AR MoCA Champion reviews & approves; management receives the pack", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-a18", name: "Bank Reconciliation Exceptions Agent", kind: "core", tier: "Tier 3 — Reconciliation, Reporting & Closing",
+    purpose: "Work only what Oracle's AutoReconciliation cannot match — the residual unreconciled lines, charges and forex.",
+    responsibilities: "After AutoReconciliation runs, identifies unreconciled lines, searches available AP/AR/Payroll/GL transactions and proposes matches; handles bank charges by drafting a miscellaneous AR receipt; routes forex gain/loss; performs the manual clearing bank transfers need; generates the bank reconciliation report. (Once H2H is live, statement import/auto-reconcile is fully system-driven and the agent focuses purely on exceptions.)",
+    process: "CM (BRS) 6.1.9–6.1.18 (manual reconciliation, charges/forex, report)",
+    inputs: ["Imported MT940 statement", "unreconciled lines", "system transactions", "tolerance rules"],
+    systems: ["Oracle Cash Management"],
+    outputs: ["Matched lines", "drafted misc receipts for charges", "forex routing", "reconciliation report"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on confident matches & charges; escalate ambiguous/forex/transfer items",
+    risks: "CM User confirms non-standard matches; Oracle Support handles file-format errors", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-a19", name: "VAT Compliance Agent", kind: "core", tier: "Tier 3 — Reconciliation, Reporting & Closing",
+    purpose: "Prepare the VAT return per entity — extract, classify, reconcile, draft the FTA working file — and manage the FTA cycle.",
+    responsibilities: "Extracts AR/AP VAT registers and the GL trial balance; recalculates VAT (Net×5%), classifies standard/zero/exempt/reverse-charge and input VAT recoverability; reconciles sub-ledger to GL control accounts; maps figures to FTA return boxes and drafts the per-entity working file; watches filing deadlines; assembles the FTA post-submission sample pack (TRN/amount/description validation); archives and distributes the monthly VAT report.",
+    process: "VAT 1.1–1.8 (extract→submit→archive→FTA review)",
+    inputs: ["AP/AR VAT registers", "trial balance", "petty cash detail", "PO/GRN", "FTA boxes"],
+    systems: ["Oracle EBS", "Excel", "FTA Portal"],
+    outputs: ["Classified VAT data", "net-VAT reconciliation", "drafted FTA return", "sample pack", "monthly report"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on extract/classify/reconcile/draft; escalate FTA submission, payment & adjustments",
+    risks: "Finance Head approves adjustments & the return; Tax User submits on FTA portal", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-a20", name: "Budget Performance Reporting Agent", kind: "core", tier: "Tier 3 — Reconciliation, Reporting & Closing",
+    purpose: "Replace the multi-hour monthly OPEX/CAPEX consolidation, cleansing and dashboarding with a validated draft.",
+    responsibilities: "Extracts OPEX & CAPEX GL budget-consumption reports per entity, consolidates them, and applies the documented cleansing rules (fill Budget Org via prior-month VLOOKUP/COA, map encumbrance type by journal source and requisition description, reclassify MOCA-encumbrance lines); incorporates HR/IT inputs and manual adjustments; compiles the performance summary, confirms the approved budget is not exceeded, and refreshes the dashboard/PPT pack.",
+    process: "Budgeting — Budget Performance Reports 1–9",
+    inputs: ["OPEX/CAPEX extracts", "COA", "prior-month reports", "HR/IT data", "manual-adjustment checklist"],
+    systems: ["Oracle GL", "Excel/PowerPoint"],
+    outputs: ["Consolidated & cleansed data", "performance summary", "refreshed dashboard & reporting pack"],
+    complexity: "Medium", impact: "High", feasibility: "Medium",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on extract/cleanse/consolidate; escalate judgemental classifications & the final pack",
+    risks: "Budget Team validates cleansing & adjustments; management reviews the pack", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-a21", name: "Annual Budget Planning Agent", kind: "core", tier: "Tier 3 — Reconciliation, Reporting & Closing",
+    purpose: "Coordinate the annual planning cycle and assemble the master budget against the MoF ceiling.",
+    responsibilities: "Captures the MoF-approved ceiling; requests and integrates workforce, vacancy, IT, project and admin budgets; prepares YTD actuals and trend/seasonality analysis; incorporates Oracle commitment renewals; organises working sheets and dashboards; reconciles the consolidated budget to ceilings and strategic priorities; drafts the budget memo/pack; supports budget upload and transfer journals in Oracle.",
+    process: "Budgeting — Annual Budget Planning 1–7; Budget Upload 1–4; Budget Transfer 1–3",
+    inputs: ["MoF approval letters", "HR/IT/Admin/Sector submissions", "performance reports", "commitment reports"],
+    systems: ["Email/Excel", "Oracle GL Budget module", "PowerPoint/Word"],
+    outputs: ["Consolidated master budget", "reconciliation to ceiling", "budget memo/pack", "upload/transfer support"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on data collection, consolidation, reconciliation & drafting; escalate the budget memo and the approvals",
+    risks: "Sector Heads justify; management approves the budget; Finance Management approves upload/transfer", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-a22", name: "Period-Close Orchestration Agent", kind: "core", tier: "Tier 3 — Reconciliation, Reporting & Closing",
+    purpose: "Drive the month-end submodule close sequence and exception clean-up so the close runs on rails.",
+    responsibilities: "Sequences AP/AR/FA/CM Create Accounting → Transfer to GL → Journal Import → Post; reviews exception/unposted reports and performs root-cause analysis (unbalanced, invalid combinations, suspended, period mismatch); tracks corrections; confirms the closing checklist; coordinates the AP/AR/GL period close; runs the updated trial balance.",
+    process: "R2R 1.1.1–1.1.8, 1.1.38–1.1.41 (submodule & period close)",
+    inputs: ["Subledger transactions", "exception reports", "closing checklist", "period status"],
+    systems: ["Oracle EBS (subledgers + GL)"],
+    outputs: ["Closed submodules", "exception resolutions", "completed checklist", "updated trial balance"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on sequencing, exception triage & checklist; escalate posting & period closure",
+    risks: "Oracle/Finance team approves postings & period closure; corrections approved per matrix", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-a23", name: "Reconciliation & Account-Analysis Agent", kind: "core", tier: "Tier 3 — Reconciliation, Reporting & Closing",
+    purpose: "Produce the ~20 closing account reconciliations and suspense analysis, with drafted adjusting entries.",
+    responsibilities: "Runs Account Analysis/GL reports and reconciles each control account on its template (intercompany, bank, prepayments, accruals, deposits, petty cash, unearned revenue, fixed assets, leases, payables/receivables, provisions, etc.); rolls forward accruals and prepaids; ages suspense/clearing items and escalates >30 days; drafts adjustment and routine reclassification entries (IT cost allocation, bank charges/forex, intercompany, unearned revenue, interest receivable, etc.).",
+    process: "R2R 1.1.24–1.1.32 (accruals, suspense, adjusting entries), 1.1.26–1.1.28 (account analysis)",
+    inputs: ["GL reports per account", "subledger balances", "accrual/prepaid schedules", "suspense balances"],
+    systems: ["Oracle GL", "Excel"],
+    outputs: ["Per-account reconciliations", "suspense aging", "drafted adjusting & routine entries"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on reconciliation & drafting; escalate every posting for approval",
+    risks: "Finance team approves adjusting/reclassification entries before posting", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-a24", name: "Lease Accounting Agent (IPSAS 43)", kind: "core", tier: "Tier 3 — Reconciliation, Reporting & Closing",
+    purpose: "Maintain the lease population and the IPSAS 43 calculations and journals each close.",
+    responsibilities: "Validates lease additions, modifications, renewals and terminations; calculates the ROU asset and lease liability on a present-value basis; computes straight-line ROU amortisation and effective-interest expense; drafts the lease journals (liability, interest, amortisation, additions, modifications, terminations) and reconciles the lease schedule.",
+    process: "R2R 1.1.33–1.1.37 (lease review, ROU/liability, amortisation/interest, journals)",
+    inputs: ["Lease contracts & schedules", "discount rates", "payment terms"],
+    systems: ["Excel", "Oracle GL"],
+    outputs: ["Validated lease population", "ROU/liability & amortisation/interest calcs", "drafted lease journals"],
     complexity: "High", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Complex", autonomy: "Low — drafts; the lawyer owns the opinion",
-    risks: "Medium — output must be verified; the lawyer owns the final opinion.",
-    nextAction: "Pilot with mandatory citation verification by counsel.",
-    subAgents: [
-      { name: "Precedent Searcher", desc: "Searches precedent and relevant authority.", complexity: "High", type: "Validation", deps: "Legal databases", status: "In Progress" },
-      { name: "Memo Drafter", desc: "Drafts cited memos and flags gaps.", complexity: "Medium", type: "Drafting", deps: "Precedent archive", status: "In Progress" }
-    ]
+    status: "In Progress", priority: "Future Phase", autonomy: "Suggest → Act-and-notify on calculations once rates are set; escalate rate/term judgement & posting",
+    risks: "Finance team reviews & approves calculations and journals (judgement on rates/terms)", nextAction: "", subAgents: []
   },
   {
-    id: "lg-04", name: "Case & Matter Tracking Agent", kind: "value-add", tier: "Matter Management",
-    purpose: "Keeps legal matters, deadlines and obligations visible and on track.",
-    responsibilities: "Track matters and deadlines; chase pending actions; surface ageing matters; produce status views for leadership.",
-    process: "Matter Intake, Deadline Tracking.",
-    inputs: ["Matter register", "Deadlines", "Action items"],
-    systems: ["Matter-management system"],
-    outputs: ["Matter dashboard", "Deadline alerts", "Ageing flags"],
-    complexity: "Low", impact: "Medium", feasibility: "High",
-    status: "Ready", priority: "Future Phase", autonomy: "High for tracking; lawyers own the work",
-    risks: "Low — tracking and reminders only.",
-    nextAction: "Enhance phase; light-touch quick win for visibility.",
-    subAgents: [
-      { name: "Deadline Tracker", desc: "Tracks matter deadlines and chases actions.", complexity: "Low", type: "Monitoring", deps: "Matter system", status: "Ready" },
-      { name: "Status Reporter", desc: "Produces matter status views for leadership.", complexity: "Low", type: "Reporting", deps: "—", status: "Ready" }
-    ]
-  }
-];
-
-const ADMIN_AGENTS = [
-  {
-    id: "ad-01", name: "Facilities & Maintenance Request Agent", kind: "core", tier: "Facilities",
-    purpose: "Handles facilities and maintenance requests from intake to closure with clear routing and follow-up.",
-    responsibilities: "Capture and classify requests; route to the right team; track resolution; chase ageing tickets; confirm closure.",
-    process: "Request Intake, Routing, Resolution Tracking.",
-    inputs: ["Service request", "Facilities catalogue", "Team assignments"],
-    systems: ["Facilities system", "Email"],
-    outputs: ["Routed requests", "Resolution tracking", "Closure confirmation"],
-    complexity: "Low", impact: "Medium", feasibility: "High",
-    status: "Ready", priority: "Quick Win", autonomy: "High for routing and tracking",
-    risks: "Low — routes and tracks.",
-    nextAction: "Approve as a quick win.",
-    subAgents: [
-      { name: "Request Classifier", desc: "Classifies and routes facilities requests.", complexity: "Low", type: "Orchestration", deps: "Catalogue", status: "Ready" },
-      { name: "Resolution Chaser", desc: "Tracks and chases ageing tickets to closure.", complexity: "Low", type: "Monitoring", deps: "—", status: "Ready" }
-    ]
-  },
-  {
-    id: "ad-02", name: "Fleet & Travel Coordination Agent", kind: "core", tier: "Travel & Fleet",
-    purpose: "Coordinates vehicle bookings, travel requests and related approvals.",
-    responsibilities: "Manage vehicle and travel bookings; check policy and budget; route approvals; reconcile usage; handle changes.",
-    process: "Travel Request, Vehicle Booking, Approval Routing.",
-    inputs: ["Travel/booking request", "Travel policy", "Availability"],
-    systems: ["Booking system", "ERP"],
-    outputs: ["Confirmed bookings", "Routed approvals", "Usage reconciliation"],
-    complexity: "Medium", impact: "Medium", feasibility: "High",
-    status: "In Progress", priority: "Strategic", autonomy: "Medium — coordinates; approvers decide",
-    risks: "Low — coordinates and reconciles; approvers decide.",
-    nextAction: "Confirm booking-system integration and travel policy.",
-    subAgents: [
-      { name: "Booking Coordinator", desc: "Manages vehicle and travel bookings.", complexity: "Medium", type: "Orchestration", deps: "Booking system", status: "In Progress" },
-      { name: "Policy & Budget Checker", desc: "Checks requests against policy and budget.", complexity: "Low", type: "Validation", deps: "Travel policy", status: "Ready" }
-    ]
-  },
-  {
-    id: "ad-03", name: "Correspondence & Records Agent", kind: "core", tier: "Records Management",
-    purpose: "Classifies, routes and archives incoming and outgoing correspondence and records.",
-    responsibilities: "Classify correspondence; extract key fields; route to owners; track responses; archive to retention rules.",
-    process: "Mail Intake, Classification, Routing, Archiving.",
-    inputs: ["Correspondence", "Classification taxonomy", "Retention rules"],
-    systems: ["DMS", "Email"],
-    outputs: ["Classified records", "Routed items", "Compliant archive"],
-    complexity: "Medium", impact: "Medium", feasibility: "High",
-    status: "Ready", priority: "Quick Win", autonomy: "Medium — classifies and routes; humans handle exceptions",
-    risks: "Low — classifies and routes; sensitive items escalated.",
-    nextAction: "Approve as a quick win; confirm the retention taxonomy.",
-    subAgents: [
-      { name: "Correspondence Classifier", desc: "Classifies and extracts key fields.", complexity: "Medium", type: "Validation", deps: "Taxonomy", status: "Ready" },
-      { name: "Retention Archiver", desc: "Archives records per retention rules.", complexity: "Low", type: "Orchestration", deps: "DMS", status: "Ready" }
-    ]
-  },
-  {
-    id: "ad-04", name: "Events & Meeting Logistics Agent", kind: "value-add", tier: "Events",
-    purpose: "Coordinates the logistics behind meetings and events end to end.",
-    responsibilities: "Schedule rooms and resources; coordinate catering and AV; send invitations and reminders; track RSVPs; handle changes.",
-    process: "Event Planning, Logistics Coordination.",
-    inputs: ["Event request", "Resource availability", "Attendee list"],
-    systems: ["Calendar", "Booking system"],
-    outputs: ["Confirmed logistics", "Invitations and reminders", "RSVP tracking"],
-    complexity: "Low", impact: "Low", feasibility: "High",
-    status: "In Progress", priority: "Future Phase", autonomy: "High for coordination",
-    risks: "Low — coordination only.",
-    nextAction: "Enhance phase.",
-    subAgents: [
-      { name: "Resource Scheduler", desc: "Schedules rooms, AV and catering.", complexity: "Low", type: "Orchestration", deps: "Booking system", status: "In Progress" },
-      { name: "RSVP Tracker", desc: "Sends invitations and tracks RSVPs.", complexity: "Low", type: "Monitoring", deps: "Calendar", status: "In Progress" }
-    ]
-  }
-];
-
-const STRATEGY_AGENTS = [
-  {
-    id: "st-01", name: "KPI & Performance Monitoring Agent", kind: "core", tier: "Performance",
-    purpose: "Tracks strategic KPIs across the organisation and surfaces performance against targets.",
-    responsibilities: "Collect KPI actuals; compare against targets; flag at-risk indicators; produce performance dashboards; answer questions in plain language.",
-    process: "KPI Collection, Target Tracking, Performance Reporting.",
-    inputs: ["KPI definitions", "Actuals from departments", "Targets"],
-    systems: ["Performance system", "BI layer"],
-    outputs: ["Performance dashboards", "At-risk flags", "Plain-language answers"],
-    complexity: "Medium", impact: "High", feasibility: "High",
-    status: "Ready", priority: "Quick Win", autonomy: "High — read-only and reporting",
-    risks: "Low — read-only.",
-    nextAction: "Approve as a quick win; standardise KPI definitions.",
-    subAgents: [
-      { name: "KPI Collector", desc: "Collects and validates KPI actuals from departments.", complexity: "Medium", type: "Validation", deps: "Performance system", status: "Ready" },
-      { name: "Performance Reporter", desc: "Produces dashboards and flags at-risk KPIs.", complexity: "Low", type: "Reporting", deps: "BI layer", status: "Ready" }
-    ]
-  },
-  {
-    id: "st-02", name: "Strategic Initiative Tracker", kind: "core", tier: "Portfolio",
-    purpose: "Keeps the portfolio of strategic initiatives visible, on track and well-governed.",
-    responsibilities: "Track initiative milestones, risks and dependencies; chase updates; flag slippage; produce a portfolio view for leadership.",
-    process: "Initiative Tracking, Milestone Monitoring.",
-    inputs: ["Initiative register", "Milestones", "Risk log"],
-    systems: ["PMO tool", "BI layer"],
-    outputs: ["Portfolio dashboard", "Slippage flags", "Risk summary"],
-    complexity: "Medium", impact: "High", feasibility: "High",
-    status: "In Progress", priority: "Strategic", autonomy: "High for tracking; owners act",
-    risks: "Low — tracks and surfaces; owners act.",
-    nextAction: "Digitise the initiative register and milestone data.",
-    subAgents: [
-      { name: "Milestone Monitor", desc: "Tracks milestones and flags slippage.", complexity: "Medium", type: "Monitoring", deps: "PMO tool", status: "In Progress" },
-      { name: "Portfolio Reporter", desc: "Produces the portfolio view for leadership.", complexity: "Low", type: "Reporting", deps: "BI layer", status: "Ready" }
-    ]
-  },
-  {
-    id: "st-03", name: "Foresight & Benchmarking Agent", kind: "value-add", tier: "Insight",
-    purpose: "Brings external benchmarks and foresight signals into strategic planning.",
-    responsibilities: "Gather benchmarks and trend signals; compare against internal performance; surface opportunities and risks; brief planners.",
-    process: "Benchmarking, Trend Scanning.",
-    inputs: ["External benchmarks", "Trend sources", "Internal metrics"],
-    systems: ["External data sources", "BI layer"],
-    outputs: ["Benchmark comparisons", "Foresight briefs", "Opportunity flags"],
+    id: "fi-a25", name: "ECL Provision Agent (IPSAS 41)", kind: "core", tier: "Tier 3 — Reconciliation, Reporting & Closing",
+    purpose: "Compute the expected-credit-loss provision per entity under the IPSAS 41 simplified approach.",
+    responsibilities: "Extracts AR aging (7 buckets) and enriches it (earned/unearned, risk rating, DSO); reconciles AR sub-ledger to GL before calculation; applies the provision-matrix loss rates per bucket, separating earned and unearned revenue; aggregates the provision per entity; drafts the ECL workbook and the provision journal; reconciles the allowance account and distributes the monthly ECL summary.",
+    process: "R2R 1.3.1–1.3.6 (ECL process)",
+    inputs: ["AR aging 7-buckets", "historical loss data", "risk ratings", "reconciled AR", "loss-rate matrix"],
+    systems: ["Oracle Receivables/GL", "Excel"],
+    outputs: ["Enriched aging", "ECL provision per entity", "drafted workbook & journal", "allowance reconciliation"],
     complexity: "High", impact: "Medium", feasibility: "Medium",
-    status: "Needs Review", priority: "Future Phase", autonomy: "High for insight; planners decide",
-    risks: "Medium — external data quality must be governed.",
-    nextAction: "Enhance phase; vet external data sources.",
-    subAgents: [
-      { name: "Benchmark Gatherer", desc: "Gathers external benchmarks and trend signals.", complexity: "High", type: "Reporting", deps: "External sources", status: "Needs Review" },
-      { name: "Foresight Briefer", desc: "Surfaces opportunities and risks for planners.", complexity: "Medium", type: "Reporting", deps: "—", status: "In Progress" }
-    ]
+    status: "In Progress", priority: "Future Phase", autonomy: "Suggest → Act-and-notify on the matrix maths once rates are approved; escalate rate setting & posting",
+    risks: "Finance team approves loss rates & provision before posting", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-a26", name: "Intercompany & Consolidation Agent", kind: "core", tier: "Tier 3 — Reconciliation, Reporting & Closing",
+    purpose: "Match intercompany balances across entities and assemble the consolidation and elimination workbook.",
+    responsibilities: "Extracts related-party and intercompany balances across all entities; reconciles to TB; matches IC receivables/payables and identifies differences; coordinates counterparty confirmations; drafts elimination, reclassification and consolidation-adjustment entries (incl. IFRS/IPSAS alignment); aggregates entity balances; validates the consolidated TB; drafts the consolidated financial statements and disclosure schedules.",
+    process: "R2R 1.2 (related party), 1.6 (consolidation & elimination)",
+    inputs: ["Entity TBs/FS/GL detail", "intercompany balances", "group COA & mapping", "counterparty confirmations"],
+    systems: ["Oracle GL", "Excel/Word", "Email"],
+    outputs: ["IC reconciliation", "drafted eliminations/reclasses/adjustments", "consolidation workbook", "draft consolidated FS"],
+    complexity: "High", impact: "High", feasibility: "Low",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on matching & drafting; escalate every elimination/adjustment posting and the consolidated FS sign-off",
+    risks: "Exec Director / Governance & Financial Control reviews & approves; entities confirm IC differences", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-a27", name: "Financial Reporting & Disclosure Agent", kind: "core", tier: "Tier 3 — Reconciliation, Reporting & Closing",
+    purpose: "Assemble the management accounts and IPSAS financial statements from the closed ledger.",
+    responsibilities: "Extracts the final TB and GL dump; classifies expenses (G&A, Project, Staff); builds the FS support workbook; drafts the primary statements (financial position, performance, changes in net assets, cash flow) and the IPSAS disclosure notes; prepares month-on-month/YTD variance analysis, charts and management commentary; cross-checks notes to balances; routes for review, sign-off and external-auditor issuance.",
+    process: "R2R 1.4 (management accounts), 1.5 (financial statement preparation)",
+    inputs: ["Final TB", "GL dump", "supporting schedules", "COA mapping", "IPSAS disclosure requirements"],
+    systems: ["Oracle GL", "Excel/Word", "Email/DocuSign"],
+    outputs: ["FS support workbook", "draft primary statements & disclosures", "management commentary", "variance pack"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on extract, classification, drafting & commentary; escalate every posting and the FS sign-off",
+    risks: "Finance team reviews; Exec Director/Head of Entity/Minister approve; External Auditor issues", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-a33", name: "Finance Intelligence — Risk, Overlap & Prediction Agent", kind: "core", tier: "Tier 3 — Reconciliation, Reporting & Closing",
+    purpose: "Turn finance from after-the-fact reporting into foresight — continuously detecting duplicates, overlaps and anomalies, identifying risk early, and producing predictions across budgets, cash, collections and vendors.",
+    responsibilities: "Detects duplicate and near-duplicate invoices/payments (extending the existing duplicate-check dashboard), overlapping commitments and charges, and double-counted carry-forwards; flags GL anomalies and unusual postings; identifies risk early — budget-overrun, collection/credit, aged AP/AR and accrual, vendor-concentration/performance, and BG/contract-expiry risk; forecasts cash flow, collections, budget consumption and accruals; surfaces all of this as ranked, explained alerts with a recommended action routed to the right team.",
+    process: "Cross-cutting — budget monitoring, AR collections/ECL, accruals & open contracts, payment duplicate-check, vendor evaluation, close analytics",
+    inputs: ["GL/TB", "AP/AR/budget/commitment data", "payment files", "vendor master & performance", "historical trends"],
+    systems: ["Oracle EBS (read)", "Excel/PowerBI", "the ecosystem's shared data"],
+    outputs: ["Duplicate/overlap/anomaly alerts", "a live risk register", "and forecasts/predictive advisories with recommended actions"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on detection, alerting & forecasting; recommendations only — humans decide and post",
+    risks: "Finance/Budget teams act on the alerts; the decision and any posting remain human", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-a28", name: "Budget Commitment Monitor Agent", kind: "core", tier: "Tier 4 — Monitoring & Governance",
+    purpose: "Run the weekly commitment monitoring continuously and flag overruns before they happen.",
+    responsibilities: "Reviews new PRs weekly against available approved budget per organisation/category; reclassifies PR→PO conversions from commitments to obligations; incorporates petty-cash, TPR (travel) and validated budget-transfer/MEMO funding lines; keeps the monitoring file current; flags potential overruns and escalates to Finance, then supports the Sector-Head discussion on remediation.",
+    process: "Budgeting — Budget Commitment Monitoring 1–1.9",
+    inputs: ["Weekly PR data", "PR→PO conversions", "petty-cash & TPR reports", "transfer/MEMO authorisations"],
+    systems: ["Oracle (read)", "Excel", "Email"],
+    outputs: ["Updated monitoring file", "PR→PO reclassification", "overrun flags & escalations"],
+    complexity: "Low", impact: "High", feasibility: "High",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on monitoring & reclassification; escalate every overrun & funding change",
+    risks: "Finance team aligns on overruns; Sector Heads agree remediation; transfers need approved memo", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-a30", name: "Approval Concierge (shared platform service)", kind: "core", tier: "Tier 4 — Monitoring & Governance",
+    purpose: "Deliver every approval as a push-based, decision-ready package and write the decision back to Oracle — the common approval experience for all agents. Give every vendor and customer one place to ask anything and receive proactive status, in Arabic or English, across registration, RFQ, PO, work confirmation, invoice, payment, BG and AR collection. Turn each person's scattered queues (Oracle notifications, emails, pending WCs, holds, reconciliations) into one ranked worklist with recommended next actions. Continuously capture how the work is actually done into a searchable, living knowledge base, and onboard new joiners and cover handovers. Keep the team's workload humane during peaks by surfacing imbalance and prompting healthy pacing — opt-in and aggregate by design. Continuously gather and analyse feedback and sentiment from both sides of every service and convert it into prioritised improvements. Give leadership a synthesised, decision-ready picture of the whole department, on demand and on a schedule, drawing on every other agent. Move assurance from periodic to continuous — monitoring controls and audit-readiness across every process, all the time. Run a continuous operational risk register for the department — identify, assess, assign, track mitigation, and give early warning — so risk is managed proactively rather than discovered late. Independently review completed work — human and agent — for correctness and completeness, and flag anything that needs fixing before it is relied on. Be the department's authoritative “what must be done and by when” radar, surfacing obligations proactively to the right people before they fall due. Bring structured, data-driven negotiation to sourcing and travel — benchmark, strategise, counter-offer and close routine commercial gaps — while every binding commitment stays a human decision. Provide a natural bilingual voice and chat channel so the department can call and be called — to answer, to follow up, and to negotiate routine terms — in real time, with seamless human handoff for anything sensitive or binding.",
+    responsibilities: "For any approval an agent prepares, assembles the summary + attachments + recommendation, delivers it to the right approver by their channel (Oracle notification/email/Teams), answers follow-up questions in-thread from the source systems, captures approve/reject/more-info, and writes the outcome back to Oracle with a full audit entry; respects the delegation-of-authority matrix and SoD. Answers status and “what do I do next” questions on demand; pushes proactive updates (payment scheduled, invoice on hold and why, BG expiring, registration approved); routes genuine issues to the right team with full context; operates in Arabic and English. Consolidates each user's open items across systems; ranks by deadline, SLA risk and impact; recommends and pre-fills the next action; learns the person's patterns; delivers a morning brief. Records process know-how, exception resolutions and decisions as they happen; answers “how do we do X here?”; builds onboarding paths; flags single-points-of-knowledge; keeps procedures current as practice evolves. Monitors task volumes and deadlines across the team; flags overload and uneven distribution to leads; suggests rebalancing and realistic sequencing through the close; prompts breaks during crunch; never tracks individuals punitively. Collects lightweight feedback after key moments (onboarding, payment, approval); analyses sentiment and themes; ranks an improvement backlog; reports a satisfaction pulse; closes the loop with respondents. Assembles periodic and on-demand executive briefings across all entities; highlights what changed, what's at risk and what needs a decision; explains cycle-time bottlenecks and slow approval points; answers leadership's ad-hoc questions in plain language. Continuously tests controls and SoD; flags policy drift and missing evidence; verifies five-year retention completeness; pre-assembles audit packs and FTA sample responses; tracks remediation. Scans signals from across the ecosystem (overruns, aged items, expiries, exceptions, SoD findings, single-points-of-knowledge, slow approvals); identifies and assesses risks by likelihood and impact; assigns owners and tracks mitigating controls; maintains the risk register and a heat map; escalates emerging or rising risks early. Re-checks journals (balanced, valid combinations), invoice coding, reconciliation tie-outs, registrations and documents, and report-to-source consistency; compares against the rules and the authoritative source; flags errors, omissions and inconsistencies together with the fix; samples and reviews agent actions as part of governance. Maintains a consolidated obligations & compliance calendar (statutory, regulatory, close, contractual, SLA, recurring); tracks status and ownership; surfaces what's due, due soon and overdue; feeds the Next-Best-Action Coach and warns leads and management; never lets a required action go unflagged. Benchmarks quotes against prior POs, contracts and awarded prices and the SOW cost estimate (A32); identifies negotiation levers (price, payment terms, delivery, scope); drafts counter-offers and talking points using negotiation playbooks; conducts routine clarification and price exchanges with suppliers and travel agents — in writing or, through the Contact-Centre agent (V12), by phone in Arabic or English — within delegated limits; handles the surrogate-quote and one-bid context; recommends accept / push / re-tender; never commits beyond its authority. Handles inbound voice/chat and places outbound calls in Arabic or English: invoice follow-up (status, missing/incorrect data, request a revised copy, payment timing) with A3; proposal and quote follow-up, clarification and surrogate-quote gathering with A8; AR collection reminders with A11; vendor-evaluation, work-confirmation and SOA follow-ups. Voices the Negotiation agent's (V11) benchmarked position and counter-offers, captures the vendor's reply, and closes routine gaps within delegated limits. Authenticates the caller; answers from the source systems via the concierge (V1); logs outcomes and call feedback; warm-transfers binding terms or anything sensitive to a human with full context; never commits beyond authority or shares restricted data.",
+    process: "All approval chains across P2P, Travel, AR, VAT, Budgeting, R2R, Payroll",
+    inputs: ["Agent-prepared package", "approval matrix", "approver directory", "source-system data Vendor/customer identity", "their transactions across Oracle", "payment & approval status"],
+    systems: ["Oracle workflow", "Email/Teams", "audit log Oracle (read)", "iSupplier/customer channels", "Email/portal", "chat Oracle (read)"],
+    outputs: ["Decision-ready packages", "in-thread Q&A", "captured decisions written back", "audit trail Answered queries", "proactive status notifications", "well-routed issues"],
+    complexity: "Medium", impact: "High", feasibility: "Medium",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on delivery, Q&A and write-back; the human decision is never automated Act-and-notify on answering & proactive updates; escalate genuine issues — never alters records Act-and-notify on prioritisation & pre-fill; the person decides each action Act-and-notify on capture & answering; team leads validate sensitive procedures Act-and-notify on signals & suggestions; leads decide; strictly aggregate & opt-in Act-and-notify on collection & analysis; humans own the improvement decisions Act-and-notify on briefing & analysis; recommendations only Act-and-notify on monitoring & pack assembly; humans own remediation & sign-off Act-and-notify on identification, assessment & tracking; humans own risk decisions & acceptance Act-and-notify on review & flagging; humans correct and approve Act-and-notify on surfacing & tracking; the owner performs the action Act-and-notify on benchmarking, strategy & routine counter-offers within limits; escalate binding terms, award and one-bid Act-and-notify on answering, outbound follow-up & routine voice negotiation within limits; warm-transfer binding terms or anything sensitive to a human",
+    risks: "The named approver decides; the agent never approves on their behalf AP/AR/vendor-relations handle escalated issues; the concierge never changes financial data The person chooses what to action; the coach advises and pre-fills Team leads validate captured knowledge; staff contribute and consume Team leads decide on rebalancing; participation is opt-in Process owners act on the backlog; management reviews the pulse Leadership decides; the agent informs and recommends Governance/financial control and auditors act on findings; the sentinel never overrides Risk owners and management decide responses; the agent identifies, assesses and tracks Reviewers/approvers decide on flagged items; the agent reviews and recommends, never overrides Owners action the items; the radar surfaces and tracks — it does not perform the task Buyer / PM / travel team approve final terms; award and binding commitments stay human Staff take warm transfers; sensitive or binding matters are human; the agent assists, negotiates within limits, and logs", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-v2", name: "Staff Next-Best-Action Coach", kind: "value-add", tier: "Value-add",
+    purpose: "Turn each person's scattered queues (Oracle notifications, emails, pending WCs, holds, reconciliations) into one ranked worklist with recommended next actions.",
+    responsibilities: "Consolidates each user's open items across systems; ranks by deadline, SLA risk and impact; recommends and pre-fills the next action; learns the person's patterns; delivers a morning brief.",
+    process: "",
+    inputs: ["The user's queues", "SLAs", "deadlines", "workload", "and agent worklists"],
+    systems: ["Oracle (read)", "Email", "the agent ecosystem"],
+    outputs: ["A ranked daily worklist", "next-best-action prompts", "SLA-risk alerts"],
+    complexity: "Medium", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on prioritisation & pre-fill; the person decides each action",
+    risks: "The person chooses what to action; the coach advises and pre-fills", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-v3", name: "Knowledge Capture & Continuity Agent", kind: "value-add", tier: "Value-add",
+    purpose: "Continuously capture how the work is actually done into a searchable, living knowledge base, and onboard new joiners and cover handovers.",
+    responsibilities: "Records process know-how, exception resolutions and decisions as they happen; answers “how do we do X here?”; builds onboarding paths; flags single-points-of-knowledge; keeps procedures current as practice evolves.",
+    process: "",
+    inputs: ["Process documentation", "agent decision logs", "resolved exceptions", "SOPs"],
+    systems: ["SharePoint/knowledge base", "the agent ecosystem", "Email"],
+    outputs: ["A living knowledge base", "onboarding guides", "key-person-risk flags", "answered how-to queries"],
+    complexity: "Medium", impact: "High", feasibility: "High",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on capture & answering; team leads validate sensitive procedures",
+    risks: "Team leads validate captured knowledge; staff contribute and consume", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-v4", name: "Wellbeing & Workload-Balance Agent", kind: "value-add", tier: "Value-add",
+    purpose: "Keep the team's workload humane during peaks by surfacing imbalance and prompting healthy pacing — opt-in and aggregate by design.",
+    responsibilities: "Monitors task volumes and deadlines across the team; flags overload and uneven distribution to leads; suggests rebalancing and realistic sequencing through the close; prompts breaks during crunch; never tracks individuals punitively.",
+    process: "",
+    inputs: ["Task volumes", "deadlines", "the close calendar", "agent worklists (aggregate)"],
+    systems: ["The agent ecosystem (worklists)", "calendar", "Email"],
+    outputs: ["Workload-balance signals", "rebalancing suggestions", "healthier close cycles"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on signals & suggestions; leads decide; strictly aggregate & opt-in",
+    risks: "Team leads decide on rebalancing; participation is opt-in", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-v6", name: "Executive Insight & Briefing Agent", kind: "value-add", tier: "Value-add",
+    purpose: "Give leadership a synthesised, decision-ready picture of the whole department, on demand and on a schedule, drawing on every other agent.",
+    responsibilities: "Assembles periodic and on-demand executive briefings across all entities; highlights what changed, what's at risk and what needs a decision; explains cycle-time bottlenecks and slow approval points; answers leadership's ad-hoc questions in plain language.",
+    process: "",
+    inputs: ["Agent outputs", "GL/budget/cash/vendor data", "cycle-time metrics", "the risk register"],
+    systems: ["Oracle (read)", "the agent ecosystem", "dashboards/Email"],
+    outputs: ["Executive briefings", "bottleneck & risk highlights", "answered leadership questions"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on briefing & analysis; recommendations only",
+    risks: "Leadership decides; the agent informs and recommends", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-v7", name: "Continuous Audit & Compliance Sentinel", kind: "value-add", tier: "Value-add",
+    purpose: "Move assurance from periodic to continuous — monitoring controls and audit-readiness across every process, all the time.",
+    responsibilities: "Continuously tests controls and SoD; flags policy drift and missing evidence; verifies five-year retention completeness; pre-assembles audit packs and FTA sample responses; tracks remediation.",
+    process: "",
+    inputs: ["Agent logs", "transactions", "approval trails", "retention records", "policy rules"],
+    systems: ["Oracle (read)", "the audit spine", "SharePoint", "Email"],
+    outputs: ["Continuous control findings", "audit-ready packs", "remediation tracking"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on monitoring & pack assembly; humans own remediation & sign-off",
+    risks: "Governance/financial control and auditors act on findings; the sentinel never overrides", nextAction: "", subAgents: []
+  },
+  {
+    id: "fi-v8", name: "Operational Risk Management Agent", kind: "value-add", tier: "Value-add",
+    purpose: "Run a continuous operational risk register for the department — identify, assess, assign, track mitigation, and give early warning — so risk is managed proactively rather than discovered late.",
+    responsibilities: "Scans signals from across the ecosystem (overruns, aged items, expiries, exceptions, SoD findings, single-points-of-knowledge, slow approvals); identifies and assesses risks by likelihood and impact; assigns owners and tracks mitigating controls; maintains the risk register and a heat map; escalates emerging or rising risks early.",
+    process: "",
+    inputs: ["Signals from all agents", "the control model", "deadlines", "vendor & budget data", "incident history"],
+    systems: ["Oracle (read)", "the agent ecosystem", "the audit spine", "dashboards"],
+    outputs: ["A living risk register & heat map", "early-warning alerts", "mitigation tracking"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on identification, assessment & tracking; humans own risk decisions & acceptance",
+    risks: "Risk owners and management decide responses; the agent identifies, assesses and tracks", nextAction: "", subAgents: []
   }
 ];
 
-const COMMS_AGENTS = [
+const KNOWLEDGE_AGENTS = [
   {
-    id: "cm-01", name: "Media Monitoring & Sentiment Agent", kind: "core", tier: "Media",
-    purpose: "Monitors media and social channels for mentions and sentiment, surfacing what needs attention.",
-    responsibilities: "Track mentions across channels; analyse sentiment; flag emerging issues; produce daily briefs; alert on crises.",
-    process: "Media Scanning, Sentiment Analysis, Issue Flagging.",
-    inputs: ["Media feeds", "Social channels", "Keyword list"],
-    systems: ["Media-monitoring tool", "BI layer"],
-    outputs: ["Daily media brief", "Sentiment dashboard", "Crisis alerts"],
-    complexity: "Medium", impact: "High", feasibility: "High",
-    status: "Ready", priority: "Quick Win", autonomy: "High — monitoring and reporting",
-    risks: "Low — monitors and alerts; comms team responds.",
-    nextAction: "Approve as a quick win; connect media feeds.",
-    subAgents: [
-      { name: "Mention Tracker", desc: "Tracks mentions across media and social channels.", complexity: "Medium", type: "Monitoring", deps: "Media feeds", status: "Ready" },
-      { name: "Sentiment Analyser", desc: "Analyses sentiment and flags emerging issues.", complexity: "Medium", type: "Reporting", deps: "BI layer", status: "Ready" }
-    ]
+    id: "kn-c1", name: "Request Intake & Triage Agent", kind: "core", tier: "Tier 1 — Intake",
+    purpose: "Be the single, intelligent front door for every request the function receives, regardless of channel.",
+    responsibilities: "Read inbound requests from Email and Events Now and convert them into a structured, classified ticket; Detect sub-process type, required languages, deadline, source files and prior published references; Flag missing inputs and request them before work starts; route to the right queue / lead",
+    process: "All 11 sub-processes (the documented Step 1 of each)",
+    inputs: ["Requester emails", "Events Now submissions", "attached files (Word/Excel/PPT/PDF/Image)"],
+    systems: ["Email", "Events Now (read)", "ticket store (write)"],
+    outputs: ["Complete", "classified", "deduplicated request ticket with SLA clock started"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act & notify (classify + route); Ask only on ambiguous/incomplete requests",
+    risks: "None for routing; Content Team Lead confirms classification only when confidence is low", nextAction: "", subAgents: []
   },
   {
-    id: "cm-02", name: "Content Drafting & Translation Agent", kind: "core", tier: "Content",
-    purpose: "Drafts and translates communications content in Arabic and English, on-brand and review-ready.",
-    responsibilities: "Draft press releases, posts and statements from briefs; translate AR/EN; enforce brand and tone; prepare for human sign-off; never publishes.",
-    process: "Content Briefing, Drafting, Bilingual Translation.",
-    inputs: ["Content brief", "Brand guidelines", "Approved messaging"],
-    systems: ["CMS", "Translation tools"],
-    outputs: ["On-brand drafts", "AR/EN translations", "Review-ready content"],
-    complexity: "Medium", impact: "High", feasibility: "High",
-    status: "In Progress", priority: "Strategic", autonomy: "Medium — drafts; comms approves and publishes",
-    risks: "Low — drafts only; a human reviews and publishes.",
-    nextAction: "Codify brand and tone guidelines; pilot on routine content.",
-    subAgents: [
-      { name: "Content Drafter", desc: "Drafts on-brand content from briefs.", complexity: "Medium", type: "Drafting", deps: "Brand guidelines", status: "In Progress" },
-      { name: "AR/EN Translator", desc: "Translates content bilingually and enforces tone.", complexity: "Medium", type: "Drafting", deps: "Translation tools", status: "In Progress" }
-    ]
+    id: "kn-c2", name: "Vendor Sourcing & Quotation Comparison Agent", kind: "core", tier: "Tier 2 — Sourcing",
+    purpose: "Run the 3-vendor RFQ loop and turn raw quotations into a decision-ready comparison.",
+    responsibilities: "Issue RFQs to the 3 pre-approved vendors for translation, interpretation or coverage; Normalise replies (cost, timeline, language/equipment availability, workforce) into one table; Benchmark against last year's quotation and recommend the best-value option",
+    process: "Editorial Translation, Interpretation, Big Events Media Coverage, Newspapers Subscriptions",
+    inputs: ["Approved vendor list", "request specification", "prior-year quotations"],
+    systems: ["Email/Phone (read/write)", "Oracle vendor master & prior spend (read)"],
+    outputs: ["Side-by-side quotation comparison + recommendation", "reduction-request drafts"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Suggest (recommendation); acts only to send RFQs and chase replies",
+    risks: "Content Team Lead and Project Manager approve the selection and any reduction request", nextAction: "", subAgents: []
   },
   {
-    id: "cm-03", name: "Campaign Planning & Scheduling Agent", kind: "core", tier: "Campaigns",
-    purpose: "Coordinates campaign calendars, channel scheduling and approvals.",
-    responsibilities: "Build campaign calendars; schedule across channels; route approvals; track performance; flag conflicts.",
-    process: "Campaign Planning, Channel Scheduling.",
-    inputs: ["Campaign plan", "Channel calendar", "Approval matrix"],
-    systems: ["Marketing platform", "CMS"],
-    outputs: ["Campaign calendar", "Scheduled posts", "Performance tracking"],
-    complexity: "Medium", impact: "Medium", feasibility: "High",
-    status: "Ready", priority: "Strategic", autonomy: "Medium — schedules; comms approves",
-    risks: "Low — schedules and tracks; publishing approved by humans.",
-    nextAction: "Confirm channel integrations and the approval matrix.",
-    subAgents: [
-      { name: "Calendar Builder", desc: "Builds the campaign calendar and flags conflicts.", complexity: "Low", type: "Orchestration", deps: "Channel calendar", status: "Ready" },
-      { name: "Channel Scheduler", desc: "Schedules content across channels.", complexity: "Medium", type: "Orchestration", deps: "Marketing platform", status: "In Progress" }
-    ]
+    id: "kn-c3", name: "Procurement & Finance Liaison Agent", kind: "core", tier: "Tier 2 — Sourcing",
+    purpose: "Carry an approved selection through PR, PO and payment without the manual hand-offs.",
+    responsibilities: "Draft the PR in Oracle from the approved quotation and attach supporting documents; Track PO generation with Procurement and surface blockers proactively; Compile final invoices and hand them to the Financial Services Department for payment",
+    process: "Editorial Translation, Interpretation, Big Events, Newspapers Subscriptions",
+    inputs: ["Approval + PR number", "selected quotation", "invoices", "delivery confirmations"],
+    systems: ["Oracle (read PR/PO/budget", "write PR draft)", "Email (write)"],
+    outputs: ["Draft PR", "PO-status tracker", "payment-ready invoice package"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Suggest → Act-and-notify on PR drafting; Ask on anything financial",
+    risks: "Project Manager / Head of Entity authorise; Finance approves all payment — never the agent", nextAction: "", subAgents: []
   },
   {
-    id: "cm-04", name: "Internal Communications Assistant", kind: "value-add", tier: "Internal Comms",
-    purpose: "Helps craft and target internal communications and measures reach and resonance.",
-    responsibilities: "Draft internal announcements; segment audiences; schedule sends; measure open and read rates; gather feedback.",
-    process: "Internal Announcement, Audience Targeting.",
-    inputs: ["Announcement brief", "Audience segments"],
-    systems: ["Intranet", "Email platform"],
-    outputs: ["Targeted announcements", "Reach metrics", "Feedback summary"],
-    complexity: "Low", impact: "Medium", feasibility: "High",
-    status: "In Progress", priority: "Future Phase", autonomy: "Medium — drafts and schedules; comms approves",
-    risks: "Low — drafts and measures; humans approve sends.",
-    nextAction: "Enhance phase.",
-    subAgents: [
-      { name: "Announcement Drafter", desc: "Drafts and targets internal announcements.", complexity: "Low", type: "Drafting", deps: "Audience segments", status: "In Progress" },
-      { name: "Reach Measurer", desc: "Measures open/read rates and gathers feedback.", complexity: "Low", type: "Reporting", deps: "Email platform", status: "In Progress" }
-    ]
+    id: "kn-c4", name: "Translation & Bilingual QA Agent (AR↔EN)", kind: "core", tier: "Tier 3 — Production",
+    purpose: "Accelerate and quality-assure Arabic–English translation while keeping humans in control of meaning.",
+    responsibilities: "Produce a first-pass translation for the translator to refine, never to publish unchecked; Run bilingual QA: terminology consistency, numbers, names, completeness, RTL/LTR integrity; Apply the approved glossary and flag deviations for human decision",
+    process: "Editorial Translation, plus translation steps in Forms, Venue Check, Publishing Media, Circulars",
+    inputs: ["Source content", "approved glossary/style guide", "previously published equivalents"],
+    systems: ["SharePoint (read precedent)", "glossary store (read/write)", "MS Word (assist)"],
+    outputs: ["Draft translation + QA report with flagged items"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Suggest only — human owns linguistic accuracy",
+    risks: "Translator/Proofreader own the final text; Content Team Lead approves before delivery", nextAction: "", subAgents: []
+  },
+  {
+    id: "kn-c5", name: "Content Drafting & Editorial Assist Agent", kind: "core", tier: "Tier 3 — Production",
+    purpose: "Give editors a strong first draft aligned to the brief, objectives and message house.",
+    responsibilities: "Draft new content and bilingual announcements from the brief and project objectives; Reuse approved phrasing and structure from previously published files; Produce variant options (tone, length) for the editor to choose from",
+    process: "Content Writing, Publishing Circulars, Documentation MOCA Forms, Publishing Media",
+    inputs: ["Brief", "objectives", "key messages", "prior publications", "QR/links"],
+    systems: ["SharePoint & MOCAverse (read precedent)", "MS Word (assist)"],
+    outputs: ["First draft(s) with sourced precedent and rationale"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Suggest only",
+    risks: "Editor and Proofreader refine; Content Team Lead approves", nextAction: "", subAgents: []
+  },
+  {
+    id: "kn-c6", name: "Proofreading & Design-Proof Agent", kind: "core", tier: "Tier 3 — Production",
+    purpose: "Catch language and design defects before they reach an approver or the public.",
+    responsibilities: "Proofread text for grammar, punctuation, consistency and completeness; Compare a designed artifact against the approved copy for missing/altered elements; Produce an annotated defect list for the designer/editor",
+    process: "Content Review & Proofreading, Circulars (design-proof steps), Publishing Media",
+    inputs: ["Draft text", "approved copy", "designed files (PDF/JPEG/PNG)"],
+    systems: ["Email/WhatsApp intake (read)", "design-proof engine"],
+    outputs: ["Annotated proof + clean-version recommendation"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Suggest → Act-and-notify on routine text fixes once trusted",
+    risks: "Editor confirms fixes; Content Team Lead approves the clean version", nextAction: "", subAgents: []
+  },
+  {
+    id: "kn-c7", name: "Approval Orchestration Agent", kind: "core", tier: "Tier 4 — Approvals",
+    purpose: "Replace email ping-pong with proactive, push-based, multi-gate approval routing.",
+    responsibilities: "Identify the correct approval chain per process and route each gate in order; Push a decision-ready summary with attachments to each approver; chase to closure; Capture approve / reject / more-info replies in-thread and advance or loop back",
+    process: "All 11 sub-processes (every documented approval gate)",
+    inputs: ["Ticket", "artifacts", "approval matrix", "approver availability"],
+    systems: ["Email + MOCAverse notifications + WhatsApp (read/write)"],
+    outputs: ["Time-stamped approval trail", "auto-advanced workflow"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act & notify on routing/chasing; never approves on a human's behalf",
+    risks: "Every approver remains the accountable decision-maker; the agent only routes and records", nextAction: "", subAgents: []
+  },
+  {
+    id: "kn-c8", name: "Multi-Channel Publishing & Circulation Agent", kind: "core", tier: "Tier 5 — Publishing",
+    purpose: "Take approved content to the right channels and the right entities, consistently.",
+    responsibilities: "Prepare publish-ready packages for Website (via IT), MOCAverse, MOCA Smart and Social; Resolve the circulation list of entities for each announcement (MOCA, PMO, FCSC, AI Office, WGS, GDFO, GEEO, SPO, GSOC, GMO); Publish to internal channels after the final gate and confirm circulation",
+    process: "Publishing Media, Publishing Circulars Through Official Channels",
+    inputs: ["Final approved content/design", "channel rules", "circulation directory"],
+    systems: ["MOCAverse", "MOCA Smart", "Social (write after gate)", "Website via IT hand-off"],
+    outputs: ["Published items + circulation confirmation log"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act & notify on internal channels post-approval; Suggest/hand-off for public web",
+    risks: "Director / Chief authorise circulation; IT owns the public website push", nextAction: "", subAgents: []
+  },
+  {
+    id: "kn-c9", name: "Knowledge Archival & Forms-Registry Agent", kind: "core", tier: "Tier 5 — Publishing",
+    purpose: "Make sure every final output is filed, versioned, numbered and findable.",
+    responsibilities: "File approved outputs to the correct SharePoint location with full metadata; Assign and manage MOCA Form reference numbers across the new/edit lifecycle; Maintain the publication inventory and archive media (photos/videos/raw files)",
+    process: "Documentation MOCA Forms, Publication Documentation, Big Events documentation",
+    inputs: ["Approved files", "reference-number scheme", "inventory requests"],
+    systems: ["SharePoint (read/write)", "reference registry (write)"],
+    outputs: ["Archived", "versioned", "reference-numbered records", "current inventory"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act & notify",
+    risks: "Content Team Lead confirms reference numbering on first run of each form type", nextAction: "", subAgents: []
+  },
+  {
+    id: "kn-c10", name: "Event & Interpretation Coordination Agent", kind: "core", tier: "Tier 6 — Coordination",
+    purpose: "Keep interpretation and big-event coverage logistics aligned across teams.",
+    responsibilities: "Coordinate venue set-up and requirements with the Events Team via Events Now; Confirm interpreter and equipment readiness and brief them with event details; Track the pre-event checklist and surface gaps before the event date",
+    process: "Interpretation, Big Events Media Coverage",
+    inputs: ["Event agenda/timeline", "venue", "interpreter/vendor confirmations"],
+    systems: ["Events Now (read/write)", "Email/WhatsApp (read/write)"],
+    outputs: ["Readiness dashboard", "coordinated logistics record"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act & notify on coordination; Ask on scope/cost changes",
+    risks: "Content Team performs the physical venue visit; agent prepares and tracks", nextAction: "", subAgents: []
+  },
+  {
+    id: "kn-c11", name: "Venue Signage QA Agent", kind: "core", tier: "Tier 6 — Coordination",
+    purpose: "Compare printed venue signage against approved files across the multi-visit check.",
+    responsibilities: "Match photos of printed signage (hall/area names, wayfinding, Majlis, corners) to approved copy via OCR; Flag spelling, bilingual and placement discrepancies for on-site correction; Log first / second / final visit results and route to the Events Team",
+    process: "Event Venue Check",
+    inputs: ["Approved bilingual signage list", "on-site photos"],
+    systems: ["Image/OCR engine", "SharePoint (approved list)", "WhatsApp/Email (write)"],
+    outputs: ["Per-visit discrepancy report with annotated images"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Suggest (flagging); human confirms corrections",
+    risks: "Content Team makes the on-site judgement; agent assists and documents", nextAction: "", subAgents: []
+  },
+  {
+    id: "kn-c12", name: "Subscription Delivery Tracking & Reconciliation Agent", kind: "core", tier: "Tier 6 — Coordination",
+    purpose: "Track newspaper deliveries year-round and reconcile discrepancies to payment. Give every Project Manager / entity a conversational front door for requests and status. Help editors, translators, proofreaders and designers see and balance their work. Protect the team during the predictable surges around major events. Capture and enforce one approved Arabic–English voice across everything the function ships. Close the loop with requesters and detect dissatisfaction early. Give the Director, Chief and Heads of Entity a live, decision-ready view. Keep the function continuously audit-ready and fix gaps before the audit team looks. Draft circulars, decrees and memos that are correct against precedent and regulation. Answer and make calls in Arabic and English for requesters, entities and vendors. Stop the team redrafting what already exists by surfacing prior work instantly.",
+    responsibilities: "Maintain a per-entity delivery log against the approved subscription list; Build the missing-deliveries comparison table and run it with the vendor and POCs; Confirm year-end deliveries and prepare the invoice hand-off to Finance Answer “where is my translation / circular / coverage?” in real time; Guide complete request submission and set expectations on timeline; Proactively notify the requester at each milestone Surface each person's next task, deadline and priority; Balance load across the team and flag bottlenecks to the lead; Bundle context (brief, glossary, precedent) so work starts faster Detect workload spikes (e.g. WGS, UAE Government Annual Meetings) early; Nudge on overload, protect focus time, and suggest reallocation; Encourage healthy patterns without surveilling individuals Maintain the approved glossary, entity names and house style; Capture newly approved terms from each delivery and simplify policy language; Serve terminology to the translation, drafting and proofreading agents Collect a light-touch satisfaction signal after each delivery; Detect negative sentiment in threads and flag at-risk requests; Aggregate themes into improvement insights Maintain dashboards on throughput, SLA, backlog and spend vs. prior year; Produce concise weekly briefs and ad-hoc answers to leadership questions; Highlight decisions awaiting authority and their business impact Verify every case has its approvals, PR/PO/invoice trail, reference number and archive; Detect and remediate gaps (missing metadata, unfiled outputs, broken trails) early; Assemble the evidence pack the audit team needs Draft bilingual circulars/decrees/memos from intent; Cross-check each draft against MOCA's own policies, past decrees/memos (internal precedent) AND external regulation; Surface conflicts, precedents and required clauses for the author Answer inbound calls: request status, intake, simple FAQs; Make outbound follow-up callbacks (vendor quotation chasing, delivery confirmations, POC reminders); Log every call and hand complex matters to a named human Index every published file, translation and circular as it is archived; On a new request, surface the closest prior equivalents to reuse; Feed precedent to the drafting, translation and authoring agents",
+    process: "Newspapers Subscriptions for MOCA & Entities All 11 sub-processes (requester-facing) All production sub-processes Function-wide All language/content sub-processes All 11 (post-delivery) Function-wide All 11 Publishing Circulars; cross-cutting authoring Requester-, vendor- and POC-facing across all 11 All 11 (the documentation repeatedly cites “previously published files / links”)",
+    inputs: ["Approved subscriptions", "delivery confirmations", "POC reports", "vendor responses Ticket status", "SLA clock", "requester identity Ticket queue"],
+    systems: ["Email/Phone (read/write)", "Oracle (PR/invoice context)", "tracker (write) Ticket store (read)", "Email/Teams/WhatsApp (write) Ticket store (read/write)", "calendar (read) Ticket store & calendar (read", "aggregate) SharePoint & MOCAverse (read)"],
+    outputs: ["Live delivery tracker", "reconciliation table", "payment-ready confirmation Instant status", "ETAs", "guided intake Personal work view", "load-balancing suggestions Early-warning nudges"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act & notify on tracking; Suggest on reconciliation Act & notify Suggest Suggest Suggest → Act-and-notify on capture Act & notify Act & notify Act & notify on remediation; Ask on anything substantive Suggest only — highest human oversight Act & notify on routine; Ask/escalate otherwise Act & notify (surfacing)",
+    risks: "Head of Entity approves reconciliations; Finance approves payment None for status; routes substantive questions to the Content Team Lead Content Team Lead owns assignment decisions; agent recommends Content Team Lead acts on nudges; participation is opt-in and privacy-respecting Content Team Lead approves additions to the official glossary Content Team Lead acts on flags; agent never adjudicates Leadership decides; agent informs The internal audit team always performs the audit; this agent prepares and supports, never replaces Director / Chief and Legal own and approve every published instrument Escalates anything sensitive or non-routine to the Content Team Lead Team decides what to reuse; agent only surfaces", nextAction: "", subAgents: []
+  },
+  {
+    id: "kn-v1", name: "Requester Concierge Agent", kind: "value-add", tier: "Value-add",
+    purpose: "Give every Project Manager / entity a conversational front door for requests and status.",
+    responsibilities: "Answer “where is my translation / circular / coverage?” in real time; Guide complete request submission and set expectations on timeline; Proactively notify the requester at each milestone",
+    process: "All 11 sub-processes (requester-facing)",
+    inputs: ["Ticket status", "SLA clock", "requester identity"],
+    systems: ["Ticket store (read)", "Email/Teams/WhatsApp (write)"],
+    outputs: ["Instant status", "ETAs", "guided intake"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act & notify",
+    risks: "None for status; routes substantive questions to the Content Team Lead", nextAction: "", subAgents: []
+  },
+  {
+    id: "kn-v2", name: "Content Team Companion & Workload Agent", kind: "value-add", tier: "Value-add",
+    purpose: "Help editors, translators, proofreaders and designers see and balance their work.",
+    responsibilities: "Surface each person's next task, deadline and priority; Balance load across the team and flag bottlenecks to the lead; Bundle context (brief, glossary, precedent) so work starts faster",
+    process: "All production sub-processes",
+    inputs: ["Ticket queue", "assignments", "capacity", "deadlines"],
+    systems: ["Ticket store (read/write)", "calendar (read)"],
+    outputs: ["Personal work view", "load-balancing suggestions"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Suggest",
+    risks: "Content Team Lead owns assignment decisions; agent recommends", nextAction: "", subAgents: []
+  },
+  {
+    id: "kn-v3", name: "Wellbeing & Proactive-Nudge Agent", kind: "value-add", tier: "Value-add",
+    purpose: "Protect the team during the predictable surges around major events.",
+    responsibilities: "Detect workload spikes (e.g. WGS, UAE Government Annual Meetings) early; Nudge on overload, protect focus time, and suggest reallocation; Encourage healthy patterns without surveilling individuals",
+    process: "Function-wide",
+    inputs: ["Aggregate (not individual-surveillance) workload signals", "event calendar"],
+    systems: ["Ticket store & calendar (read", "aggregate)"],
+    outputs: ["Early-warning nudges", "rebalancing suggestions"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Suggest",
+    risks: "Content Team Lead acts on nudges; participation is opt-in and privacy-respecting", nextAction: "", subAgents: []
+  },
+  {
+    id: "kn-v4", name: "Bilingual Terminology, Glossary & Style-Guide Agent", kind: "value-add", tier: "Value-add",
+    purpose: "Capture and enforce one approved Arabic–English voice across everything the function ships.",
+    responsibilities: "Maintain the approved glossary, entity names and house style; Capture newly approved terms from each delivery and simplify policy language; Serve terminology to the translation, drafting and proofreading agents",
+    process: "All language/content sub-processes",
+    inputs: ["Approved deliveries", "prior translations", "policy texts"],
+    systems: ["SharePoint & MOCAverse (read)", "glossary store (read/write)"],
+    outputs: ["Living bilingual glossary + style guide"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Suggest → Act-and-notify on capture",
+    risks: "Content Team Lead approves additions to the official glossary", nextAction: "", subAgents: []
+  },
+  {
+    id: "kn-v5", name: "Sentiment & Feedback Agent", kind: "value-add", tier: "Value-add",
+    purpose: "Close the loop with requesters and detect dissatisfaction early.",
+    responsibilities: "Collect a light-touch satisfaction signal after each delivery; Detect negative sentiment in threads and flag at-risk requests; Aggregate themes into improvement insights",
+    process: "All 11 (post-delivery)",
+    inputs: ["Delivery events", "requester replies", "ratings"],
+    systems: ["Email/Teams (read/write)", "feedback store (write)"],
+    outputs: ["Satisfaction trend", "at-risk flags", "theme report"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act & notify",
+    risks: "Content Team Lead acts on flags; agent never adjudicates", nextAction: "", subAgents: []
+  },
+  {
+    id: "kn-v6", name: "Leadership Briefing & Decision-Support Agent", kind: "value-add", tier: "Value-add",
+    purpose: "Give the Director, Chief and Heads of Entity a live, decision-ready view.",
+    responsibilities: "Maintain dashboards on throughput, SLA, backlog and spend vs. prior year; Produce concise weekly briefs and ad-hoc answers to leadership questions; Highlight decisions awaiting authority and their business impact",
+    process: "Function-wide",
+    inputs: ["Tickets", "approvals", "Oracle spend", "SLA data"],
+    systems: ["Ticket store + Oracle (read)", "dashboard (write)"],
+    outputs: ["Live dashboard + narrative briefs"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act & notify",
+    risks: "Leadership decides; agent informs", nextAction: "", subAgents: []
+  },
+  {
+    id: "kn-v7", name: "Audit-Readiness & Remediation Agent", kind: "value-add", tier: "Value-add",
+    purpose: "Keep the function continuously audit-ready and fix gaps before the audit team looks.",
+    responsibilities: "Verify every case has its approvals, PR/PO/invoice trail, reference number and archive; Detect and remediate gaps (missing metadata, unfiled outputs, broken trails) early; Assemble the evidence pack the audit team needs",
+    process: "All 11",
+    inputs: ["Approval trails", "Oracle records", "SharePoint archive", "registry"],
+    systems: ["Oracle", "SharePoint", "registry (read", "write = remediation tasks/metadata)"],
+    outputs: ["Readiness score", "remediation log", "audit evidence pack"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act & notify on remediation; Ask on anything substantive",
+    risks: "The internal audit team always performs the audit; this agent prepares and supports, never replaces", nextAction: "", subAgents: []
+  },
+  {
+    id: "kn-v8", name: "Policy, Decree & Memo Author Agent", kind: "value-add", tier: "Value-add",
+    purpose: "Draft circulars, decrees and memos that are correct against precedent and regulation.",
+    responsibilities: "Draft bilingual circulars/decrees/memos from intent; Cross-check each draft against MOCA's own policies, past decrees/memos (internal precedent) AND external regulation; Surface conflicts, precedents and required clauses for the author",
+    process: "Publishing Circulars; cross-cutting authoring",
+    inputs: ["Drafting intent", "internal precedent corpus", "external regulations"],
+    systems: ["MOCAverse & SharePoint precedent (read)", "regulation sources (read)"],
+    outputs: ["Compliant draft + precedent/regulation cross-check report"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Suggest only — highest human oversight",
+    risks: "Director / Chief and Legal own and approve every published instrument", nextAction: "", subAgents: []
+  },
+  {
+    id: "kn-v9", name: "Bilingual Call-Centre Voice Agent (AR / EN)", kind: "value-add", tier: "Value-add",
+    purpose: "Answer and make calls in Arabic and English for requesters, entities and vendors.",
+    responsibilities: "Answer inbound calls: request status, intake, simple FAQs; Make outbound follow-up callbacks (vendor quotation chasing, delivery confirmations, POC reminders); Log every call and hand complex matters to a named human",
+    process: "Requester-, vendor- and POC-facing across all 11",
+    inputs: ["Ticket data", "vendor/POC contacts", "call scripts"],
+    systems: ["Telephony", "ticket store (read/write)"],
+    outputs: ["Handled calls", "logged callbacks", "escalations"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act & notify on routine; Ask/escalate otherwise",
+    risks: "Escalates anything sensitive or non-routine to the Content Team Lead", nextAction: "", subAgents: []
+  },
+  {
+    id: "kn-v10", name: "Knowledge Discovery & Reuse Agent", kind: "value-add", tier: "Value-add",
+    purpose: "Stop the team redrafting what already exists by surfacing prior work instantly.",
+    responsibilities: "Index every published file, translation and circular as it is archived; On a new request, surface the closest prior equivalents to reuse; Feed precedent to the drafting, translation and authoring agents",
+    process: "All 11 (the documentation repeatedly cites “previously published files / links”)",
+    inputs: ["Archive", "new request context"],
+    systems: ["SharePoint & MOCAverse (read)", "search index (read/write) Email", "Events Now (read)", "ticket store (write)"],
+    outputs: ["Ranked reuse suggestions with links"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act & notify (surfacing)",
+    risks: "Team decides what to reuse; agent only surfaces", nextAction: "", subAgents: []
   }
 ];
 
-/* -- Departments ---------------------------------------------------------- */
+/* -- Departments awaiting their blueprints (kept empty for now) ----------- */
+const IT_AGENTS = [];
+const LEGAL_AGENTS = [];
+const ADMIN_AGENTS = [];
+const STRATEGY_AGENTS = [];
+const COMMS_AGENTS = [];
+
 const DEPARTMENTS = [
   {
     id: "hr", name: "Human Resources", short: "HR", nameAr: "الموارد البشرية",
     description: "Agentifying the full HR landscape — 7 operating domains and 84 sub-processes across a 9-entity government operating model, now including Performance Management, Contract Renewal and Staff Mobility. 18 core agents (nine tiers) plus 8 recommended value-add agents wrap the human-judgment layer on top of Oracle HCM.",
     owner: "Total Experience Team — Corporate Support Services",
     focal: "Aisha Al Mansoori · Director, HR Transformation",
-    lastUpdated: "2026-06-22",
-    agents: HR_AGENTS
+    lastUpdated: "2026-06-22", agents: HR_AGENTS
   },
   {
     id: "procurement", name: "Procurement", short: "Procurement", nameAr: "المشتريات",
-    description: "Source-to-contract and vendor-management agents that speed purchasing, keep vendors compliant and surface spend savings — with all award and payment decisions kept human.",
+    description: "Procure-to-pay and vendor-management agents from the Procurement & Finance blueprint — vendor registration, sourcing, bid evaluation, contract drafting, budget-gate approvals and supplier experience — wrapping the human-judgment layer over Oracle, NER and ICP.",
     owner: "Corporate Support Services — Procurement",
     focal: "Mohammed Al Hashimi · Head of Procurement",
-    lastUpdated: "2026-06-18",
-    agents: PROCUREMENT_AGENTS
+    lastUpdated: "2026-06-22", agents: PROCUREMENT_AGENTS
   },
   {
     id: "finance", name: "Finance", short: "Finance", nameAr: "المالية",
-    description: "Accounts-payable, budget, close and treasury agents that compress manual reconciliation and reporting — every payment release and ledger close stays under human control.",
+    description: "Finance agents from the Procurement & Finance blueprint — AP/AR, payments, payroll, reconciliations, VAT, budgeting, period-close, IPSAS reporting and finance intelligence — with every payment and close kept human-approved.",
     owner: "Corporate Support Services — Finance",
     focal: "Fatima Al Zaabi · Director of Finance",
-    lastUpdated: "2026-06-20",
-    agents: FINANCE_AGENTS
+    lastUpdated: "2026-06-22", agents: FINANCE_AGENTS
+  },
+  {
+    id: "knowledge", name: "Knowledge & Content", short: "Knowledge", nameAr: "المعرفة والمحتوى",
+    description: "Knowledge & content agents under one orchestrator — request intake, bilingual translation & QA, content drafting, proofreading, multi-gate approvals, multi-channel publishing, archival and event coordination — wrapping Email, Events Now and SharePoint.",
+    owner: "Government Communication & Knowledge",
+    focal: "Layla Al Hammadi · Head of Knowledge & Content",
+    lastUpdated: "2026-06-22", agents: KNOWLEDGE_AGENTS
   },
   {
     id: "it", name: "Information Technology", short: "IT", nameAr: "تقنية المعلومات",
-    description: "Service-desk, identity, security and asset agents that lift IT responsiveness and control — privileged access and incident response remain human-approved.",
-    owner: "Digital & Technology",
-    focal: "Khalid Al Suwaidi · Chief Information Officer",
-    lastUpdated: "2026-06-19",
-    agents: IT_AGENTS
+    description: "Awaiting blueprint — agents will be added once the IT details are provided.",
+    owner: "Digital & Technology", focal: "To be assigned",
+    lastUpdated: "2026-06-22", agents: IT_AGENTS
   },
   {
     id: "legal", name: "Legal", short: "Legal", nameAr: "الشؤون القانونية",
-    description: "Contract-review, compliance and research agents that accelerate legal work while every opinion and approval stays with counsel.",
-    owner: "Legal Affairs",
-    focal: "Noura Al Kaabi · Legal Counsel",
-    lastUpdated: "2026-06-15",
-    agents: LEGAL_AGENTS
+    description: "Awaiting blueprint — agents will be added once the Legal details are provided.",
+    owner: "Legal Affairs", focal: "To be assigned",
+    lastUpdated: "2026-06-22", agents: LEGAL_AGENTS
   },
   {
     id: "admin", name: "Admin Services", short: "Admin", nameAr: "الخدمات الإدارية",
-    description: "Facilities, fleet, records and events agents that streamline day-to-day corporate services and keep nothing waiting.",
-    owner: "Corporate Support Services — Administration",
-    focal: "Saeed Al Nuaimi · Head of Admin Services",
-    lastUpdated: "2026-06-17",
-    agents: ADMIN_AGENTS
+    description: "Awaiting blueprint — agents will be added once the Admin Services details are provided.",
+    owner: "Corporate Support Services — Administration", focal: "To be assigned",
+    lastUpdated: "2026-06-22", agents: ADMIN_AGENTS
   },
   {
     id: "strategy", name: "Strategy", short: "Strategy", nameAr: "الاستراتيجية",
-    description: "Performance, portfolio and foresight agents that give leadership a live, evidence-based view of strategy execution.",
-    owner: "Strategy & Performance Management",
-    focal: "Hessa Al Falasi · Director, Strategy & Performance",
-    lastUpdated: "2026-06-16",
-    agents: STRATEGY_AGENTS
+    description: "Awaiting blueprint — agents will be added once the Strategy details are provided.",
+    owner: "Strategy & Performance Management", focal: "To be assigned",
+    lastUpdated: "2026-06-22", agents: STRATEGY_AGENTS
   },
   {
     id: "comms", name: "Communications", short: "Comms", nameAr: "الاتصال الحكومي",
-    description: "Media-monitoring, bilingual content, campaign and internal-comms agents that strengthen government communication — with publishing always human-approved.",
-    owner: "Government Communication",
-    focal: "Omar Al Marri · Director of Communications",
-    lastUpdated: "2026-06-14",
-    agents: COMMS_AGENTS
+    description: "Awaiting blueprint — agents will be added once the Communications details are provided.",
+    owner: "Government Communication", focal: "To be assigned",
+    lastUpdated: "2026-06-22", agents: COMMS_AGENTS
   }
 ];
 
-/* Expose globally for the app layer */
 window.DASHBOARD_DATA = { departments: DEPARTMENTS, complexityScore: COMPLEXITY_SCORE };
