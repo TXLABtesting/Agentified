@@ -571,13 +571,43 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
 .mm-legend span { display: inline-flex; align-items: center; gap: 6px; }
 .mm-legend i { width: 9px; height: 9px; border-radius: 3px; }
 
+.mm-wrap { padding: var(--sp-6) var(--sp-8) var(--sp-8); max-width: 1440px; }
+.mm-wrap.is-full {
+  position: fixed; inset: 0; z-index: 90; max-width: none; background: var(--bg);
+  padding: 14px 18px; display: flex; flex-direction: column;
+}
+.mm-wrap.is-full .page__head { display: none; }
+.mm-wrap.is-full .mm-controls { margin-bottom: 10px; }
+.mm-wrap.is-full .mm-stagewrap { flex: 1; min-height: 0; }
+.mm-wrap.is-full .mm-canvas { max-height: none; height: 100%; }
+
+.mm-stagewrap { position: relative; }
 .mm-canvas {
   position: relative; overflow: auto; border: 1px solid var(--line); border-radius: var(--r-md);
   background: var(--surface); box-shadow: var(--sh-1); max-height: calc(100vh - 250px);
   background-image: radial-gradient(var(--line) 1px, transparent 1px); background-size: 22px 22px;
+  cursor: grab;
 }
+.mm-canvas.is-grabbing { cursor: grabbing; }
 .mm-inner { position: relative; }
+.mm-stage { position: relative; transform-origin: 0 0; user-select: none; }
 .mm-svg { position: absolute; top: 0; left: 0; pointer-events: none; }
+
+/* zoom + pan controls (overlay the canvas viewport) */
+.mm-zoom {
+  position: absolute; right: 14px; bottom: 14px; z-index: 6; display: flex; align-items: center; gap: 2px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-full); box-shadow: var(--sh-2); padding: 3px;
+}
+.mm-zbtn { width: 30px; height: 30px; border: none; background: none; border-radius: var(--r-full);
+  font-size: 17px; font-weight: 700; color: var(--ink-2); cursor: pointer; display: grid; place-items: center; }
+.mm-zbtn:hover { background: var(--surface-2); color: var(--brand); }
+.mm-zlevel { width: auto; min-width: 44px; padding: 0 8px; font-size: 11px; color: var(--ink-3); }
+.mm-pan-hint {
+  position: absolute; left: 14px; bottom: 14px; z-index: 6; display: inline-flex; align-items: center; gap: 6px;
+  font-size: var(--fs-2xs); color: var(--ink-3); background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--r-full); padding: 5px 11px; box-shadow: var(--sh-1);
+}
+.mm-pan-hint svg { width: 13px; height: 13px; }
 .mm-link { fill: none; stroke: #D8CFC0; stroke-width: 1.6; }
 .mm-link--d0 { stroke: var(--brand); opacity: .45; stroke-width: 2; }
 .mm-clink { fill: none; stroke: var(--gold-ink); stroke-width: 1.5; stroke-dasharray: 5 4; opacity: .7; }

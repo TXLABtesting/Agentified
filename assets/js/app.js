@@ -18,7 +18,9 @@
     chat: [],
     mindDept: "hr",
     mindSubs: true,
-    mindLinks: true
+    mindLinks: true,
+    mindZoom: 1,
+    mindFull: false
   };
   /* expose live (edit-aware) data to the assistant engine */
   window.getDashboardData = function () { return DATA; };
@@ -64,7 +66,9 @@
     mail:      'M4 5h16a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V7a2 2 0 012-2zM2 7l10 6 10-6',
     app:       'M7 2h10a2 2 0 012 2v16a2 2 0 01-2 2H7a2 2 0 01-2-2V4a2 2 0 012-2zM10 18h4',
     idcard:    'M3 5h18a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V6a1 1 0 011-1zM7 10a2 2 0 100 4 2 2 0 000-4zM13 10h5M13 14h5M4.5 17a3 3 0 015 0',
-    folder:    'M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z'
+    folder:    'M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z',
+    expand:    'M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3M3 16v3a2 2 0 002 2h3m13-5v3a2 2 0 01-2 2h-3',
+    shrink:    'M9 3v3a2 2 0 01-2 2H4m16 0h-3a2 2 0 01-2-2V3M4 16h3a2 2 0 012 2v3m6 0v-3a2 2 0 012-2h3'
   };
   function icon(name, cls) {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
@@ -706,6 +710,8 @@
           icon("mindmap") + (STATE.mindLinks ? "Hide agent links" : "Show agent links") + "</button>" +
         '<button class="btn btn--sm' + (STATE.mindSubs ? " btn--primary" : "") + '" data-mindsubs>' +
           icon("sub") + (STATE.mindSubs ? "Hide sub-agents" : "Show sub-agents") + "</button>") +
+        '<button class="btn btn--sm" data-mindfull>' + icon(STATE.mindFull ? "shrink" : "expand") +
+          (STATE.mindFull ? "Exit full screen" : "Full screen") + "</button>" +
       "</div></div>";
 
     const legend =
@@ -723,16 +729,31 @@
         (STATE.mindLinks && collabCount ? " (" + collabCount + " links)" : "") +
         ", and each card shows the systems it relies on.";
 
-    return '<div class="page"><div class="page__head"><h2>Agent team</h2>' +
-      "<p>The agents as a team — the orchestrator leads, agents collaborate, and each card shows what it connects to. " + desc + "</p></div>" +
-      controls + legend +
-      '<div class="mm-canvas"><div class="mm-inner" style="width:' + maxRight + "px;height:" + totalH + 'px">' +
+    const z = STATE.mindZoom;
+    const innerW = Math.round(maxRight * z), innerH = Math.round(totalH * z);
+    const stage =
+      '<div class="mm-stage" style="width:' + maxRight + "px;height:" + totalH + "px;transform:scale(" + z + ')">' +
         '<svg class="mm-svg" width="' + maxRight + '" height="' + totalH + '">' +
           '<defs><marker id="mm-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">' +
             '<path d="M0,0 L10,5 L0,10 z" fill="var(--gold-ink)"/></marker></defs>' +
-          paths + collabPaths + "</svg>" +
-        nodeHtml +
-      "</div></div></div>";
+          paths + collabPaths + "</svg>" + nodeHtml +
+      "</div>";
+    const stageWrap =
+      '<div class="mm-stagewrap">' +
+        '<div class="mm-canvas"><div class="mm-inner" style="width:' + innerW + "px;height:" + innerH + 'px">' + stage + "</div></div>" +
+        '<div class="mm-zoom">' +
+          '<button class="mm-zbtn" data-zoom="out" title="Zoom out" aria-label="Zoom out">−</button>' +
+          '<button class="mm-zbtn mm-zlevel" data-zoom="reset" title="Reset zoom">' + Math.round(z * 100) + "%</button>" +
+          '<button class="mm-zbtn" data-zoom="in" title="Zoom in" aria-label="Zoom in">+</button>' +
+        "</div>" +
+        '<div class="mm-pan-hint">' + icon("mindmap") + "Drag to move · use ± to zoom</div>" +
+      "</div>";
+
+    return '<div class="mm-wrap' + (STATE.mindFull ? " is-full" : "") + '">' +
+      '<div class="page__head"><h2>Agent team</h2>' +
+      "<p>The agents as a team — the orchestrator leads, agents collaborate, and each card shows what it connects to. " + desc + "</p></div>" +
+      controls + legend + stageWrap +
+      "</div>";
   }
 
   function viewSettings() {
@@ -1040,6 +1061,7 @@
     else location.hash = "#/" + view;
   }
   function render() {
+    if (STATE.view !== "mindmap" && STATE.mindFull) { STATE.mindFull = false; document.body.style.overflow = ""; }
     renderNav();
     renderHeader();
     const v = STATE.view;
@@ -1057,7 +1079,7 @@
     const t = e.target.closest("[data-nav],[data-goto-dept],[data-agent],[data-edit],[data-save]," +
       "[data-close-drawer],[data-close-modal],[data-add],[data-export],[data-share],[data-reset]," +
       "[data-filter-toggle],[data-filter],[data-apply-filters],[data-clear-filters],[data-menu]," +
-      "[data-suggest],[data-chat-clear],[data-mind],[data-mindsubs],[data-mindlinks]");
+      "[data-suggest],[data-chat-clear],[data-mind],[data-mindsubs],[data-mindlinks],[data-zoom],[data-mindfull]");
     if (!t) {
       // close filter popover on outside click
       if (STATE.filterOpen && !e.target.closest(".has-pop")) { STATE.filterOpen = false; renderHeader(); }
@@ -1067,6 +1089,8 @@
     else if (t.dataset.mind) { STATE.mindDept = t.dataset.mind; renderBody(); }
     else if (t.hasAttribute("data-mindsubs")) { STATE.mindSubs = !STATE.mindSubs; renderBody(); }
     else if (t.hasAttribute("data-mindlinks")) { STATE.mindLinks = !STATE.mindLinks; renderBody(); }
+    else if (t.dataset.zoom) { zoomMap(t.dataset.zoom); }
+    else if (t.hasAttribute("data-mindfull")) { setMindFull(!STATE.mindFull); }
     else if (t.dataset.suggest) { sendChat(t.dataset.suggest); }
     else if (t.hasAttribute("data-chat-clear")) { STATE.chat = []; renderBody(); setTimeout(focusChat, 30); }
     else if (t.dataset.gotoDept) { go("department", t.dataset.gotoDept); }
@@ -1091,6 +1115,7 @@
     if (e.key === "Escape") {
       if ($("#modalScrim").classList.contains("is-open")) return closeModal();
       if ($("#drawer").classList.contains("is-open")) return closeDrawer();
+      if (STATE.mindFull) return setMindFull(false);
       if (STATE.filterOpen) { STATE.filterOpen = false; renderHeader(); }
     }
     if (e.key === "Enter" || e.key === " ") {
@@ -1174,6 +1199,35 @@
   // mobile sidebar
   function toggleSidebarMobile() { $("#sidebar").classList.toggle("is-open"); }
   function closeSidebarMobile() { $("#sidebar").classList.remove("is-open"); }
+
+  /* ---- Mind map zoom / full screen / pan -------------------------------- */
+  function zoomMap(dir) {
+    const z = STATE.mindZoom;
+    STATE.mindZoom = dir === "in" ? Math.min(2, +(z + 0.15).toFixed(2))
+      : dir === "out" ? Math.max(0.4, +(z - 0.15).toFixed(2)) : 1;
+    renderBody();
+  }
+  function setMindFull(on) {
+    STATE.mindFull = on;
+    document.body.style.overflow = on ? "hidden" : "";
+    renderBody();
+  }
+  // drag-to-pan inside the mind-map canvas (works across re-renders)
+  let mmPan = null;
+  document.addEventListener("pointerdown", function (e) {
+    const canvas = e.target.closest(".mm-canvas");
+    if (!canvas || e.target.closest(".mm-node, button, a, input")) return;
+    mmPan = { c: canvas, x: e.clientX, y: e.clientY, sl: canvas.scrollLeft, st: canvas.scrollTop };
+    canvas.classList.add("is-grabbing");
+  });
+  document.addEventListener("pointermove", function (e) {
+    if (!mmPan) return;
+    mmPan.c.scrollLeft = mmPan.sl - (e.clientX - mmPan.x);
+    mmPan.c.scrollTop = mmPan.st - (e.clientY - mmPan.y);
+  });
+  function endPan() { if (mmPan) { mmPan.c.classList.remove("is-grabbing"); mmPan = null; } }
+  document.addEventListener("pointerup", endPan);
+  document.addEventListener("pointerleave", endPan);
 
   window.addEventListener("hashchange", function () { parseHash(); render(); });
 
