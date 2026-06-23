@@ -15,7 +15,9 @@
     search: "",
     filters: { complexity: [], status: [], priority: [], kind: [] },
     filterOpen: false,
-    chat: []
+    chat: [],
+    mindDept: "hr",
+    mindSubs: true
   };
   /* expose live (edit-aware) data to the assistant engine */
   window.getDashboardData = function () { return DATA; };
@@ -55,7 +57,8 @@
     menu:      'M3 6h18M3 12h18M3 18h18',
     chat:      'M21 11.5a8.4 8.4 0 01-8.5 8.5 8.4 8.4 0 01-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 01-.9-3.8A8.5 8.5 0 0112.5 3a8.4 8.4 0 018.5 8.5z',
     send:      'M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z',
-    spark:     'M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17l-1.9-5.1L4.5 10l5.6-1.4L12 3z'
+    spark:     'M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17l-1.9-5.1L4.5 10l5.6-1.4L12 3z',
+    mindmap:   'M18 8a3 3 0 100-6 3 3 0 000 6zM6 15a3 3 0 100-6 3 3 0 000 6zM18 22a3 3 0 100-6 3 3 0 000 6zM8.6 13.5l6.8 4M15.4 6.5l-6.8 4'
   };
   function icon(name, cls) {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
@@ -197,6 +200,7 @@
       { id: "departments", label: "Departments", icon: "dept", count: g.depts },
       { id: "agents", label: "Agents", icon: "agents", count: g.total },
       { id: "subagents", label: "Sub-agents", icon: "sub", count: g.subs },
+      { id: "mindmap", label: "Mind map", icon: "mindmap" },
       { id: "review", label: "Pending review", icon: "review", count: g.review },
       { id: "assistant", label: "Agent assistant", icon: "chat" },
       { id: "settings", label: "Settings", icon: "settings" }
@@ -214,7 +218,7 @@
   function breadcrumb() {
     const v = STATE.view;
     const names = { overview: "Overview", departments: "Departments", agents: "Agents",
-      subagents: "Sub-agents", review: "Pending review", assistant: "Agent assistant", settings: "Settings" };
+      subagents: "Sub-agents", mindmap: "Mind map", review: "Pending review", assistant: "Agent assistant", settings: "Settings" };
     if (v === "department") {
       const d = findDept(STATE.deptId);
       return '<button data-nav="departments">Departments</button><span class="sep">·</span>' +
@@ -549,6 +553,105 @@
       "<p>Agents flagged for leadership review, update or refinement — highest complexity first.</p></div>" + body + "</div>";
   }
 
+  /* ---- Mind map (agent relationship graph) ----------------------------- */
+  const MM = { col: [24, 312, 624, 916], width: [214, 250, 232, 214], rowH: 48, pad: 26 };
+  const statusVar = { "Ready": "var(--green)", "In Progress": "var(--blue)", "Needs Review": "var(--amber)" };
+
+  function viewMindmap() {
+    const g = globalStats();
+    const isAll = STATE.mindDept === "all";
+    let root;
+    if (isAll) {
+      root = { type: "root", label: "Agentic Transformation", meta: g.depts + " departments · " + g.total + " agents",
+        children: DATA.departments.map((d) => ({
+          type: "dept", id: d.id, label: d.name, meta: d.agents.length + " agents",
+          children: d.agents.map((a) => ({ type: "agent", id: a.id, label: a.name, status: a.status, complexity: a.complexity, children: [] }))
+        })) };
+    } else {
+      const d = findDept(STATE.mindDept) || DATA.departments[0];
+      const subs = STATE.mindSubs;
+      root = { type: "root", deptId: d.id, label: d.name,
+        meta: d.agents.length + " agents" + (subs ? " · " + subCount(d) + " sub-agents" : "") + " · 1 orchestrator",
+        children: d.agents.map((a) => ({
+          type: "agent", id: a.id, label: a.name, status: a.status, complexity: a.complexity, kind: a.kind, tier: a.tier,
+          children: subs ? (a.subAgents || []).map((s) => ({ type: "sub", parentId: a.id, label: s.name, status: s.status, complexity: s.complexity })) : []
+        })) };
+    }
+
+    // recursive layout: leaves get equal slots; parents centre on their children
+    const links = [], nodes = [];
+    let cursor = MM.pad;
+    (function layout(node, depth) {
+      node.x = MM.col[depth]; node.w = MM.width[depth]; node.depth = depth;
+      if (!node.children || !node.children.length) {
+        node.y = cursor + MM.rowH / 2; cursor += MM.rowH;
+      } else {
+        node.children.forEach((c) => layout(c, depth + 1));
+        node.y = (node.children[0].y + node.children[node.children.length - 1].y) / 2;
+        node.children.forEach((c) => links.push([node, c]));
+      }
+      nodes.push(node);
+    })(root, 0);
+
+    const maxRight = Math.max.apply(null, nodes.map((n) => n.x + n.w)) + MM.pad;
+    const totalH = cursor + MM.pad;
+
+    const paths = links.map(([p, c]) => {
+      const x1 = p.x + p.w, x2 = c.x, mx = (x1 + x2) / 2;
+      return '<path class="mm-link mm-link--d' + p.depth + '" d="M' + x1 + ',' + p.y + ' C' + mx + ',' + p.y + ' ' + mx + ',' + c.y + ' ' + x2 + ',' + c.y + '"/>';
+    }).join("");
+
+    const nodeHtml = nodes.map((n) => {
+      const pos = 'left:' + n.x + 'px;top:' + n.y + 'px;width:' + n.w + 'px';
+      if (n.type === "root") {
+        return '<div class="mm-node mm-root"' + (n.deptId ? ' data-goto-dept="' + n.deptId + '"' : "") +
+          ' style="' + pos + '">' + icon(n.deptId ? deptIconName(n.deptId) : "overview") +
+          "<div><b>" + esc(n.label) + "</b><span>" + esc(n.meta) + "</span></div></div>";
+      }
+      if (n.type === "dept") {
+        return '<div class="mm-node mm-dept" data-goto-dept="' + n.id + '" style="' + pos + '">' +
+          '<span class="mm-ic">' + icon(deptIconName(n.id)) + "</span>" +
+          "<div><b>" + esc(n.label) + "</b><span>" + esc(n.meta) + "</span></div></div>";
+      }
+      if (n.type === "agent") {
+        return '<div class="mm-node mm-agent" data-agent="' + n.id + '" title="' + esc(n.label) +
+          '" style="' + pos + ";border-left-color:" + (statusVar[n.status] || "var(--slate)") + '">' +
+          '<b>' + esc(n.label) + "</b>" +
+          '<span class="mm-meta"><i class="mm-dot" style="background:' + (statusVar[n.status] || "var(--slate)") + '"></i>' +
+          esc(n.status) + " · " + esc(n.complexity) + "</span></div>";
+      }
+      // sub
+      return '<div class="mm-node mm-sub" data-agent="' + n.parentId + '" title="' + esc(n.label) +
+        '" style="' + pos + '"><b>' + esc(n.label) + "</b></div>";
+    }).join("");
+
+    const pills = ['<button class="mm-pill' + (isAll ? " is-on" : "") + '" data-mind="all">All departments</button>']
+      .concat(DATA.departments.map((d) =>
+        '<button class="mm-pill' + (STATE.mindDept === d.id ? " is-on" : "") + '" data-mind="' + d.id + '">' + esc(d.short) + "</button>")).join("");
+
+    const controls =
+      '<div class="mm-controls"><div class="mm-pills">' + pills + "</div>" +
+      (isAll ? "" : '<button class="btn btn--sm' + (STATE.mindSubs ? " btn--primary" : "") + '" data-mindsubs>' +
+        icon("sub") + (STATE.mindSubs ? "Hide sub-agents" : "Show sub-agents") + "</button>") + "</div>";
+
+    const legend =
+      '<div class="mm-legend">' +
+        '<span><i style="background:var(--green)"></i>Ready</span>' +
+        '<span><i style="background:var(--blue)"></i>In progress</span>' +
+        '<span><i style="background:var(--amber)"></i>Needs review</span>' +
+        '<span class="muted">Click a node to open its agent</span>' +
+      "</div>";
+
+    return '<div class="page"><div class="page__head"><h2>Agent mind map</h2>' +
+      "<p>The relationship between departments, main agents and sub-agents. " +
+      (isAll ? "Showing all departments and their agents." : "Showing " + esc((findDept(STATE.mindDept) || {}).name || "") + " — root orchestrator → agents" + (STATE.mindSubs ? " → sub-agents." : ".")) + "</p></div>" +
+      controls + legend +
+      '<div class="mm-canvas"><div class="mm-inner" style="width:' + maxRight + "px;height:" + totalH + 'px">' +
+        '<svg class="mm-svg" width="' + maxRight + '" height="' + totalH + '">' + paths + "</svg>" +
+        nodeHtml +
+      "</div></div></div>";
+  }
+
   function viewSettings() {
     const g = globalStats();
     return '<div class="page"><div class="page__head"><h2>Settings</h2>' +
@@ -846,7 +949,7 @@
     const h = location.hash.replace(/^#\/?/, "");
     const parts = h.split("/");
     if (parts[0] === "department" && parts[1]) { STATE.view = "department"; STATE.deptId = parts[1]; return; }
-    const valid = ["overview", "departments", "agents", "subagents", "review", "assistant", "settings"];
+    const valid = ["overview", "departments", "agents", "subagents", "mindmap", "review", "assistant", "settings"];
     STATE.view = valid.includes(parts[0]) ? parts[0] : "overview";
   }
   function go(view, deptId) {
@@ -859,7 +962,7 @@
     const v = STATE.view;
     const map = {
       overview: viewOverview, departments: viewDepartments, department: viewDepartmentDetail,
-      agents: viewAgents, subagents: viewSubAgents, review: viewReview, assistant: viewAssistant, settings: viewSettings
+      agents: viewAgents, subagents: viewSubAgents, mindmap: viewMindmap, review: viewReview, assistant: viewAssistant, settings: viewSettings
     };
     $("#view").innerHTML = (map[v] || viewOverview)();
     window.scrollTo({ top: 0 });
@@ -871,13 +974,15 @@
     const t = e.target.closest("[data-nav],[data-goto-dept],[data-agent],[data-edit],[data-save]," +
       "[data-close-drawer],[data-close-modal],[data-add],[data-export],[data-share],[data-reset]," +
       "[data-filter-toggle],[data-filter],[data-apply-filters],[data-clear-filters],[data-menu]," +
-      "[data-suggest],[data-chat-clear]");
+      "[data-suggest],[data-chat-clear],[data-mind],[data-mindsubs]");
     if (!t) {
       // close filter popover on outside click
       if (STATE.filterOpen && !e.target.closest(".has-pop")) { STATE.filterOpen = false; renderHeader(); }
       return;
     }
     if (t.dataset.nav) { STATE.filterOpen = false; closeSidebarMobile(); go(t.dataset.nav); }
+    else if (t.dataset.mind) { STATE.mindDept = t.dataset.mind; renderBody(); }
+    else if (t.hasAttribute("data-mindsubs")) { STATE.mindSubs = !STATE.mindSubs; renderBody(); }
     else if (t.dataset.suggest) { sendChat(t.dataset.suggest); }
     else if (t.hasAttribute("data-chat-clear")) { STATE.chat = []; renderBody(); setTimeout(focusChat, 30); }
     else if (t.dataset.gotoDept) { go("department", t.dataset.gotoDept); }
@@ -944,7 +1049,7 @@
     renderNav();
     const map = {
       overview: viewOverview, departments: viewDepartments, department: viewDepartmentDetail,
-      agents: viewAgents, subagents: viewSubAgents, review: viewReview, assistant: viewAssistant, settings: viewSettings
+      agents: viewAgents, subagents: viewSubAgents, mindmap: viewMindmap, review: viewReview, assistant: viewAssistant, settings: viewSettings
     };
     $("#view").innerHTML = (map[STATE.view] || viewOverview)();
   }
