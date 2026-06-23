@@ -151,34 +151,39 @@
   /* ---- Charts (inline SVG) --------------------------------------------- */
   function barChart(rows) {
     const max = Math.max.apply(null, rows.map((r) => r.value).concat([1]));
-    return '<div class="barchart">' + rows.map((r) =>
-      '<div class="barrow" role="button" tabindex="0" data-goto-dept="' + r.id + '">' +
-        '<div class="barrow__label" title="' + esc(r.label) + '">' + esc(r.label) + "</div>" +
-        '<div class="barrow__track"><div class="barrow__fill" style="width:' +
-          ((r.value / max) * 100).toFixed(1) + '%"></div></div>' +
-        '<div class="barrow__val">' + r.value + "</div>" +
-      "</div>").join("") + "</div>";
+    return '<div class="bchart">' + rows.map((r, i) => {
+      const empty = !r.value;
+      const w = empty ? 0 : Math.max(5, (r.value / max) * 100);
+      return '<button class="brow' + (empty ? " is-empty" : "") + (i === 0 && !empty ? " is-top" : "") +
+        '" data-goto-dept="' + r.id + '" tabindex="0">' +
+        '<span class="brow__name" title="' + esc(r.label) + '">' + esc(r.label) + "</span>" +
+        '<span class="brow__bar"><i style="width:' + w.toFixed(1) + '%"></i></span>' +
+        (empty ? '<span class="brow__await">Awaiting</span>' : '<span class="brow__val">' + r.value + "</span>") +
+        "</button>";
+    }).join("") + "</div>";
   }
   function donut(segments, centerVal, centerLabel) {
     const total = segments.reduce((s, x) => s + x.value, 0) || 1;
-    const r = 60, c = 2 * Math.PI * r;
+    const r = 58, c = 2 * Math.PI * r, gap = segments.length > 1 ? 7 : 0;
     let offset = 0;
     const circles = segments.map((s) => {
-      const len = (s.value / total) * c;
-      const el = '<circle cx="75" cy="75" r="' + r + '" fill="none" stroke="' + s.color +
-        '" stroke-width="20" stroke-dasharray="' + len.toFixed(2) + " " + (c - len).toFixed(2) +
-        '" stroke-dashoffset="' + (-offset).toFixed(2) + '"></circle>';
-      offset += len;
+      const frac = (s.value / total) * c;
+      const len = Math.max(0.01, frac - gap);
+      const el = '<circle class="donut-seg" cx="80" cy="80" r="' + r + '" fill="none" stroke="' + s.color +
+        '" stroke-width="17" stroke-linecap="round" stroke-dasharray="' + len.toFixed(2) + " " + (c - len).toFixed(2) +
+        '" stroke-dashoffset="' + (-offset - gap / 2).toFixed(2) + '"></circle>';
+      offset += frac;
       return el;
     }).join("");
     return '<div class="donut-wrap"><div class="donut">' +
-      '<svg width="150" height="150" viewBox="0 0 150 150">' +
-        '<circle cx="75" cy="75" r="' + r + '" fill="none" stroke="var(--line-2)" stroke-width="20"></circle>' +
+      '<svg width="158" height="158" viewBox="0 0 160 160">' +
+        '<circle cx="80" cy="80" r="' + r + '" fill="none" stroke="var(--line-2)" stroke-width="17"></circle>' +
         circles + "</svg>" +
       '<div class="donut__center"><b>' + centerVal + "</b><span>" + esc(centerLabel) + "</span></div></div>" +
       '<div class="legend">' + segments.map((s) =>
         '<div class="legend__item"><span class="legend__sw" style="background:' + s.color + '"></span>' +
-        '<span class="lt">' + esc(s.label) + '</span><span class="lv">' + s.value + "</span></div>").join("") +
+        '<span class="lt">' + esc(s.label) + '</span><span class="lv">' + s.value +
+        ' <em>' + Math.round((s.value / total) * 100) + "%</em></span></div>").join("") +
       "</div></div>";
   }
   function stackedStatus(g) {
@@ -188,13 +193,15 @@
       { v: g.prog, c: "var(--blue)", l: "In Progress" },
       { v: g.review, c: "var(--amber)", l: "Needs Review" }
     ];
-    return '<div class="stack">' + seg.map((s) =>
+    return '<div class="statwrap"><div class="stack">' + seg.map((s) =>
       '<span title="' + s.l + ": " + s.v + '" style="width:' + ((s.v / total) * 100).toFixed(1) +
       "%;background:" + s.c + '"></span>').join("") + "</div>" +
-      '<div class="legend">' + seg.map((s) =>
-        '<div class="legend__item"><span class="legend__sw" style="background:' + s.c + '"></span>' +
-        '<span class="lt">' + s.l + '</span><span class="lv">' + s.v + " · " +
-        Math.round((s.v / total) * 100) + "%</span></div>").join("") + "</div>";
+      '<div class="statlist">' + seg.map((s) =>
+        '<div class="statrow"><span class="statrow__dot" style="background:' + s.c + '"></span>' +
+        '<span class="statrow__l">' + s.l + "</span>" +
+        '<b class="statrow__v">' + s.v + "</b>" +
+        '<span class="statrow__p">' + Math.round((s.v / total) * 100) + "%</span></div>").join("") +
+      "</div></div>";
   }
   const CPLX_COLORS = { "Low": "var(--green)", "Medium": "var(--blue)", "High": "var(--amber)", "Very High": "var(--red)" };
   function cdistBar(cdist) {
