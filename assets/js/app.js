@@ -196,55 +196,52 @@
       { id: "overview", label: "Overview", icon: "overview" },
       { id: "departments", label: "Departments", icon: "dept", count: g.depts },
       { id: "agents", label: "Agents", icon: "agents", count: g.total },
-      { id: "subagents", label: "Sub-Agents", icon: "sub", count: g.subs },
-      { id: "review", label: "Pending Review", icon: "review", count: g.review }
+      { id: "subagents", label: "Sub-agents", icon: "sub", count: g.subs },
+      { id: "review", label: "Pending review", icon: "review", count: g.review },
+      { id: "assistant", label: "Agent assistant", icon: "chat" },
+      { id: "settings", label: "Settings", icon: "settings" }
     ];
     const active = (STATE.view === "department" ? "departments" : STATE.view);
     $("#nav").innerHTML =
-      '<div class="nav__label">Main</div>' +
+      '<div class="nav__label">Workspace</div>' +
       items.map((it) =>
         '<button class="nav__item' + (active === it.id ? " is-active" : "") + '" data-nav="' + it.id + '">' +
         icon(it.icon) + "<span>" + it.label + "</span>" +
-        (it.count != null ? '<span class="nav__count">' + it.count + "</span>" : "") + "</button>").join("") +
-      '<div class="nav__label">Tools</div>' +
-      '<button class="nav__item' + (active === "assistant" ? " is-active" : "") + '" data-nav="assistant">' +
-        icon("chat") + "<span>Agent Assistant</span></button>" +
-      '<div class="nav__label">System</div>' +
-      '<button class="nav__item' + (active === "settings" ? " is-active" : "") + '" data-nav="settings">' +
-        icon("settings") + "<span>Settings</span></button>";
+        (it.count != null ? '<span class="nav__count">' + it.count + "</span>" : "") + "</button>").join("");
   }
 
-  /* ---- Header ----------------------------------------------------------- */
+  /* ---- Header (slim top bar) -------------------------------------------- */
+  function breadcrumb() {
+    const v = STATE.view;
+    const names = { overview: "Overview", departments: "Departments", agents: "Agents",
+      subagents: "Sub-agents", review: "Pending review", assistant: "Agent assistant", settings: "Settings" };
+    if (v === "department") {
+      const d = findDept(STATE.deptId);
+      return '<button data-nav="departments">Departments</button><span class="sep">·</span>' +
+        '<span class="current">' + esc(d ? d.short : "") + "</span>";
+    }
+    return '<span class="current">' + esc(names[v] || "Overview") + "</span>";
+  }
   function renderHeader() {
     const f = STATE.filters;
     const activeFilters = f.complexity.length + f.status.length + f.priority.length + f.kind.length;
     $("#header").innerHTML =
-      '<div class="header__top">' +
-        '<div class="header__titles">' +
-          '<button class="btn btn--icon btn--ghost menu-toggle" data-menu style="margin-bottom:8px">' + icon("menu") + "</button>" +
-          '<div class="eyebrow">UAE Government · Agentic Transformation Programme</div>' +
-          '<h1>Agentic Transformation Dashboard <span class="ar" dir="rtl">لوحة التحوّل الذكي</span></h1>' +
-          '<p class="subtitle">Overview of AI agents designed across departments</p>' +
-          '<div class="header__updated"><span class="dot"></span>Last updated ' + fmtDate("2026-06-22") +
-            " · " + globalStats().total + " agents across " + globalStats().depts + " departments</div>" +
+      '<div class="topbar">' +
+        '<button class="btn btn--icon btn--ghost menu-toggle" data-menu>' + icon("menu") + "</button>" +
+        '<div class="topbar__crumb">' + icon("overview") + breadcrumb() + "</div>" +
+        '<div class="search">' + icon("search") +
+          '<input id="searchInput" type="search" placeholder="Search departments, agents or sub-agents" value="' +
+          esc(STATE.search) + '" autocomplete="off" />' +
         "</div>" +
-        '<div class="header__actions">' +
+        '<div class="topbar__actions">' +
           '<div class="has-pop">' +
             '<button class="btn" data-filter-toggle>' + icon("filter") + "Filter" +
               (activeFilters ? '<span class="badge-dot"></span>' : "") + "</button>" +
             filterPopover() +
           "</div>" +
           '<button class="btn" data-export>' + icon("export") + "Export</button>" +
-          '<button class="btn" data-share>' + icon("link") + "Share</button>" +
-          '<button class="btn btn--primary" data-add>' + icon("plus") + "Add / Update Agent</button>" +
+          '<button class="btn btn--primary" data-add>' + icon("plus") + "Add / update agent</button>" +
         "</div>" +
-      "</div>" +
-      '<div class="toolbar">' +
-        '<div class="search">' + icon("search") +
-          '<input id="searchInput" type="search" placeholder="Search agents, sub-agents, departments…" value="' +
-          esc(STATE.search) + '" autocomplete="off" />' +
-        "</div>" +
-        (activeFilters ? '<button class="btn btn--sm btn--ghost" data-clear-filters>Clear ' + activeFilters + " filter" + (activeFilters > 1 ? "s" : "") + "</button>" : "") +
       "</div>";
   }
   function filterPopover() {
@@ -360,7 +357,14 @@
           "<th>Complexity Distribution</th><th>Status</th><th>Readiness</th><th>Last Updated</th><th></th>" +
         "</tr></thead><tbody>" + rows + "</tbody></table></div></div></div>";
 
-    return '<div class="page">' + kpiHTML +
+    const head =
+      '<div class="page__head page__head--hero">' +
+        '<div class="eyebrow">UAE Government · Agentic Transformation Programme</div>' +
+        '<h2>Agentic Transformation Dashboard <span class="ar" dir="rtl">لوحة التحوّل الذكي</span></h2>' +
+        '<p>Overview of AI agents designed across departments · <span class="muted">Last updated ' +
+          fmtDate("2026-06-22") + "</span></p></div>";
+
+    return '<div class="page">' + head + kpiHTML +
       '<div class="section"><div class="section__head"><h3>At a Glance</h3>' +
         '<span class="hint">Scan in under two minutes</span></div>' + charts + "</div>" +
       table + "</div>";
@@ -405,7 +409,7 @@
     const d = findDept(STATE.deptId);
     if (!d) return viewDepartments();
     const s = deptStats(d);
-    const back = '<button class="backlink" data-nav="departments">' + icon("chevL") + "Back to departments</button>";
+    const back = '<button class="backlink" data-nav="overview">' + icon("chevL") + "Back to overview</button>";
 
     const hero =
       '<div class="card"><div class="card__body">' +
