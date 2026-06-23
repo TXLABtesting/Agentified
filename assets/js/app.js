@@ -623,32 +623,34 @@
         })) };
     }
 
-    // recursive layout: leaves get a slot sized to their card; parents centre on children
+    // vertical (top-down) layout: depth = row (y), siblings spread horizontally (x)
     const links = [], nodes = [], byId = {};
-    const slotH = (n) => n.type === "sub" ? 58 : n.type === "agent" ? 120 : n.type === "dept" ? 72 : 70;
+    const rowY = [44, 250, 524, 790];
+    const widthFor = (n) => n.type === "root" ? 244 : n.type === "dept" ? 216 : n.type === "agent" ? (isAll ? 196 : 222) : 178;
+    const slotW = (n) => n.type === "sub" ? 196 : n.type === "agent" ? (isAll ? 210 : 240) : n.type === "dept" ? 234 : 220;
     let cursor = MM.pad;
     (function layout(node, depth) {
-      node.x = MM.col[depth]; node.w = MM.width[depth]; node.depth = depth;
+      node.depth = depth; node.w = widthFor(node); node.y = rowY[depth];
       if (node.id) byId[node.id] = node;
       if (!node.children || !node.children.length) {
-        const h = slotH(node); node.y = cursor + h / 2; cursor += h;
+        const w = slotW(node); node.x = cursor + w / 2; cursor += w;
       } else {
         node.children.forEach((c) => layout(c, depth + 1));
-        node.y = (node.children[0].y + node.children[node.children.length - 1].y) / 2;
+        node.x = (node.children[0].x + node.children[node.children.length - 1].x) / 2;
         node.children.forEach((c) => links.push([node, c]));
       }
       nodes.push(node);
     })(root, 0);
 
-    const maxRight = Math.max.apply(null, nodes.map((n) => n.x + n.w)) + MM.pad;
-    const totalH = cursor + MM.pad;
+    const maxRight = cursor + MM.pad;
+    const totalH = Math.max.apply(null, nodes.map((n) => n.y)) + 150;
 
     const paths = links.map(([p, c]) => {
-      const x1 = p.x + p.w, x2 = c.x, mx = (x1 + x2) / 2;
-      return '<path class="mm-link mm-link--d' + p.depth + '" d="M' + x1 + ',' + p.y + ' C' + mx + ',' + p.y + ' ' + mx + ',' + c.y + ' ' + x2 + ',' + c.y + '"/>';
+      const my = (p.y + c.y) / 2;
+      return '<path class="mm-link mm-link--d' + p.depth + '" d="M' + p.x + ',' + p.y + ' C' + p.x + ',' + my + ' ' + c.x + ',' + my + ' ' + c.x + ',' + c.y + '"/>';
     }).join("");
 
-    // agent-to-agent "speaks to" links (department mode only), arcing on the left
+    // agent-to-agent "speaks to" links (department mode only), arcing above the row
     let collabPaths = "", collabCount = 0;
     if (!isAll && STATE.mindLinks) {
       nodes.forEach((n) => {
@@ -656,15 +658,15 @@
         n.talksTo.forEach((tid) => {
           const t = byId[tid]; if (!t) return;
           collabCount++;
-          const x = n.x, cx = n.x - 52 - Math.min(40, Math.abs(n.y - t.y) / 8);
-          collabPaths += '<path class="mm-clink" marker-end="url(#mm-arrow)" d="M' + x + ',' + n.y +
-            ' C' + cx + ',' + n.y + ' ' + cx + ',' + t.y + ' ' + (t.x - 3) + ',' + t.y + '"/>';
+          const cy = n.y - 56 - Math.min(70, Math.abs(n.x - t.x) / 6);
+          collabPaths += '<path class="mm-clink" marker-end="url(#mm-arrow)" d="M' + n.x + ',' + n.y +
+            ' C' + n.x + ',' + cy + ' ' + t.x + ',' + cy + ' ' + t.x + ',' + (t.y - 4) + '"/>';
         });
       });
     }
 
     const nodeHtml = nodes.map((n) => {
-      const pos = 'left:' + n.x + 'px;top:' + n.y + 'px;width:' + n.w + 'px';
+      const pos = 'left:' + (n.x - n.w / 2) + 'px;top:' + n.y + 'px;width:' + n.w + 'px';
       if (n.type === "root") {
         return '<div class="mm-node mm-lead"' + (n.deptId ? ' data-goto-dept="' + n.deptId + '"' : "") +
           ' style="' + pos + '">' +
@@ -1072,6 +1074,11 @@
     $("#view").innerHTML = (map[v] || viewOverview)();
     window.scrollTo({ top: 0 });
     if (v === "assistant") { const sc = $("#chatScroll"); if (sc) sc.scrollTop = sc.scrollHeight; setTimeout(focusChat, 40); }
+    if (v === "mindmap") centerMindmap();
+  }
+  function centerMindmap() {
+    const c = $(".mm-canvas"); if (!c) return;
+    c.scrollLeft = Math.max(0, (c.scrollWidth - c.clientWidth) / 2);
   }
 
   /* ---- Events (delegated) ---------------------------------------------- */
@@ -1161,6 +1168,7 @@
       agents: viewAgents, subagents: viewSubAgents, mindmap: viewMindmap, review: viewReview, assistant: viewAssistant, settings: viewSettings
     };
     $("#view").innerHTML = (map[STATE.view] || viewOverview)();
+    if (STATE.view === "mindmap") centerMindmap();
   }
 
   function toggleFilter(key, val) {
