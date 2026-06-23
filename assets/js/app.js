@@ -200,7 +200,7 @@
       { id: "departments", label: "Departments", icon: "dept", count: g.depts },
       { id: "agents", label: "Agents", icon: "agents", count: g.total },
       { id: "subagents", label: "Sub-agents", icon: "sub", count: g.subs },
-      { id: "mindmap", label: "Mind map", icon: "mindmap" },
+      { id: "mindmap", label: "Agent team", icon: "mindmap" },
       { id: "review", label: "Pending review", icon: "review", count: g.review },
       { id: "assistant", label: "Agent assistant", icon: "chat" },
       { id: "settings", label: "Settings", icon: "settings" }
@@ -218,7 +218,7 @@
   function breadcrumb() {
     const v = STATE.view;
     const names = { overview: "Overview", departments: "Departments", agents: "Agents",
-      subagents: "Sub-agents", mindmap: "Mind map", review: "Pending review", assistant: "Agent assistant", settings: "Settings" };
+      subagents: "Sub-agents", mindmap: "Agent team", review: "Pending review", assistant: "Agent assistant", settings: "Settings" };
     if (v === "department") {
       const d = findDept(STATE.deptId);
       return '<button data-nav="departments">Departments</button><span class="sep">·</span>' +
@@ -553,9 +553,20 @@
       "<p>Agents flagged for leadership review, update or refinement — highest complexity first.</p></div>" + body + "</div>";
   }
 
-  /* ---- Mind map (agent relationship graph) ----------------------------- */
-  const MM = { col: [24, 312, 624, 916], width: [214, 250, 232, 214], rowH: 48, pad: 26 };
+  /* ---- Mind map / team structure --------------------------------------- */
+  const MM = { col: [24, 320, 648, 952], width: [226, 268, 250, 214], rowH: 56, pad: 26 };
   const statusVar = { "Ready": "var(--green)", "In Progress": "var(--blue)", "Needs Review": "var(--amber)" };
+  const STATUS_TINT = {
+    "Ready": ["var(--green)", "var(--green-bg)"],
+    "In Progress": ["var(--blue)", "var(--blue-bg)"],
+    "Needs Review": ["var(--amber)", "var(--amber-bg)"]
+  };
+  function roleFromTier(t) { if (!t) return "Agent"; const p = t.split("·"); return (p[p.length - 1] || t).trim(); }
+  function initials(name) {
+    const skip = { "hr": 1, "and": 1, "agent": 1, "&": 1, "the": 1, "of": 1 };
+    const w = name.split(/[^A-Za-z0-9]+/).filter((x) => x && !skip[x.toLowerCase()]);
+    return ((w[0] || name).charAt(0) + (w[1] ? w[1].charAt(0) : (w[0] || "").charAt(1) || "")).toUpperCase();
+  }
 
   function viewMindmap() {
     const g = globalStats();
@@ -604,25 +615,30 @@
     const nodeHtml = nodes.map((n) => {
       const pos = 'left:' + n.x + 'px;top:' + n.y + 'px;width:' + n.w + 'px';
       if (n.type === "root") {
-        return '<div class="mm-node mm-root"' + (n.deptId ? ' data-goto-dept="' + n.deptId + '"' : "") +
-          ' style="' + pos + '">' + icon(n.deptId ? deptIconName(n.deptId) : "overview") +
-          "<div><b>" + esc(n.label) + "</b><span>" + esc(n.meta) + "</span></div></div>";
+        return '<div class="mm-node mm-lead"' + (n.deptId ? ' data-goto-dept="' + n.deptId + '"' : "") +
+          ' style="' + pos + '">' +
+          '<span class="mm-av mm-av--lead">' + icon("spark") + "</span>" +
+          '<div class="mm-tx"><b>' + esc(n.label) + (n.deptId ? " Orchestrator" : "") + "</b>" +
+          '<span class="mm-role">' + (n.deptId ? "Conducts the team" : "Programme") + " · " + esc(n.meta) + "</span></div></div>";
       }
       if (n.type === "dept") {
-        return '<div class="mm-node mm-dept" data-goto-dept="' + n.id + '" style="' + pos + '">' +
-          '<span class="mm-ic">' + icon(deptIconName(n.id)) + "</span>" +
-          "<div><b>" + esc(n.label) + "</b><span>" + esc(n.meta) + "</span></div></div>";
+        return '<div class="mm-node mm-team" data-goto-dept="' + n.id + '" style="' + pos + '">' +
+          '<span class="mm-av mm-av--team">' + icon(deptIconName(n.id)) + "</span>" +
+          '<div class="mm-tx"><b>' + esc(n.label) + "</b><span class=\"mm-role\">" + esc(n.meta) + "</span></div></div>";
       }
       if (n.type === "agent") {
-        return '<div class="mm-node mm-agent" data-agent="' + n.id + '" title="' + esc(n.label) +
-          '" style="' + pos + ";border-left-color:" + (statusVar[n.status] || "var(--slate)") + '">' +
-          '<b>' + esc(n.label) + "</b>" +
-          '<span class="mm-meta"><i class="mm-dot" style="background:' + (statusVar[n.status] || "var(--slate)") + '"></i>' +
-          esc(n.status) + " · " + esc(n.complexity) + "</span></div>";
+        const tint = STATUS_TINT[n.status] || ["var(--slate)", "var(--slate-bg)"];
+        return '<div class="mm-node mm-member" data-agent="' + n.id + '" title="' + esc(n.label) +
+          '" style="' + pos + ";border-left-color:" + tint[0] + '">' +
+          '<span class="mm-av" style="color:' + tint[0] + ";background:" + tint[1] + '">' + icon("cpu") + "</span>" +
+          '<div class="mm-tx"><b>' + esc(n.label) + "</b>" +
+          '<span class="mm-role"><i class="mm-dot" style="background:' + tint[0] + '"></i>' +
+          esc(roleFromTier(n.tier)) + " · " + esc(n.complexity) + "</span></div></div>";
       }
-      // sub
-      return '<div class="mm-node mm-sub" data-agent="' + n.parentId + '" title="' + esc(n.label) +
-        '" style="' + pos + '"><b>' + esc(n.label) + "</b></div>";
+      // sub-agent = junior member chip
+      return '<div class="mm-node mm-rep" data-agent="' + n.parentId + '" title="' + esc(n.label) +
+        '" style="' + pos + '"><span class="mm-av mm-av--rep">' + esc(initials(n.label)) + "</span>" +
+        '<b>' + esc(n.label) + "</b></div>";
     }).join("");
 
     const pills = ['<button class="mm-pill' + (isAll ? " is-on" : "") + '" data-mind="all">All departments</button>']
@@ -639,12 +655,12 @@
         '<span><i style="background:var(--green)"></i>Ready</span>' +
         '<span><i style="background:var(--blue)"></i>In progress</span>' +
         '<span><i style="background:var(--amber)"></i>Needs review</span>' +
-        '<span class="muted">Click a node to open its agent</span>' +
+        '<span class="muted">Click any member to open its agent</span>' +
       "</div>";
 
-    return '<div class="page"><div class="page__head"><h2>Agent mind map</h2>' +
-      "<p>The relationship between departments, main agents and sub-agents. " +
-      (isAll ? "Showing all departments and their agents." : "Showing " + esc((findDept(STATE.mindDept) || {}).name || "") + " — root orchestrator → agents" + (STATE.mindSubs ? " → sub-agents." : ".")) + "</p></div>" +
+    return '<div class="page"><div class="page__head"><h2>Agent team</h2>' +
+      "<p>The agents as a team — the orchestrator leads, main agents report to it, and each agent has its own sub-agents. " +
+      (isAll ? "Showing every department and its agents." : "Showing the " + esc((findDept(STATE.mindDept) || {}).name || "") + " team" + (STATE.mindSubs ? " and each agent's sub-agents." : ".")) + "</p></div>" +
       controls + legend +
       '<div class="mm-canvas"><div class="mm-inner" style="width:' + maxRight + "px;height:" + totalH + 'px">' +
         '<svg class="mm-svg" width="' + maxRight + '" height="' + totalH + '">' + paths + "</svg>" +

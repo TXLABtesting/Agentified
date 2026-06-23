@@ -581,44 +581,46 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
 .mm-link { fill: none; stroke: #D8CFC0; stroke-width: 1.6; }
 .mm-link--d0 { stroke: var(--brand); opacity: .45; stroke-width: 2; }
 
-.mm-node { position: absolute; transform: translateY(-50%); box-sizing: border-box; }
-.mm-root {
-  background: var(--brand); color: #fff; border-radius: var(--r-md); padding: 11px 14px;
-  box-shadow: var(--sh-2); display: flex; align-items: center; gap: 10px;
-}
-.mm-root[data-goto-dept] { cursor: pointer; }
-.mm-root svg { width: 22px; height: 22px; color: var(--gold); flex: none; }
-.mm-root b { font-size: var(--fs-sm); display: block; line-height: 1.25; }
-.mm-root span { font-size: var(--fs-2xs); opacity: .85; }
-
-.mm-dept {
-  background: var(--brand-tint); border: 1px solid #E2D5C0; border-radius: var(--r-sm);
-  padding: 9px 12px; cursor: pointer; display: flex; align-items: center; gap: 9px;
-  transition: box-shadow .15s, transform .12s;
-}
-.mm-dept:hover { box-shadow: var(--sh-2); transform: translate(2px, -50%); }
-.mm-dept .mm-ic { width: 26px; height: 26px; border-radius: 7px; background: #fff; display: grid; place-items: center; flex: none; }
-.mm-dept .mm-ic svg { width: 15px; height: 15px; color: var(--brand); }
-.mm-dept b { font-size: var(--fs-xs); color: var(--brand-700); display: block; line-height: 1.2; }
-.mm-dept span { font-size: var(--fs-2xs); color: var(--ink-3); }
-
-.mm-agent {
-  background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--slate);
-  border-radius: var(--r-sm); padding: 8px 12px; cursor: pointer; box-shadow: var(--sh-1);
-  transition: box-shadow .15s, transform .12s;
-}
-.mm-agent:hover { box-shadow: var(--sh-2); transform: translate(2px, -50%); z-index: 2; }
-.mm-agent b { font-size: 12.5px; color: var(--ink); display: block; line-height: 1.3;
-  overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.mm-agent .mm-meta { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; color: var(--ink-3); margin-top: 3px; }
+.mm-node { position: absolute; transform: translateY(-50%); box-sizing: border-box; display: flex; align-items: center; gap: 10px; }
+.mm-tx { min-width: 0; }
+.mm-tx b { display: block; line-height: 1.25; overflow: hidden; text-overflow: ellipsis;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.mm-role { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; color: var(--ink-3); margin-top: 3px; }
 .mm-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
 
-.mm-sub {
-  background: var(--surface-2); border: 1px solid var(--line-2); border-radius: var(--r-sm);
-  padding: 7px 11px; cursor: pointer; transition: box-shadow .15s, transform .12s;
-}
-.mm-sub:hover { box-shadow: var(--sh-1); transform: translate(2px, -50%); border-color: var(--line); }
-.mm-sub b { font-size: 11.5px; color: var(--ink-2); font-weight: 600; line-height: 1.25;
+/* avatars */
+.mm-av { width: 38px; height: 38px; border-radius: 50%; flex: none; display: grid; place-items: center;
+  font-size: var(--fs-xs); font-weight: 700; }
+.mm-av svg { width: 19px; height: 19px; }
+.mm-av--lead { background: rgba(255,255,255,.16); color: var(--gold); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
+.mm-av--team { width: 34px; height: 34px; background: #fff; color: var(--brand); }
+.mm-av--rep { width: 28px; height: 28px; background: var(--brand-tint); color: var(--brand-700); font-size: 10px; }
+
+/* lead (orchestrator) card */
+.mm-lead { background: linear-gradient(135deg, var(--brand) 0%, var(--brand-700) 100%);
+  color: #fff; border-radius: var(--r-md); padding: 11px 14px; box-shadow: var(--sh-2); }
+.mm-lead[data-goto-dept] { cursor: pointer; }
+.mm-lead .mm-tx b { font-size: var(--fs-sm); }
+.mm-lead .mm-role { color: rgba(255,255,255,.8); }
+
+/* department/team card */
+.mm-team { background: var(--brand-tint); border: 1px solid #E2D5C0; border-radius: var(--r-md);
+  padding: 9px 12px; cursor: pointer; transition: box-shadow .15s, transform .12s; }
+.mm-team:hover { box-shadow: var(--sh-2); transform: translate(2px, -50%); }
+.mm-team .mm-tx b { font-size: var(--fs-xs); color: var(--brand-700); }
+
+/* main agent = team member card */
+.mm-member { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--slate);
+  border-radius: var(--r-md); padding: 9px 12px; cursor: pointer; box-shadow: var(--sh-1);
+  transition: box-shadow .15s, transform .12s; }
+.mm-member:hover { box-shadow: var(--sh-2); transform: translate(2px, -50%); z-index: 2; }
+.mm-member .mm-tx b { font-size: 12.5px; color: var(--ink); }
+
+/* sub-agent = report chip */
+.mm-rep { background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--r-full);
+  padding: 5px 12px 5px 5px; cursor: pointer; box-shadow: var(--sh-1); transition: box-shadow .15s, transform .12s; }
+.mm-rep:hover { box-shadow: var(--sh-2); transform: translate(2px, -50%); border-color: var(--line); }
+.mm-rep b { font-size: 11.5px; color: var(--ink-2); font-weight: 600; line-height: 1.2;
   overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
 /* ---- Settings ------------------------------------------------------------ */
