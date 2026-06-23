@@ -571,7 +571,7 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
 .mm-legend span { display: inline-flex; align-items: center; gap: 6px; }
 .mm-legend i { width: 9px; height: 9px; border-radius: 3px; }
 
-.mm-wrap { padding: var(--sp-6) var(--sp-8) var(--sp-8); max-width: 1440px; }
+.mm-wrap { padding: var(--sp-6) var(--sp-8) var(--sp-8); max-width: none; }
 .mm-wrap.is-full {
   position: fixed; inset: 0; z-index: 90; max-width: none; background: var(--bg);
   padding: 14px 18px; display: flex; flex-direction: column;
@@ -608,9 +608,13 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
   border: 1px solid var(--line); border-radius: var(--r-full); padding: 5px 11px; box-shadow: var(--sh-1);
 }
 .mm-pan-hint svg { width: 13px; height: 13px; }
-.mm-link { fill: none; stroke: #D8CFC0; stroke-width: 1.6; }
-.mm-link--d0 { stroke: var(--brand); opacity: .45; stroke-width: 2; }
-.mm-clink { fill: none; stroke: var(--gold-ink); stroke-width: 1.5; stroke-dasharray: 5 4; opacity: .7; }
+.mm-link { fill: none; stroke: #D7CEBF; stroke-width: 1.4; }
+.mm-link--d0 { stroke: #C9BCA4; stroke-width: 1.6; }
+.mm-clink { fill: none; stroke: var(--gold-ink); stroke-width: 1.8; opacity: .85; }
+/* hover focus */
+.mm-member { transition: box-shadow .15s, transform .12s, opacity .15s; }
+.mm-member.is-dim { opacity: .32; }
+.mm-member.is-focus { box-shadow: 0 0 0 2px var(--brand), var(--sh-2); z-index: 3; }
 
 .mm-node { position: absolute; transform: translateY(-50%); box-sizing: border-box; display: flex; align-items: center; gap: 10px; }
 .mm-tx { min-width: 0; }

@@ -18,10 +18,12 @@
     chat: [],
     mindDept: "hr",
     mindSubs: true,
-    mindLinks: true,
+    mindLinks: false,
     mindZoom: 1,
     mindFull: false
   };
+  let MM_COLLAB = {};   // agentId -> [path strings] for hover highlighting
+  let MM_ADJ = {};      // agentId -> { connectedId: true }
   /* expose live (edit-aware) data to the assistant engine */
   window.getDashboardData = function () { return DATA; };
 
@@ -643,27 +645,44 @@
     })(root, 0);
 
     const maxRight = cursor + MM.pad;
-    const totalH = Math.max.apply(null, nodes.map((n) => n.y)) + 150;
+    const totalH = Math.max.apply(null, nodes.map((n) => n.y)) + 160;
+    const halfH = (n) => n.type === "root" ? 42 : n.type === "dept" ? 34 : n.type === "agent" ? (isAll ? 34 : 60) : 24;
 
+    // clean elbow (org-chart) connectors: parent drop -> shared horizontal bus -> child drop
     const paths = links.map(([p, c]) => {
-      const my = (p.y + c.y) / 2;
-      return '<path class="mm-link mm-link--d' + p.depth + '" d="M' + p.x + ',' + p.y + ' C' + p.x + ',' + my + ' ' + c.x + ',' + my + ' ' + c.x + ',' + c.y + '"/>';
+      const py = p.y + halfH(p), cy = c.y - halfH(c);
+      const bus = py + Math.round((cy - py) * 0.5), r = 9;
+      const dir = c.x === p.x ? 0 : (c.x > p.x ? 1 : -1);
+      if (!dir) return '<path class="mm-link mm-link--d' + p.depth + '" d="M' + p.x + ',' + py + ' L' + p.x + ',' + cy + '"/>';
+      return '<path class="mm-link mm-link--d' + p.depth + '" d="' +
+        "M" + p.x + "," + py + " L" + p.x + "," + (bus - r) +
+        " Q" + p.x + "," + bus + " " + (p.x + dir * r) + "," + bus +
+        " L" + (c.x - dir * r) + "," + bus +
+        " Q" + c.x + "," + bus + " " + c.x + "," + (bus + r) +
+        " L" + c.x + "," + cy + '"/>';
     }).join("");
 
-    // agent-to-agent "speaks to" links (department mode only), arcing above the row
-    let collabPaths = "", collabCount = 0;
-    if (!isAll && STATE.mindLinks) {
+    // agent-to-agent "speaks to" links: built per-agent for hover; shown all only if toggled
+    MM_COLLAB = {}; MM_ADJ = {}; let allCollab = "", collabCount = 0;
+    if (!isAll) {
       nodes.forEach((n) => {
         if (n.type !== "agent" || !n.talksTo) return;
         n.talksTo.forEach((tid) => {
           const t = byId[tid]; if (!t) return;
           collabCount++;
-          const cy = n.y - 56 - Math.min(70, Math.abs(n.x - t.x) / 6);
-          collabPaths += '<path class="mm-clink" marker-end="url(#mm-arrow)" d="M' + n.x + ',' + n.y +
-            ' C' + n.x + ',' + cy + ' ' + t.x + ',' + cy + ' ' + t.x + ',' + (t.y - 4) + '"/>';
+          const sy = n.y - halfH(n), ty = t.y - halfH(t);
+          const top = Math.min(sy, ty) - (38 + Math.min(80, Math.abs(n.x - t.x) / 5));
+          const path = '<path class="mm-clink" marker-end="url(#mm-arrow)" d="M' + n.x + ',' + sy +
+            ' C' + n.x + ',' + top + ' ' + t.x + ',' + top + ' ' + t.x + ',' + ty + '"/>';
+          allCollab += path;
+          (MM_COLLAB[n.id] = MM_COLLAB[n.id] || []).push(path);
+          (MM_COLLAB[t.id] = MM_COLLAB[t.id] || []).push(path);
+          (MM_ADJ[n.id] = MM_ADJ[n.id] || {})[t.id] = 1;
+          (MM_ADJ[t.id] = MM_ADJ[t.id] || {})[n.id] = 1;
         });
       });
     }
+    const collabPaths = STATE.mindLinks ? allCollab : "";
 
     const nodeHtml = nodes.map((n) => {
       const pos = 'left:' + (n.x - n.w / 2) + 'px;top:' + n.y + 'px;width:' + n.w + 'px';
@@ -738,7 +757,7 @@
         '<svg class="mm-svg" width="' + maxRight + '" height="' + totalH + '">' +
           '<defs><marker id="mm-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">' +
             '<path d="M0,0 L10,5 L0,10 z" fill="var(--gold-ink)"/></marker></defs>' +
-          paths + collabPaths + "</svg>" + nodeHtml +
+          paths + '<g id="mmCollab">' + collabPaths + "</g></svg>" + nodeHtml +
       "</div>";
     const stageWrap =
       '<div class="mm-stagewrap">' +
@@ -1236,6 +1255,32 @@
   function endPan() { if (mmPan) { mmPan.c.classList.remove("is-grabbing"); mmPan = null; } }
   document.addEventListener("pointerup", endPan);
   document.addEventListener("pointerleave", endPan);
+
+  // hover an agent to reveal only its "speaks to" links (keeps the canvas clean)
+  let mmHover = null;
+  document.addEventListener("mouseover", function (e) {
+    if (STATE.view !== "mindmap" || STATE.mindLinks) return;
+    const m = e.target.closest(".mm-member"); if (!m) return;
+    const id = m.getAttribute("data-agent"); if (id === mmHover) return;
+    mmHover = id;
+    const g = document.getElementById("mmCollab");
+    if (g) g.innerHTML = (MM_COLLAB[id] || []).join("");
+    const adj = MM_ADJ[id] || {};
+    const hasLinks = !!(MM_COLLAB[id] && MM_COLLAB[id].length);
+    document.querySelectorAll(".mm-member").forEach((el) => {
+      const aid = el.getAttribute("data-agent");
+      el.classList.toggle("is-dim", hasLinks && aid !== id && !adj[aid]);
+    });
+    m.classList.add("is-focus");
+  });
+  document.addEventListener("mouseout", function (e) {
+    if (STATE.view !== "mindmap" || STATE.mindLinks) return;
+    const m = e.target.closest(".mm-member"); if (!m) return;
+    if (e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(".mm-member") === m) return;
+    mmHover = null;
+    const g = document.getElementById("mmCollab"); if (g) g.innerHTML = "";
+    document.querySelectorAll(".mm-member").forEach((el) => el.classList.remove("is-dim", "is-focus"));
+  });
 
   window.addEventListener("hashchange", function () { parseHash(); render(); });
 
