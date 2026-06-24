@@ -1894,9 +1894,128 @@ const PROTOCOL_AGENTS = [
   }
 ];
 
+const ADMIN_AGENTS = [
+  {
+    id: "ad-ad1", name: "Workplace & Hospitality Agent", kind: "core", tier: "Core",
+    purpose: "Run the E-Pantry and MOCA Mart smoothly — menus, ordering, fulfilment and stock — so the workplace just works.",
+    responsibilities: "Maintains the Qlub menu, QR and office mapping; takes employee orders; coordinates reception and fulfilment; monitors pantry inventory and triggers restock; manages MOCA Mart orders.",
+    process: "Admin — E-Pantry/Qlub (menu, QR, ordering, fulfilment), MOCA Mart",
+    inputs: ["Menu", "orders", "inventory levels", "office map"],
+    systems: ["Qlub Platform", "PACKMAN", "Excel", "Email"],
+    outputs: ["Fulfilled orders", "maintained menu", "monitored stock"],
+    complexity: "Low", impact: "Medium", feasibility: "High",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on ordering, fulfilment & restock prompts; humans confirm purchases",
+    risks: "Admin/Hospitality team confirm fulfilment and restock", nextAction: "",
+    subAgents: [{ name: "Maintains Qlub menu, QR office", desc: "Maintains the Qlub menu, QR and office mapping", complexity: "Low", type: "Task", deps: "Qlub Platform", status: "In Progress" }, { name: "Takes employee orders", desc: "takes employee orders", complexity: "Low", type: "Task", deps: "Qlub Platform", status: "In Progress" }, { name: "Coordinates reception fulfilment", desc: "coordinates reception and fulfilment", complexity: "Low", type: "Orchestration", deps: "Qlub Platform", status: "In Progress" }]
+  },
+  {
+    id: "ad-ad2", name: "Admin Asset Management Agent", kind: "core", tier: "Core",
+    purpose: "Keep the admin asset estate accurate — counts, tagging, event movements, transfers and disposals — across SPAN and the logistics tools.",
+    responsibilities: "Runs partial and annual inventory counts; monitors and controls assets; issues and receives assets for events; registers and tags new assets; processes transfers between locations and disposals; reconciles with SPAN.",
+    process: "Admin — Asset Management (counts, monitoring, event issue/receive, registration/tagging, transfer, disposal)",
+    inputs: ["Asset register", "count data", "event asset lists", "movement & disposal requests"],
+    systems: ["SPAN Tool", "PACKMAN", "Aramex", "GovSign", "Excel"],
+    outputs: ["Reconciled asset counts", "tagged assets", "tracked movements", "disposals"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on counts, tagging & movement tracking; escalate disposals",
+    risks: "Asset Officer/Auditor confirm counts; disposal is approved", nextAction: "",
+    subAgents: [{ name: "Runs partial annual inventory counts", desc: "Runs partial and annual inventory counts", complexity: "Medium", type: "Task", deps: "SPAN Tool", status: "In Progress" }, { name: "Monitors controls assets", desc: "monitors and controls assets", complexity: "Medium", type: "Monitoring", deps: "SPAN Tool", status: "In Progress" }, { name: "Issues receives assets events", desc: "issues and receives assets for events", complexity: "Medium", type: "Task", deps: "SPAN Tool", status: "In Progress" }]
+  },
+  {
+    id: "ad-g1", name: "Approval Concierge", kind: "core", tier: "Core",
+    purpose: "Deliver every approval as a decision-ready package pushed to the right person — applying the approval matrices so approvers decide in seconds, never hunting in a system. Match the ecosystem's autonomy with continuous risk management and quality assurance across CSS. Keep the team's workload balanced and sustainable so both service quality and staff wellbeing hold up under pressure. Give every employee a single, proactive assistant that spans the CSS self-service catalogue and brings things to them before they ask. Continuously gather and analyse feedback across CSS and convert it into prioritised improvement. Give the department's service recipients a single, proactive point of contact so they never have to chase or learn a system. Be the authoritative 'what's due and by when' radar for the whole sector.",
+    responsibilities: "Assembles the decision package for any workflow; applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs); pushes it via the person's channel; takes Q&A in-thread; captures approve/reject/more-info and writes it back to the system of record. Maintains the operational risk register and heat map; independently reviews human and agent outputs against the rules and source; flags errors, omissions and rising risks with the fix; samples agent actions for governance. Monitors task volumes, queue depth and turnaround per person across the agents; detects overload and uneven distribution; recommends rebalancing and routing routine spikes to automation; flags sustained pressure and leave/cover gaps to managers; protects focus time. Answers and acts across HR/IT/Admin/Finance self-service via the specialist agents; pushes proactive reminders (visa, insurance, contract, payslip, leave balance); tracks each request to done; gathers feedback. Collects lightweight feedback after key moments; analyses sentiment and themes; ranks an improvement backlog; reports a satisfaction pulse by function; closes the loop with respondents. Acts as the recipient's point of contact across the department's services; provides information and the exact requirements; collects what's needed and handles the system work on their behalf where possible; pushes status updates at each step; answers questions (with the voice agent); gathers feedback. Maintains a consolidated obligations & compliance calendar across functions; tracks status and ownership; nudges before due dates; feeds the leadership view and the experience concierge.",
+    process: "Cross-CSS — every approval chain (HR, Procurement, Travel, Finance, Legal, IT, Events, Protocol)",
+    inputs: ["The pending decision", "the approval matrix", "supporting documents", "approver channel"],
+    systems: ["Oracle", "MOCA Smart", "MOCA APP", "Teams", "Email Oracle (read)", "the agent ecosystem"],
+    outputs: ["Pushed decision packages", "captured decisions written back", "full audit trail"],
+    complexity: "Medium", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on answering, routing & reminders; escalate exceptions Act-and-notify on collection & analysis; humans own improvements Act-and-notify on information, requirements, status & on-behalf handling; escalate exceptions Act-and-notify on surfacing, nudging & tracking; the owner acts",
+    risks: "The matrix-defined approver always decides Risk owners and reviewers decide; the agent reviews and recommends Managers decide on staffing and cover; the agent surfaces and recommends Specialist teams handle exceptions; the employee confirms actions Process owners act on the backlog; management reviews the pulse Staff handle exceptions; the recipient confirms key submissions Owners action the items; the radar surfaces and tracks", nextAction: "",
+    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "In Progress" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }]
+  },
+  {
+    id: "ad-v9", name: "Continuous Risk & Quality Assurance", kind: "value-add", tier: "Value-add",
+    purpose: "Match the ecosystem's autonomy with continuous risk management and quality assurance across CSS.",
+    responsibilities: "Maintains the operational risk register and heat map; independently reviews human and agent outputs against the rules and source; flags errors, omissions and rising risks with the fix; samples agent actions for governance.",
+    process: "",
+    inputs: [],
+    systems: ["Oracle (read)", "the agent ecosystem", "the audit spine"],
+    outputs: [],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on risk tracking & review; humans own decisions & corrections",
+    risks: "Risk owners and reviewers decide; the agent reviews and recommends", nextAction: "",
+    subAgents: [{ name: "Maintains operational risk register heat", desc: "Maintains the operational risk register and heat map", complexity: "Medium", type: "Task", deps: "Oracle (read)", status: "In Progress" }, { name: "Independently reviews human agent outputs", desc: "independently reviews human and agent outputs against the rules and source", complexity: "Medium", type: "Task", deps: "Oracle (read)", status: "In Progress" }, { name: "Flags errors, omissions rising risks", desc: "flags errors, omissions and rising risks with the fix", complexity: "Medium", type: "Task", deps: "Oracle (read)", status: "In Progress" }]
+  },
+  {
+    id: "ad-v11", name: "Wellbeing & Workload-Balance Agent", kind: "value-add", tier: "Value-add",
+    purpose: "Keep the team's workload balanced and sustainable so both service quality and staff wellbeing hold up under pressure.",
+    responsibilities: "Monitors task volumes, queue depth and turnaround per person across the agents; detects overload and uneven distribution; recommends rebalancing and routing routine spikes to automation; flags sustained pressure and leave/cover gaps to managers; protects focus time.",
+    process: "",
+    inputs: [],
+    systems: ["The agent ecosystem", "MOCA Smart", "calendars"],
+    outputs: [],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human",
+    risks: "Managers decide on staffing and cover; the agent surfaces and recommends", nextAction: "",
+    subAgents: [{ name: "Monitors task volumes, queue depth", desc: "Monitors task volumes, queue depth and turnaround per person across the agents", complexity: "Medium", type: "Monitoring", deps: "The agent ecosystem", status: "In Progress" }, { name: "Detects overload uneven distribution", desc: "detects overload and uneven distribution", complexity: "Medium", type: "Task", deps: "The agent ecosystem", status: "In Progress" }, { name: "Recommends rebalancing routing routine", desc: "recommends rebalancing and routing routine spikes to automation", complexity: "Medium", type: "Orchestration", deps: "The agent ecosystem", status: "In Progress" }]
+  },
+  {
+    id: "ad-v1", name: "Employee Experience Concierge", kind: "value-add", tier: "Value-add",
+    purpose: "Give every employee a single, proactive assistant that spans the CSS self-service catalogue and brings things to them before they ask.",
+    responsibilities: "Answers and acts across HR/IT/Admin/Finance self-service via the specialist agents; pushes proactive reminders (visa, insurance, contract, payslip, leave balance); tracks each request to done; gathers feedback.",
+    process: "",
+    inputs: [],
+    systems: ["MOCA APP", "MOCA Smart", "the specialist agents"],
+    outputs: [],
+    complexity: "Medium", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on answering, routing & reminders; escalate exceptions",
+    risks: "Specialist teams handle exceptions; the employee confirms actions", nextAction: "",
+    subAgents: [{ name: "Answers acts HR/IT/Admin/Finance", desc: "Answers and acts across HR/IT/Admin/Finance self-service via the specialist agents", complexity: "Medium", type: "Conversational", deps: "MOCA APP", status: "In Progress" }, { name: "Pushes proactive reminders (visa,", desc: "pushes proactive reminders (visa, insurance, contract, payslip, leave balance)", complexity: "Medium", type: "Task", deps: "MOCA APP", status: "In Progress" }, { name: "Tracks each request done", desc: "tracks each request to done", complexity: "Medium", type: "Monitoring", deps: "MOCA APP", status: "In Progress" }]
+  },
+  {
+    id: "ad-v10", name: "Feedback & Sentiment Agent", kind: "value-add", tier: "Value-add",
+    purpose: "Continuously gather and analyse feedback across CSS and convert it into prioritised improvement.",
+    responsibilities: "Collects lightweight feedback after key moments; analyses sentiment and themes; ranks an improvement backlog; reports a satisfaction pulse by function; closes the loop with respondents.",
+    process: "",
+    inputs: [],
+    systems: ["MOCA Smart", "survey/chat", "the agent ecosystem", "dashboards"],
+    outputs: [],
+    complexity: "Medium", impact: "Medium", feasibility: "High",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on collection & analysis; humans own improvements",
+    risks: "Process owners act on the backlog; management reviews the pulse", nextAction: "",
+    subAgents: [{ name: "Collects lightweight feedback after key", desc: "Collects lightweight feedback after key moments", complexity: "Medium", type: "Task", deps: "MOCA Smart", status: "In Progress" }, { name: "Analyses sentiment themes", desc: "analyses sentiment and themes", complexity: "Medium", type: "Reporting", deps: "MOCA Smart", status: "In Progress" }, { name: "Ranks improvement backlog", desc: "ranks an improvement backlog", complexity: "Medium", type: "Task", deps: "MOCA Smart", status: "In Progress" }]
+  },
+  {
+    id: "ad-v12", name: "Service-Recipient Experience Agent", kind: "value-add", tier: "Value-add",
+    purpose: "Give the department's service recipients a single, proactive point of contact so they never have to chase or learn a system.",
+    responsibilities: "Acts as the recipient's point of contact across the department's services; provides information and the exact requirements; collects what's needed and handles the system work on their behalf where possible; pushes status updates at each step; answers questions (with the voice agent); gathers feedback.",
+    process: "",
+    inputs: [],
+    systems: ["The department's systems (on the recipient's behalf)", "MOCA Smart", "voice/chat"],
+    outputs: [],
+    complexity: "Medium", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on information, requirements, status & on-behalf handling; escalate exceptions",
+    risks: "Staff handle exceptions; the recipient confirms key submissions", nextAction: "",
+    subAgents: [{ name: "Acts recipient's point contact", desc: "Acts as the recipient's point of contact across the department's services", complexity: "Medium", type: "Task", deps: "The department's systems (on the recipient's behalf)", status: "In Progress" }, { name: "Provides information exact requirements", desc: "provides information and the exact requirements", complexity: "Medium", type: "Task", deps: "The department's systems (on the recipient's behalf)", status: "In Progress" }, { name: "Collects what's needed handles system", desc: "collects what's needed and handles the system work on their behalf where possible", complexity: "Medium", type: "Task", deps: "The department's systems (on the recipient's behalf)", status: "In Progress" }]
+  },
+  {
+    id: "ad-v5", name: "Proactive Nudge & Deadline Radar", kind: "value-add", tier: "Value-add",
+    purpose: "Be the authoritative 'what's due and by when' radar for the whole sector.",
+    responsibilities: "Maintains a consolidated obligations & compliance calendar across functions; tracks status and ownership; nudges before due dates; feeds the leadership view and the experience concierge.",
+    process: "",
+    inputs: [],
+    systems: ["Oracle (read)", "the agent ecosystem", "MOCA Smart", "calendar"],
+    outputs: [],
+    complexity: "Medium", impact: "High", feasibility: "High",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on surfacing, nudging & tracking; the owner acts",
+    risks: "Owners action the items; the radar surfaces and tracks", nextAction: "",
+    subAgents: [{ name: "Maintains consolidated obligations &", desc: "Maintains a consolidated obligations & compliance calendar across functions", complexity: "Medium", type: "Task", deps: "Oracle (read)", status: "In Progress" }, { name: "Tracks status ownership", desc: "tracks status and ownership", complexity: "Medium", type: "Monitoring", deps: "Oracle (read)", status: "In Progress" }, { name: "Nudges before due dates", desc: "nudges before due dates", complexity: "Medium", type: "Monitoring", deps: "Oracle (read)", status: "In Progress" }]
+  }
+];
+
 /* -- Departments awaiting their blueprints -------------------------------- */
 const LEGAL_AGENTS = [];
-const ADMIN_AGENTS = [];
 const STRATEGY_AGENTS = [];
 
 const DEPARTMENTS = [
@@ -1964,8 +2083,9 @@ const DEPARTMENTS = [
   },
   {
     id: "admin", name: "Admin Services", short: "Admin", nameAr: "الخدمات الإدارية",
-    description: "Awaiting blueprint — agents will be added once the Admin Services details are provided.",
-    owner: "Corporate Support Services — Administration", focal: "To be assigned",
+    description: "Workplace & hospitality and admin asset-management agents — plus the shared Approval Concierge — running day-to-day corporate services with judgment kept human.",
+    owner: "Corporate Support Services — Administration",
+    focal: "Saeed Al Nuaimi · Head of Admin Services",
     lastUpdated: "2026-06-24", agents: ADMIN_AGENTS
   },
   {
