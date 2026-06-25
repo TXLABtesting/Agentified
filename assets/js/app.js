@@ -476,25 +476,38 @@
         '<div class="agent-grid">' + agentCards + "</div></div></div>";
   }
 
-  function levelChip(level, kind) { return chip(level + " " + kind, COLOR.level[level] || "slate"); }
-
-  function agentRow(a) {
+  function agentRow(a, d) {
+    const tint = STATUS_TINT[a.status] || ["var(--slate)", "var(--slate-bg)"];
+    const sub = d ? d.short : ((findDept(a.deptId) || {}).short || a.deptName || "");
+    const proc = ((a.process || a.purpose || "").split(";")[0].split("—")[0].trim()).slice(0, 72);
+    const sys = systemsFor(a);
+    const shown = sys.slice(0, 4), more = sys.length - shown.length;
+    const nSub = a.subAgents ? a.subAgents.length : 0;
     return '<div class="acard" data-agent="' + a.id + '">' +
-      '<div class="acard__head"><h4>' + esc(a.name) + "</h4>" + statusChip(a.status) + "</div>" +
-      '<p class="acard__desc">' + esc(a.purpose) + "</p>" +
-      '<div class="acard__process">' + icon("layers") + esc(a.process.split(";")[0].split("—")[0].trim().slice(0, 60)) + "</div>" +
-      '<div class="acard__chips">' +
-        chip(a.complexity + " complexity", COLOR.complexity[a.complexity] || "slate") +
-        levelChip(a.impact, "impact") +
-        levelChip(a.feasibility, "feasibility") +
-        prioChip(a.priority) +
+      '<div class="acard__head">' +
+        '<span class="acard__logo" style="color:' + tint[0] + ";background:" + tint[1] + '">' + icon("cpu") + "</span>" +
+        '<div class="acard__ttl"><h4>' + esc(a.name) + "</h4>" +
+          '<span class="acard__sub">' + esc(sub) + "</span></div>" +
+        '<span class="acard__time"><i style="background:' + tint[0] + '"></i>' + esc(a.status) + "</span>" +
       "</div>" +
-      '<div class="acard__foot">' +
-        '<span class="subcount">' + icon("sub") + "<b>" + (a.subAgents ? a.subAgents.length : 0) + "</b> sub-agents</span>" +
-        '<div class="acard__actions">' +
-          '<button class="btn btn--sm btn--icon" data-edit="' + a.id + '" title="Edit">' + icon("edit") + "</button>" +
-          '<button class="btn btn--sm btn--primary" data-agent="' + a.id + '">View details ' + icon("chevR") + "</button>" +
+      '<div class="acard__tags">' +
+        '<span class="acard__tag">' + esc(a.priority) + "</span>" +
+        '<span class="acard__tag is-kind">' + (a.kind === "value-add" ? "Value-Add" : "Core") + "</span>" +
+      "</div>" +
+      '<div class="acard__panel">' +
+        '<div class="acard__info">' +
+          (proc ? '<div class="acard__inforow">' + icon("layers") + "<span>" + esc(proc) + "</span></div>" : "") +
+          '<div class="acard__inforow">' + icon("gauge") + "<span>" + esc(a.complexity) + " complexity · " + esc(a.impact) + " impact · " + esc(a.feasibility) + " feasibility</span></div>" +
         "</div>" +
+        '<div class="acard__skills">' +
+          shown.map((x) => '<span class="acard__skill">' + esc(x.label) + "</span>").join("") +
+          (more > 0 ? '<span class="acard__skill is-more">+' + more + "</span>" : "") +
+          '<span class="acard__skill is-sub">' + icon("sub") + " " + nSub + " sub-agents</span>" +
+        "</div>" +
+      "</div>" +
+      '<div class="acard__cta">' +
+        '<button class="acard__apply" data-agent="' + a.id + '">View details ' + icon("chevR") + "</button>" +
+        '<button class="acard__save" data-edit="' + a.id + '" title="Edit">' + icon("edit") + "</button>" +
       "</div>" +
     "</div>";
   }

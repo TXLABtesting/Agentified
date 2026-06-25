@@ -397,26 +397,47 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
 .readiness-track { height: 10px; border-radius: var(--r-full); background: var(--line-2); overflow: hidden; }
 .readiness-track > i { display: block; height: 100%; border-radius: var(--r-full); background: linear-gradient(90deg, var(--green) 0%, #3C9466 100%); transition: width .6s cubic-bezier(.2,.7,.3,1); }
 
-/* ---- Agent cards (department detail / review) — 2-column grid ------------- */
-.agent-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-4); }
+/* ---- Agent cards (listing-style) — 2-column grid ------------------------- */
+.agent-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-5); }
 .acard {
-  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
   box-shadow: var(--sh-1); padding: var(--sp-5); cursor: pointer;
-  transition: box-shadow .18s, border-color .18s, transform .12s;
-  display: flex; flex-direction: column;
+  transition: box-shadow .18s, transform .12s; display: flex; flex-direction: column; gap: 14px;
 }
-.acard:hover { box-shadow: var(--sh-2); border-color: #D9DEE4; transform: translateY(-1px); }
-.acard__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-3); }
-.acard__head h4 { font-size: var(--fs-h3); font-weight: 700; color: var(--ink); line-height: 1.3; }
-.acard__desc { color: var(--ink-2); font-size: var(--fs-sm); margin-top: 6px; line-height: 1.55; }
-.acard__process { display: inline-flex; align-items: center; gap: 7px; font-size: var(--fs-xs); color: var(--ink-3); margin-top: 12px; }
-.acard__process svg { width: 14px; height: 14px; color: var(--gold-ink); flex: none; }
-.acard__chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
-.acard__foot { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); margin-top: var(--sp-4); padding-top: var(--sp-4); border-top: 1px solid var(--line-2); }
-.acard__actions { display: flex; gap: 8px; }
-.subcount { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-xs); color: var(--ink-3); }
-.subcount svg { width: 15px; height: 15px; }
-.subcount b { color: var(--ink); font-weight: 700; }
+.acard:hover { box-shadow: var(--sh-2); transform: translateY(-2px); }
+.acard__head { display: flex; align-items: flex-start; gap: 12px; }
+.acard__logo { width: 46px; height: 46px; border-radius: 50%; flex: none; display: grid; place-items: center; }
+.acard__logo svg { width: 22px; height: 22px; }
+.acard__ttl { flex: 1; min-width: 0; }
+.acard__ttl h4 { font-size: var(--fs-h3); font-weight: 700; color: var(--ink); line-height: 1.3; }
+.acard__sub { font-size: var(--fs-xs); color: var(--ink-3); }
+.acard__time { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-2xs); font-weight: 600; color: var(--ink-3); white-space: nowrap; flex: none; }
+.acard__time i { width: 7px; height: 7px; border-radius: 50%; }
+.acard__tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.acard__tag { font-size: 10px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+  padding: 4px 11px; border-radius: var(--r-full); background: var(--gold-soft); color: #8A6A22; }
+.acard__tag.is-kind { background: var(--brand-tint); color: var(--brand); }
+.acard__panel { background: var(--surface-2); border: 1px solid var(--line-2); border-radius: var(--r-md); padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.acard__info { display: flex; flex-direction: column; gap: 8px; }
+.acard__inforow { display: flex; align-items: flex-start; gap: 8px; font-size: var(--fs-sm); color: var(--ink-2); }
+.acard__inforow svg { width: 15px; height: 15px; color: var(--ink-3); flex: none; margin-top: 1px; }
+.acard__skills { display: flex; gap: 6px; flex-wrap: wrap; }
+.acard__skill { font-size: var(--fs-2xs); color: var(--ink-2); background: #fff; border: 1px solid var(--line); border-radius: var(--r-full); padding: 4px 11px; }
+.acard__skill.is-more { color: var(--ink-3); }
+.acard__skill.is-sub { display: inline-flex; align-items: center; gap: 5px; color: var(--brand); background: var(--brand-tint); border-color: transparent; font-weight: 600; }
+.acard__skill.is-sub svg { width: 13px; height: 13px; }
+.acard__cta { display: flex; align-items: center; gap: 10px; margin-top: auto; }
+.acard__apply { flex: 1; height: 46px; border: none; border-radius: var(--r-full); cursor: pointer;
+  font-size: var(--fs-body); font-weight: 700; color: #fff; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: linear-gradient(135deg, var(--brand) 0%, #3D5BD0 100%); box-shadow: 0 6px 16px rgba(30,58,110,.28);
+  transition: filter .15s, transform .05s; }
+.acard__apply svg { width: 16px; height: 16px; }
+.acard__apply:hover { filter: brightness(1.07); }
+.acard__apply:active { transform: translateY(1px); }
+.acard__save { width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--line); background: #fff;
+  color: var(--ink-2); display: grid; place-items: center; cursor: pointer; flex: none; transition: background .15s, border .15s; }
+.acard__save:hover { background: var(--surface-2); border-color: #CDD4DD; }
+.acard__save svg { width: 16px; height: 16px; }
 
 /* ---- Drawer -------------------------------------------------------------- */
 .scrim { position: fixed; inset: 0; background: rgba(20,24,31,.45); opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 50; backdrop-filter: blur(1px); }
