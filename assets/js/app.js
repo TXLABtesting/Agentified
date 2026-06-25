@@ -490,6 +490,7 @@
           '<span class="acard__sub">' + esc(sub) + "</span></div>" +
         '<span class="acard__time"><i style="background:' + tint[0] + '"></i>' + esc(a.status) + "</span>" +
       "</div>" +
+      '<p class="acard__desc">' + esc(a.purpose) + "</p>" +
       '<div class="acard__tags">' +
         '<span class="acard__tag">' + esc(a.priority) + "</span>" +
         '<span class="acard__tag is-kind">' + (a.kind === "value-add" ? "Value-Add" : "Core") + "</span>" +
