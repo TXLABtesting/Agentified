@@ -78,8 +78,9 @@
       '<path d="' + I[name] + '"/></svg>';
   }
   function deptIconName(id) {
-    return ({ hr: "user", procurement: "doc", finance: "pulse", it: "cpu",
-      legal: "shield", admin: "layers", strategy: "target", comms: "link" })[id] || "dept";
+    return ({ hr: "user", procurement: "doc", finance: "pulse", knowledge: "folder",
+      legal: "idcard", comms: "chat", cyber: "shield", it: "cpu", protocol: "flag",
+      admin: "layers", strategy: "target" })[id] || "dept";
   }
 
   /* ---- Helpers ---------------------------------------------------------- */
