@@ -8,29 +8,29 @@
 /* ---- Design tokens ------------------------------------------------------- */
 :root {
   /* Brand */
-  --brand:        #5E4326;   /* deep official brown — formal, premium */
-  --brand-600:    #74552F;   /* lighter brown (hover / gradient end) */
-  --brand-700:    #3C2A16;   /* espresso (sidebar) */
-  --brand-tint:   #F1EADF;   /* warm sand tint (chip / active backgrounds) */
-  --gold:         #B68A35;   /* restrained gold accent (sovereign detail) */
-  --gold-ink:     #785A1D;   /* darker gold for text on light surfaces */
-  --gold-soft:    #F3ECDC;
+  --brand:        #1E3A6E;   /* deep navy — premium, official */
+  --brand-600:    #294C8A;   /* lighter navy (hover / gradient end) */
+  --brand-700:    #142648;   /* darkest navy (sidebar) */
+  --brand-tint:   #E9EEF7;   /* light navy tint (chip / active backgrounds) */
+  --gold:         #C09A3E;   /* warm gold accent (sovereign detail) */
+  --gold-ink:     #7C5E1C;   /* darker gold for text on light surfaces */
+  --gold-soft:    #F4EDDC;
 
-  /* Ink / neutrals */
-  --ink:          #14181F;
-  --ink-2:        #383F4B;
-  --ink-3:        #5A6470;   /* darkened for AA contrast on white */
-  --line:         #E5E7EB;
-  --line-2:       #EEF0F3;
-  --bg:           #F5F5F2;
+  /* Ink / neutrals (cool) */
+  --ink:          #131722;
+  --ink-2:        #38414F;
+  --ink-3:        #5B6573;   /* AA contrast on white */
+  --line:         #E3E8EF;
+  --line-2:       #EDF1F6;
+  --bg:           #F3F6FA;
   --surface:      #FFFFFF;
-  --surface-2:    #FAFAF7;
+  --surface-2:    #F8FAFC;
 
-  /* Semantic — brand is brown; green is reserved for positive/success states */
+  /* Semantic — navy is the brand; these carry meaning */
   --green:        #2E7D52;  --green-bg:  #E6F2EB;
-  --amber:        #835910;  --amber-bg:  #FAEFD8;
-  --blue:         #1A559E;  --blue-bg:   #E7EFFA;
-  --red:          #A02E2E;  --red-bg:    #FAE7E7;
+  --amber:        #8A5E12;  --amber-bg:  #FBF1DC;
+  --blue:         #2563C9;  --blue-bg:   #E8EFFC;
+  --red:          #B23A3A;  --red-bg:    #FBEAEA;
   --slate:        #4C5870;  --slate-bg:  #EDF0F5;
 
   /* Type scale */
@@ -156,7 +156,7 @@ a { color: inherit; text-decoration: none; }
 .topbar__crumb > svg { width: 16px; height: 16px; color: var(--ink-3); flex: none; }
 .topbar__crumb button { background: none; border: none; padding: 0; font-size: var(--fs-sm); font-weight: 600; color: var(--ink-3); }
 .topbar__crumb button:hover { color: var(--brand); }
-.topbar__crumb .sep { color: #C3BCAF; }
+.topbar__crumb .sep { color: #C2C9D5; }
 .topbar__crumb .current { color: var(--ink); }
 .topbar__actions { display: flex; gap: var(--sp-2); align-items: center; margin-left: auto; }
 
@@ -630,8 +630,8 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
   border: 1px solid var(--line); border-radius: var(--r-full); padding: 5px 11px; box-shadow: var(--sh-1);
 }
 .mm-pan-hint svg { width: 13px; height: 13px; }
-.mm-link { fill: none; stroke: #D7CEBF; stroke-width: 1.4; }
-.mm-link--d0 { stroke: #C9BCA4; stroke-width: 1.6; }
+.mm-link { fill: none; stroke: #D3DAE4; stroke-width: 1.4; }
+.mm-link--d0 { stroke: #C2C9D5; stroke-width: 1.6; }
 .mm-clink { fill: none; stroke: var(--gold-ink); stroke-width: 1.8; opacity: .85; }
 /* hover focus */
 .mm-member { transition: box-shadow .15s, transform .12s, opacity .15s; }
@@ -661,7 +661,7 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
 .mm-lead .mm-role { color: rgba(255,255,255,.8); }
 
 /* department/team card */
-.mm-team { background: var(--brand-tint); border: 1px solid #E2D5C0; border-radius: var(--r-md);
+.mm-team { background: var(--brand-tint); border: 1px solid #DCE3EE; border-radius: var(--r-md);
   padding: 9px 12px; cursor: pointer; transition: box-shadow .15s, transform .12s; }
 .mm-team:hover { box-shadow: var(--sh-2); transform: translate(2px, -50%); }
 .mm-team .mm-tx b { font-size: var(--fs-xs); color: var(--brand-700); }
@@ -681,7 +681,7 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
   border-radius: var(--r-full); font-size: 10px; font-weight: 600;
   background: var(--surface-2); border: 1px solid var(--line); color: var(--ink-2); }
 .mm-syschip svg { width: 12px; height: 12px; }
-.mm-sys--oracle { background: var(--brand-tint); border-color: #E2D5C0; color: var(--brand-700); }
+.mm-sys--oracle { background: var(--brand-tint); border-color: #D3DEEF; color: var(--brand-700); }
 .mm-sys--email { background: var(--blue-bg); border-color: #CFE0F4; color: var(--blue); }
 .mm-sys--icp { background: var(--amber-bg); border-color: #EBDCBB; color: var(--amber); }
 .mm-sys--moca { background: var(--green-bg); border-color: #CFE6D7; color: var(--green); }
