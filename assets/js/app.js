@@ -322,7 +322,7 @@
       { v: g.avg.toFixed(1), l: "Avg. Complexity Score", icon: "gauge", cls: "is-gold", sub: "Scale 1 (Low) – 4 (Very High)" }
     ];
     const kpiHTML = '<div class="kpi-grid">' + kpis.map((k) =>
-      '<div class="kpi"><div class="kpi__icon ' + k.cls + '">' + icon(k.icon) + "</div>" +
+      '<div class="kpi ' + k.cls + '"><div class="kpi__icon ' + k.cls + '">' + icon(k.icon) + "</div>" +
       '<div class="kpi__value">' + k.v + "</div><div class=\"kpi__label\">" + k.l + "</div>" +
       '<div class="kpi__sub">' + esc(k.sub) + "</div></div>").join("") + "</div>";
 

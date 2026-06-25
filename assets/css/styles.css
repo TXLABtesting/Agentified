@@ -8,30 +8,40 @@
 /* ---- Design tokens ------------------------------------------------------- */
 :root {
   /* Brand */
-  --brand:        #1E3A6E;   /* deep navy — premium, official */
+  --brand:        #1E3A6E;   /* deep navy — premium, official (buttons, links) */
   --brand-600:    #294C8A;   /* lighter navy (hover / gradient end) */
-  --brand-700:    #142648;   /* darkest navy (sidebar) */
-  --brand-tint:   #E9EEF7;   /* light navy tint (chip / active backgrounds) */
-  --gold:         #C09A3E;   /* warm gold accent (sovereign detail) */
+  --brand-700:    #142648;   /* darkest navy (deep ink) */
+  --brand-tint:   #ECE9F4;   /* soft periwinkle tint (chip / active backgrounds) */
+  --gold:         #C6A24A;   /* warm gold accent (sovereign detail) */
   --gold-ink:     #7C5E1C;   /* darker gold for text on light surfaces */
-  --gold-soft:    #F4EDDC;
+  --gold-soft:    #F1E6C9;
 
-  /* Ink / neutrals (cool) */
-  --ink:          #131722;
-  --ink-2:        #38414F;
-  --ink-3:        #5B6573;   /* AA contrast on white */
-  --line:         #E3E8EF;
-  --line-2:       #EDF1F6;
-  --bg:           #F3F6FA;
+  /* Sidebar — warm neutral charcoal (Zarss-inspired) */
+  --sidebar:      #211F1C;
+  --sidebar-2:    #2C2A26;
+
+  /* Ink / neutrals (warm) */
+  --ink:          #211E1A;
+  --ink-2:        #44403A;
+  --ink-3:        #6A655C;   /* AA contrast on warm surfaces */
+  --line:         #E6E1D7;
+  --line-2:       #EFEBE2;
+  --bg:           #ECE9E1;   /* warm cream canvas */
   --surface:      #FFFFFF;
-  --surface-2:    #F8FAFC;
+  --surface-2:    #FAF8F3;
 
-  /* Semantic — navy is the brand; these carry meaning */
-  --green:        #2E7D52;  --green-bg:  #E6F2EB;
-  --amber:        #8A5E12;  --amber-bg:  #FBF1DC;
-  --blue:         #2563C9;  --blue-bg:   #E8EFFC;
-  --red:          #B23A3A;  --red-bg:    #FBEAEA;
-  --slate:        #4C5870;  --slate-bg:  #EDF0F5;
+  /* Pastel accents (Zarss palette) */
+  --sage:   #4F6B43;  --sage-bg:   #D6DEC8;
+  --butter: #8A6D1E;  --butter-bg: #F2E1A6;
+  --peri:   #4B45A8;  --peri-bg:   #DCDAF6;
+  --rose-2: #A6577A;  --rose2-bg:  #F1D6DF;
+
+  /* Semantic — carry meaning */
+  --green:        #4F6B43;  --green-bg:  #E2EAD7;
+  --amber:        #8A6D1E;  --amber-bg:  #F4E8C4;
+  --blue:         #3A5D9E;  --blue-bg:   #DEE7F4;
+  --red:          #A8493F;  --red-bg:    #F3DBD6;
+  --slate:        #5A554C;  --slate-bg:  #EAE5DB;
 
   /* Type scale */
   --fs-display: 30px;
@@ -86,8 +96,8 @@ a { color: inherit; text-decoration: none; }
 
 /* ---- Sidebar (floating rounded panel) ------------------------------------ */
 .sidebar {
-  background: var(--brand-700);
-  color: #EBE2D2;
+  background: var(--sidebar);
+  color: #E7E2D7;
   position: sticky; top: 16px; height: calc(100vh - 32px);
   display: flex; flex-direction: column;
   border-radius: var(--r-xl); overflow: hidden; box-shadow: var(--sh-2);
@@ -235,17 +245,23 @@ a { color: inherit; text-decoration: none; }
   transition: box-shadow .18s, transform .12s;
 }
 .kpi:hover { box-shadow: var(--sh-2); transform: translateY(-2px); }
-.kpi__icon { width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; margin-bottom: var(--sp-4); background: var(--brand-tint); color: var(--brand); }
+/* Pastel-filled tiles (Zarss-inspired) */
+.kpi.is-violet { background: var(--peri-bg); }
+.kpi.is-green  { background: var(--sage-bg); }
+.kpi.is-blue   { background: var(--blue-bg); }
+.kpi.is-amber  { background: var(--butter-bg); }
+.kpi.is-rose   { background: var(--rose2-bg); }
+.kpi.is-gold   { background: var(--gold-soft); }
+.kpi__icon { width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; margin-bottom: var(--sp-4); background: rgba(255,255,255,.7); color: var(--brand); }
 .kpi__icon svg { width: 20px; height: 20px; }
-.kpi__icon.is-gold   { background: #F5EDD9; color: #9A7B22; }
-.kpi__icon.is-red    { background: #FCEAEA; color: var(--red); }
-.kpi__icon.is-rose   { background: #FCEAF0; color: #C0457A; }
-.kpi__icon.is-amber  { background: #FBF1DC; color: var(--amber); }
-.kpi__icon.is-blue   { background: #E8EFFC; color: var(--blue); }
-.kpi__icon.is-green  { background: #E6F4EC; color: var(--green); }
-.kpi__icon.is-violet { background: #EFEBFB; color: #6D4FC0; }
-.kpi__value { font-size: 28px; font-weight: 700; letter-spacing: -.5px; line-height: 1.1; }
-.kpi__label { color: var(--ink-3); font-size: var(--fs-sm); margin-top: 2px; }
+.kpi.is-gold   .kpi__icon { color: var(--butter); }
+.kpi.is-rose   .kpi__icon { color: var(--rose-2); }
+.kpi.is-amber  .kpi__icon { color: var(--butter); }
+.kpi.is-blue   .kpi__icon { color: var(--blue); }
+.kpi.is-green  .kpi__icon { color: var(--sage); }
+.kpi.is-violet .kpi__icon { color: var(--peri); }
+.kpi__value { font-size: 28px; font-weight: 700; letter-spacing: -.5px; line-height: 1.1; color: var(--ink); }
+.kpi__label { color: var(--ink-2); font-size: var(--fs-sm); margin-top: 2px; font-weight: 500; }
 .kpi__sub { font-size: var(--fs-2xs); color: var(--ink-3); margin-top: 8px; display: flex; align-items: center; gap: 5px; }
 
 /* ---- Generic card -------------------------------------------------------- */
