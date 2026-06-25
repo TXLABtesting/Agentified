@@ -95,14 +95,15 @@ The grounded engine remains as an automatic offline fallback.
 
 ## Data
 
-- **Human Resources** is authored from the live *Agentifying HR — Strategic
-  Blueprint*: 13 core agents (across six tiers) plus 10 recommended value-add
-  agents, with their real complexity / impact / feasibility / phase ratings,
-  purpose, responsibilities, systems, autonomy and recommended actions.
-- **Procurement, Finance, IT, Legal, Admin Services, Strategy and
-  Communications** use realistic mock data, structured identically.
-- Totals (53 main agents · 128 sub-agents · 8 departments) are computed at
-  runtime, so dropping in real data later requires no UI changes.
+- Every department is authored from its live *Agentic Blueprint* (01–10):
+  **Human Resources, Procurement/Travel/Vendor, Finance & Accounting,
+  Knowledge & Content, Legal, Events & Communication, Cyber Security,
+  IT Operations, Protocol and Admin Services** — each with its real
+  complexity / impact / feasibility / phase ratings, purpose,
+  responsibilities, systems, autonomy and recommended actions, plus
+  derived sub-agents.
+- Totals (143 main agents · 427 sub-agents · 10 departments) are computed at
+  runtime, so refreshing the data later requires no UI changes.
 
 All data lives in [`assets/js/data.js`](assets/js/data.js); the UI layer is in
 [`assets/js/app.js`](assets/js/app.js) and styling tokens in

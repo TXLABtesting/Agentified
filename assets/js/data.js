@@ -17,16 +17,16 @@ const HR_AGENTS = [
   },
   {
     id: "hr-h2", name: "Employee Services (ESS) Companion", kind: "core", tier: "Core",
-    purpose: "Be every employee's single assistant for HR self-service — personal & bank updates, leave, permissions, attendance, allowances, letters, payslips, visa, insurance, remote work and gift disclosure — validated and routed correctly the first time.",
-    responsibilities: "Handles the full ESS catalogue conversationally; validates each request against policy and the Leave Approval Matrix (25 leave & remote-work types across entities); pre-fills forms; routes to the right approver level; answers status; issues HR letters and payslips on request.",
-    process: "HR — ESS (all request types) + Leave/Remote-Work Approval Matrix",
-    inputs: ["Employee request", "profile", "leave balance", "the approval matrix", "supporting documents"],
+    purpose: "Be every employee's single assistant for HR self-service — personal & bank updates, allowances and claims, declarations, HR letters, payslips, visa, insurance and gift disclosure — validated and routed correctly the first time.",
+    responsibilities: "Handles the ESS catalogue conversationally — personal-info and bank-account updates, education-allowance and air-ticket claims, dependent acknowledgement and relative declaration, HR letter requests, payslip download, residency visa, health insurance and gift-receipt disclosure; validates each against policy; pre-fills forms; routes to the right approver; answers status. Leave, permissions, remote work and attendance justifications are owned by the Attendance & Leave Agent (H9).",
+    process: "HR — ESS (personal info, bank, allowances & claims, declarations, letters, payslip, visa, insurance, gift disclosure)",
+    inputs: ["Employee request", "profile", "entitlements", "supporting documents"],
     systems: ["Oracle HR", "MOCA APP", "MOCA Smart", "GovSign", "SharePoint", "Email"],
     outputs: ["Validated", "routed requests", "issued letters/payslips", "answered queries", "fewer rejections"],
     complexity: "Medium", impact: "High", feasibility: "High",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on validation, pre-fill, routing & letters; escalate per the approval matrix",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on clean, in-policy requests; escalate exceptions",
     risks: "The matrix-defined approver decides; the employee confirms submissions", nextAction: "",
-    subAgents: [{ name: "Handles full ESS catalogue", desc: "Handles the full ESS catalogue conversationally", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "In Progress" }, { name: "Validates each request policy Leave", desc: "validates each request against policy and the Leave Approval Matrix (25 leave & remote-work types across entities)", complexity: "Medium", type: "Validation", deps: "Oracle HR", status: "In Progress" }, { name: "Pre-fills forms", desc: "pre-fills forms", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "In Progress" }]
+    subAgents: [{ name: "Handles ESS catalogue conversationally —", desc: "Handles the ESS catalogue conversationally — personal-info and bank-account updates, education-allowance and air-ticket claims,", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "In Progress" }, { name: "Validates each policy", desc: "validates each against policy", complexity: "Medium", type: "Validation", deps: "Oracle HR", status: "In Progress" }, { name: "Pre-fills forms", desc: "pre-fills forms", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "In Progress" }]
   },
   {
     id: "hr-h3", name: "HR Operations & Lifecycle Agent", kind: "core", tier: "Core",
@@ -97,7 +97,7 @@ const HR_AGENTS = [
     id: "hr-h8", name: "Offboarding & Exit Agent", kind: "core", tier: "Core",
     purpose: "Run a clean, complete exit — revoking access, recovering assets, settling end-of-service and capturing knowledge before the person leaves.",
     responsibilities: "Orchestrates the leaver checklist across HR, IT and Admin; triggers IT access revocation and Admin asset return; coordinates end-of-service and gratuity with Finance; runs the exit interview; captures the leaver's knowledge and handover before the last day; closes the record.",
-    process: "HR — Termination & End-of-Service, extended into full offboarding orchestration (a cross-department seam)",
+    process: "HR — EOS: Resignation Submission, Offboarding Notification, Station Clearance, Final Settlement & Payment, Post-Departure Cleanup, extended into full offboarding orchestration (a cross-department seam)",
     inputs: ["Leaver event", "access & asset inventory", "EOS inputs", "handover items"],
     systems: ["Oracle HR", "IT (access)", "SPAN/Admin (assets)", "Finance", "SharePoint"],
     outputs: ["Revoked access", "returned assets", "settled EOS", "captured knowledge", "closed record"],
@@ -105,6 +105,32 @@ const HR_AGENTS = [
     status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on the checklist, access/asset coordination & knowledge capture; escalate EOS",
     risks: "HR and Finance approve EOS; managers confirm handover", nextAction: "",
     subAgents: [{ name: "Orchestrates leaver checklist HR, Admin", desc: "Orchestrates the leaver checklist across HR, IT and Admin", complexity: "Medium", type: "Validation", deps: "Oracle HR", status: "In Progress" }, { name: "Triggers access revocation Admin asset", desc: "triggers IT access revocation and Admin asset return", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "In Progress" }, { name: "Coordinates end-of-service gratuity", desc: "coordinates end-of-service and gratuity with Finance", complexity: "Medium", type: "Orchestration", deps: "Oracle HR", status: "In Progress" }]
+  },
+  {
+    id: "hr-h9", name: "Attendance & Leave Agent", kind: "core", tier: "Core",
+    purpose: "Own attendance and leave end-to-end — every leave type by its own rules, permissions and remote work, attendance justifications, and the full violations cycle of reporting, contacting employees and clearing — so HR handles only genuine exceptions.",
+    responsibilities: "Takes leave requests and applies each type's own rules (e.g. compensation leave only after annual is used; document validation for sick, maternity and Hajj; correct balance deduction and accrual; type-specific archiving) and the per-entity Leave Approval Matrix, auto-deciding clean cases; handles permissions, remote-work requests and attendance justifications, correcting the record on approval; runs Attendance Violations Management — compiles and cleans the year-to-date violations report, emails each employee their violations with a call-to-action, sends weekly reminders to non-responders, escalates repeat or old violations to the HR Director, runs the year-end leave carry-over offset, and drives the outsourced-staff flow with the agencies; checks overlaps, balances and team coverage before deciding.",
+    process: "HR — ESS Leave/Permission/Remote-Work/Attendance Justification; HR-SS 17 per-leave types + 25-type Leave Approval Matrix; HR-SS Attendance Violations Management + Outsource (via Agency)",
+    inputs: ["Leave request & type", "balances & accruals", "supporting documents", "the Leave Approval Matrix", "attendance/timesheet data", "violation records"],
+    systems: ["Oracle ERP/HR", "MOCA APP", "MOCA Smart", "Email", "GovSign", "Talent Management System"],
+    outputs: ["Validated & decided leave per type", "corrected attendance records", "a clean violations report", "employee outreach & reminders", "escalations", "year-end carry-over offset"],
+    complexity: "Medium", impact: "High", feasibility: "High",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on clean leave decisions, justification corrections, report compilation & cleaning, outreach & reminders; escalate exceptions, repeat violations and document-required types",
+    risks: "Line Manager/matrix approvers decide where required; HR Director acts on escalated/repeat violations; HR validates documents for sick/maternity/Hajj", nextAction: "",
+    subAgents: [{ name: "Takes leave requests applies each", desc: "Takes leave requests and applies each type's own rules (e.g. compensation leave only after annual is used", complexity: "Medium", type: "Task", deps: "Oracle ERP/HR", status: "In Progress" }, { name: "Document validation sick, maternity Hajj", desc: "document validation for sick, maternity and Hajj", complexity: "Medium", type: "Validation", deps: "Oracle ERP/HR", status: "In Progress" }, { name: "Correct balance deduction accrual", desc: "correct balance deduction and accrual", complexity: "Medium", type: "Task", deps: "Oracle ERP/HR", status: "In Progress" }]
+  },
+  {
+    id: "hr-h10", name: "Employee Relations Agent", kind: "core", tier: "Core",
+    purpose: "Be the first responder for employee inquiries, complaints and special cases across every channel — answering what it can, routing the rest with context, and never letting a grievance go quiet.",
+    responsibilities: "Intakes HR inquiries, complaints/grievances and special-case requests from HR Services email, Emanasa, the MOCA App and other channels; answers policy questions from the knowledge base; triages and routes complaints to the right HR owner with full context and an SLA; tracks each to resolution; flags sensitive cases for human handling; captures themes for HR.",
+    process: "HR — Employee Relations: Inquiries, Complaints/Grievances, Special-Cases Support",
+    inputs: ["Employee inquiry/complaint", "channel", "the policy knowledge base", "case history"],
+    systems: ["HR Services email", "Emanasa", "MOCA APP", "MOCA Smart", "SharePoint"],
+    outputs: ["Answered inquiries", "triaged & routed complaints with SLA", "tracked resolutions", "theme insights"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on intake, routine answers, triage & routing; complaints and grievances handled by humans",
+    risks: "HR handles complaints, grievances and sensitive/special cases; the agent intakes, answers routine and routes", nextAction: "",
+    subAgents: [{ name: "Intakes HR inquiries,", desc: "Intakes HR inquiries, complaints/grievances and special-case requests from HR Services email, Emanasa, the MOCA App and other ch", complexity: "Medium", type: "Task", deps: "HR Services email", status: "In Progress" }, { name: "Answers policy questions knowledge base", desc: "answers policy questions from the knowledge base", complexity: "Medium", type: "Conversational", deps: "HR Services email", status: "In Progress" }, { name: "Triages routes complaints right HR", desc: "triages and routes complaints to the right HR owner with full context and an SLA", complexity: "Medium", type: "Orchestration", deps: "HR Services email", status: "In Progress" }]
   },
   {
     id: "hr-g1", name: "Approval Concierge", kind: "core", tier: "Core",
