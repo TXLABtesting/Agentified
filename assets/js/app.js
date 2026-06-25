@@ -313,11 +313,11 @@
   function viewOverview() {
     const g = globalStats();
     const kpis = [
-      { v: g.total, l: "Total Agents", icon: "agents", cls: "", sub: g.ready + " ready · " + g.prog + " in progress" },
-      { v: g.depts, l: "Departments Covered", icon: "dept", cls: "is-gold", sub: "Across corporate & support functions" },
+      { v: g.total, l: "Total Agents", icon: "agents", cls: "is-violet", sub: g.ready + " ready · " + g.prog + " in progress" },
+      { v: g.depts, l: "Departments Covered", icon: "dept", cls: "is-green", sub: "Across corporate & support functions" },
       { v: g.subs, l: "Total Sub-Agents", icon: "sub", cls: "is-blue", sub: "Specialised task agents" },
       { v: g.high, l: "High-Complexity Agents", icon: "bolt", cls: "is-amber", sub: "High & very-high complexity" },
-      { v: g.review, l: "Agents Pending Review", icon: "review", cls: "is-red", sub: "Awaiting leadership decision" },
+      { v: g.review, l: "Agents Pending Review", icon: "review", cls: "is-rose", sub: "Awaiting leadership decision" },
       { v: g.avg.toFixed(1), l: "Avg. Complexity Score", icon: "gauge", cls: "is-gold", sub: "Scale 1 (Low) – 4 (Very High)" }
     ];
     const kpiHTML = '<div class="kpi-grid">' + kpis.map((k) =>
