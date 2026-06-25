@@ -29,12 +29,12 @@
 
   /* ---- Icon set (inline SVG, 24x24 stroke) ------------------------------ */
   const I = {
-    overview:  'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z',
-    dept:      'M3 21h18M5 21V7l7-4 7 4v14M9 9h0M9 13h0M9 17h0M15 9h0M15 13h0M15 17h0',
-    agents:    'M12 2a5 5 0 015 5v1a5 5 0 01-10 0V7a5 5 0 015-5zM4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1',
+    overview:  'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z',
+    dept:      'M4 21V7l8-4 8 4v14M3 21h18M9 21v-4a3 3 0 016 0v4M8 10h.01M16 10h.01',
+    agents:    'M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75',
     sub:       'M4 6h16M7 12h13M10 18h10M4 12v6',
     review:    'M12 9v4m0 4h.01M10.3 3.9l-8 14A2 2 0 004 21h16a2 2 0 001.7-3l-8-14a2 2 0 00-3.4 0z',
-    settings:  'M12 15a3 3 0 100-6 3 3 0 000 6zM19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-1.8-.3 1.6 1.6 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.6 1.6 0 00-1-1.5 1.6 1.6 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00.3-1.8 1.6 1.6 0 00-1.5-1H3a2 2 0 110-4h.1a1.6 1.6 0 001.5-1 1.6 1.6 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3H9a1.6 1.6 0 001-1.5V3a2 2 0 114 0v.1a1.6 1.6 0 001 1.5 1.6 1.6 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8V9a1.6 1.6 0 001.5 1H21a2 2 0 110 4h-.1a1.6 1.6 0 00-1.5 1z',
+    settings:  'M12 15a3 3 0 100-6 3 3 0 000 6zM19.1 12.9a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-2.9 1.2V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-2.9-1.2l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00-1.2-2.9H4a2 2 0 110-4h.1a1.7 1.7 0 001.2-2.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 002.9-1.2V4a2 2 0 114 0v.1a1.7 1.7 0 002.9 1.2l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.4 1.9z',
     search:    'M11 19a8 8 0 100-16 8 8 0 000 16zm10 2l-4.3-4.3',
     filter:    'M3 4h18l-7 8v6l-4 2v-8L3 4z',
     export:    'M12 3v12m0-12l-4 4m4-4l4 4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2',
@@ -60,10 +60,10 @@
     gauge:     'M12 14a2 2 0 100-4 2 2 0 000 4zm0-10a10 10 0 00-9 14h18A10 10 0 0012 4zm0 0v2m6.5 4.5l-1.4 1.4',
     list:      'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
     menu:      'M3 6h18M3 12h18M3 18h18',
-    chat:      'M21 11.5a8.4 8.4 0 01-8.5 8.5 8.4 8.4 0 01-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 01-.9-3.8A8.5 8.5 0 0112.5 3a8.4 8.4 0 018.5 8.5z',
+    chat:      'M21 15a2 2 0 01-2 2H8l-5 4V5a2 2 0 012-2h14a2 2 0 012 2z',
     send:      'M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z',
     spark:     'M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17l-1.9-5.1L4.5 10l5.6-1.4L12 3z',
-    mindmap:   'M18 8a3 3 0 100-6 3 3 0 000 6zM6 15a3 3 0 100-6 3 3 0 000 6zM18 22a3 3 0 100-6 3 3 0 000 6zM8.6 13.5l6.8 4M15.4 6.5l-6.8 4',
+    mindmap:   'M9 4h6a1 1 0 011 1v3a1 1 0 01-1 1H9a1 1 0 01-1-1V5a1 1 0 011-1zM3 15h5a1 1 0 011 1v3a1 1 0 01-1 1H3a1 1 0 01-1-1v-3a1 1 0 011-1zM16 15h5a1 1 0 011 1v3a1 1 0 01-1 1h-5a1 1 0 01-1-1v-3a1 1 0 011-1zM12 9v3M12 12H5.5v3M12 12h6.5v3',
     db:        'M12 3c4.4 0 8 1.3 8 3s-3.6 3-8 3-8-1.3-8-3 3.6-3 8-3zM4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6',
     mail:      'M4 5h16a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V7a2 2 0 012-2zM2 7l10 6 10-6',
     app:       'M7 2h10a2 2 0 012 2v16a2 2 0 01-2 2H7a2 2 0 01-2-2V4a2 2 0 012-2zM10 18h4',
@@ -73,7 +73,7 @@
     shrink:    'M9 3v3a2 2 0 01-2 2H4m16 0h-3a2 2 0 01-2-2V3M4 16h3a2 2 0 012 2v3m6 0v-3a2 2 0 012-2h3'
   };
   function icon(name, cls) {
-    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" ' +
       'stroke-linecap="round" stroke-linejoin="round"' + (cls ? ' class="' + cls + '"' : '') + '>' +
       '<path d="' + I[name] + '"/></svg>';
   }
@@ -216,23 +216,27 @@
   /* ---- Sidebar / nav ---------------------------------------------------- */
   function renderNav() {
     const g = globalStats();
-    const items = [
-      { id: "overview", label: "Overview", icon: "overview" },
-      { id: "departments", label: "Departments", icon: "dept", count: g.depts },
-      { id: "agents", label: "Agents", icon: "agents", count: g.total },
-      { id: "subagents", label: "Sub-agents", icon: "sub", count: g.subs },
-      { id: "mindmap", label: "Agent team", icon: "mindmap" },
-      { id: "review", label: "Pending review", icon: "review", count: g.review },
-      { id: "assistant", label: "Agent assistant", icon: "chat" },
-      { id: "settings", label: "Settings", icon: "settings" }
+    const groups = [
+      { label: "Workspace", items: [
+        { id: "overview", label: "Overview", icon: "overview" },
+        { id: "departments", label: "Departments", icon: "dept", count: g.depts },
+        { id: "agents", label: "Agents", icon: "agents", count: g.total },
+        { id: "mindmap", label: "Agent team", icon: "mindmap" }
+      ]},
+      { label: "Tools", items: [
+        { id: "assistant", label: "Agent assistant", icon: "chat" },
+        { id: "settings", label: "Settings", icon: "settings" }
+      ]}
     ];
-    const active = (STATE.view === "department" ? "departments" : STATE.view);
-    $("#nav").innerHTML =
-      '<div class="nav__label">Workspace</div>' +
-      items.map((it) =>
+    const active = (STATE.view === "department" ? "departments"
+      : (STATE.view === "subagents" || STATE.view === "review") ? "agents" : STATE.view);
+    $("#nav").innerHTML = groups.map((grp) =>
+      '<div class="nav__label">' + grp.label + '</div>' +
+      grp.items.map((it) =>
         '<button class="nav__item' + (active === it.id ? " is-active" : "") + '" data-nav="' + it.id + '">' +
         icon(it.icon) + "<span>" + it.label + "</span>" +
-        (it.count != null ? '<span class="nav__count">' + it.count + "</span>" : "") + "</button>").join("");
+        (it.count != null ? '<span class="nav__count">' + it.count + "</span>" : "") + "</button>").join("")
+    ).join("");
   }
 
   /* ---- Header (slim top bar) -------------------------------------------- */
