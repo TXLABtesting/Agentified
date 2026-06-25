@@ -388,10 +388,7 @@
         '<p>Overview of AI agents designed across departments · <span class="muted">Last updated ' +
           fmtDate("2026-06-22") + "</span></p></div>";
 
-    return '<div class="page">' + head + kpiHTML +
-      '<div class="section"><div class="section__head"><h3>At a Glance</h3>' +
-        '<span class="hint">Scan in under two minutes</span></div>' + charts + "</div>" +
-      table + "</div>";
+    return '<div class="page">' + head + kpiHTML + table + "</div>";
   }
 
   function viewDepartments() {
