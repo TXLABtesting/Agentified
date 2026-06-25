@@ -672,7 +672,7 @@
 
     const maxRight = cursor + MM.pad;
     const totalH = Math.max.apply(null, nodes.map((n) => n.y)) + 160;
-    const halfH = (n) => n.type === "root" ? 42 : n.type === "dept" ? 34 : n.type === "agent" ? (isAll ? 34 : 60) : 24;
+    const halfH = (n) => n.type === "root" ? 36 : n.type === "dept" ? 32 : n.type === "agent" ? (isAll ? 32 : 52) : 22;
 
     // clean elbow (org-chart) connectors: parent drop -> shared horizontal bus -> child drop
     const paths = links.map(([p, c]) => {
@@ -712,32 +712,36 @@
 
     const nodeHtml = nodes.map((n) => {
       const pos = 'left:' + (n.x - n.w / 2) + 'px;top:' + n.y + 'px;width:' + n.w + 'px';
+      const cc = (n.children || []).length;
+      const badge = cc ? '<span class="mm-badge">' + cc + "</span>" : "";
       if (n.type === "root") {
         return '<div class="mm-node mm-lead"' + (n.deptId ? ' data-goto-dept="' + n.deptId + '"' : "") +
           ' style="' + pos + '">' +
           '<span class="mm-av mm-av--lead">' + icon("spark") + "</span>" +
           '<div class="mm-tx"><b>' + esc(n.label) + (n.deptId ? " Orchestrator" : "") + "</b>" +
-          '<span class="mm-role">' + (n.deptId ? "Conducts the team" : "Programme") + " · " + esc(n.meta) + "</span></div></div>";
+          '<span class="mm-role">' + (n.deptId ? "Conducts the team" : "Programme") + "</span></div>" + badge + "</div>";
       }
       if (n.type === "dept") {
         return '<div class="mm-node mm-team" data-goto-dept="' + n.id + '" style="' + pos + '">' +
           '<span class="mm-av mm-av--team">' + icon(deptIconName(n.id)) + "</span>" +
-          '<div class="mm-tx"><b>' + esc(n.label) + "</b><span class=\"mm-role\">" + esc(n.meta) + "</span></div></div>";
+          '<div class="mm-tx"><b>' + esc(n.label) + '</b><span class="mm-role">' + esc(n.meta) + "</span></div>" + badge + "</div>";
       }
       if (n.type === "agent") {
         const tint = STATUS_TINT[n.status] || ["var(--slate)", "var(--slate-bg)"];
-        const sys = isAll ? [] : systemsFor(n);
-        const sysRow = sys.length ? '<div class="mm-sys">' + sys.map((x) =>
-          '<span class="mm-syschip mm-sys--' + x.key + '" title="Connects to ' + esc(x.label) + '">' +
-          icon(x.icon) + "<span>" + esc(x.label) + "</span></span>").join("") + "</div>" : "";
-        return '<div class="mm-node mm-member" data-agent="' + n.id + '" title="' + esc(n.label) +
-          '" style="' + pos + ";border-left-color:" + tint[0] + '">' +
+        const sys = isAll ? [] : systemsFor(n).slice(0, 4);
+        const foot = isAll ? "" :
+          '<div class="mm-member__foot">' +
+            '<span class="mm-sysrow">' + sys.map((x) =>
+              '<span class="mm-sysi mm-sys--' + x.key + '" title="' + esc(x.label) + '">' + icon(x.icon) + "</span>").join("") + "</span>" +
+            '<span class="mm-details">Details ' + icon("chevR") + "</span>" +
+          "</div>";
+        return '<div class="mm-node mm-member" data-agent="' + n.id + '" title="' + esc(n.label) + '" style="' + pos + '">' +
           '<div class="mm-member__top">' +
             '<span class="mm-av" style="color:' + tint[0] + ";background:" + tint[1] + '">' + icon("cpu") + "</span>" +
             '<div class="mm-tx"><b>' + esc(n.label) + "</b>" +
             '<span class="mm-role"><i class="mm-dot" style="background:' + tint[0] + '"></i>' +
-            esc(roleFromTier(n.tier)) + " · " + esc(n.complexity) + "</span></div>" +
-          "</div>" + sysRow + "</div>";
+            esc(roleFromTier(n.tier)) + " · " + esc(n.status) + "</span></div>" +
+          "</div>" + foot + badge + "</div>";
       }
       // sub-agent = junior member chip
       return '<div class="mm-node mm-rep" data-agent="' + n.parentId + '" title="' + esc(n.label) +

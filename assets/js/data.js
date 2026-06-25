@@ -1866,7 +1866,7 @@ const ADMIN_AGENTS = [
 
 const DEPARTMENTS = [
   {
-    id: "hr", name: "People & HR", short: "HR", nameAr: "الموارد البشرية",
+    id: "hr", name: "Human Resources", short: "HR", nameAr: "الموارد البشرية",
     description: "People & HR agents under one orchestrator — covering the employee journey, performance, leave and case work — wrapping the human-judgment layer on top of Oracle HCM.",
     owner: "Total Experience Team — Corporate Support Services", focal: "Aisha Al Mansoori · Director, HR Transformation", lastUpdated: "2026-06-24", agents: HR_AGENTS
   },
