@@ -746,14 +746,14 @@
       const cc = (n.children || []).length;
       const badge = cc ? '<span class="mm-badge">' + cc + "</span>" : "";
       if (n.type === "root") {
-        return '<div class="mm-node mm-lead"' + (n.deptId ? ' data-goto-dept="' + n.deptId + '"' : "") +
+        return '<div class="mm-node mm-lead"' + (n.deptId ? ' data-deptinfo="' + n.deptId + '"' : ' data-proginfo="1"') +
           ' style="' + pos + '">' +
           '<span class="mm-av mm-av--lead">' + icon("spark") + "</span>" +
           '<div class="mm-tx"><b>' + esc(n.label) + (n.deptId ? " Orchestrator" : "") + "</b>" +
           '<span class="mm-role">' + (n.deptId ? "Conducts the team" : "Programme") + "</span></div>" + badge + "</div>";
       }
       if (n.type === "dept") {
-        return '<div class="mm-node mm-team" data-goto-dept="' + n.id + '" style="' + pos + '">' +
+        return '<div class="mm-node mm-team" data-deptinfo="' + n.id + '" style="' + pos + '">' +
           '<span class="mm-av mm-av--team">' + icon(deptIconName(n.id)) + "</span>" +
           '<div class="mm-tx"><b>' + esc(n.label) + '</b><span class="mm-role">' + esc(n.meta) + "</span></div>" + badge + "</div>";
       }
@@ -1006,12 +1006,93 @@
         '<button class="btn btn--primary" data-edit="' + a.id + '">' + icon("edit") + "Edit / Update</button>" +
       "</div>";
 
+    showDrawer(html);
+  }
+  function showDrawer(html) {
     const drawer = $("#drawer");
     drawer.innerHTML = html;
     drawer.classList.add("is-open");
     drawer.setAttribute("aria-hidden", "false");
     $("#scrim").classList.add("is-open");
     document.body.style.overflow = "hidden";
+  }
+  const scoreCell = (label, val) => '<div class="score"><b>' + esc(label) + '</b><span style="font-size:18px;font-weight:700;color:var(--ink)">' + esc(val) + "</span></div>";
+  const miniList = (agents) => '<div class="chat-list">' + agents.map((a) =>
+    '<div class="chat-li"><div class="chat-li__main"><button class="chat-link" data-agent="' + a.id + '">' + esc(a.name) +
+    '</button><span class="chat-li__dept">' + esc(catLabel(a)) + "</span></div>" +
+    '<div class="chat-li__chips">' + cplxChip(a.complexity) + statusChip(a.status) + "</div></div>").join("") + "</div>";
+
+  // Department details — opens in the drawer, stays on whatever view you're on
+  function openDeptDetail(id) {
+    const d = findDept(id); if (!d) return;
+    const s = deptStats(d);
+    const proc = d.agents.filter((a) => catOf(a) === "process").length;
+    const cmix = Object.keys(s.cdist).filter((k) => s.cdist[k]).map((k) => cplxChip(k) + " " + s.cdist[k]).join(" &nbsp; ");
+    const field = (label, ic, value, strong) =>
+      '<div class="field"><div class="field__label">' + (ic ? icon(ic) : "") + esc(label) + "</div>" +
+      '<div class="field__value' + (strong ? " is-strong" : "") + '">' + value + "</div></div>";
+    const html =
+      '<div class="drawer__head">' +
+        '<div class="drawer__eyebrow"><span class="drawer__dept">Department · ' + esc(d.short) + "</span>" +
+          '<button class="close-x" data-close-drawer>' + icon("close") + "</button></div>" +
+        "<h2>" + esc(d.name) + "</h2>" +
+        '<div class="drawer__chips">' + statusChip(s.deptStatus) +
+          chip(s.count + " agents", "brand") + chip(s.subs + " sub-agents", "slate") + "</div>" +
+      "</div>" +
+      '<div class="drawer__body">' +
+        '<div class="scorebox" style="grid-template-columns:repeat(2,1fr)">' +
+          scoreCell("Agents", s.count) + scoreCell("Sub-agents", s.subs) +
+          scoreCell("Avg complexity", s.avg.toFixed(1) + " / 4") + scoreCell("Readiness", s.readiness + "%") + "</div>" +
+        field("About", "target", esc(d.description), true) +
+        field("Process vs Extras", "layers", chip(proc + " Process", "brand") + " " + chip((s.count - proc) + " Extras", "gold")) +
+        field("Complexity mix", "gauge", cmix || "—") +
+        field("Focal point", "idcard", esc(d.focal)) +
+        field("Sits under", "folder", esc(d.owner)) +
+        '<div class="divider"></div>' +
+        '<div class="field__label">' + icon("agents") + "Agents (" + s.count + ")</div>" +
+        '<div style="margin-top:8px">' + miniList(d.agents.map((a) => Object.assign({ deptName: d.name }, a))) + "</div>" +
+      "</div>" +
+      '<div class="drawer__foot">' +
+        '<button class="btn" data-close-drawer>Close</button>' +
+        '<button class="btn btn--primary" data-goto-dept="' + d.id + '">Open department page</button>' +
+      "</div>";
+    showDrawer(html);
+  }
+
+  // Programme overview — the whole tree at a glance, opens in the drawer
+  function openProgrammeDetail() {
+    const g = globalStats();
+    const agents = allAgents();
+    const proc = agents.filter((a) => catOf(a) === "process").length;
+    const field = (label, ic, value, strong) =>
+      '<div class="field"><div class="field__label">' + (ic ? icon(ic) : "") + esc(label) + "</div>" +
+      '<div class="field__value' + (strong ? " is-strong" : "") + '">' + value + "</div></div>";
+    const deptRows = '<div class="chat-list">' + DATA.departments.slice().sort((a, b) => b.agents.length - a.agents.length).map((d) =>
+      '<div class="chat-li"><div class="chat-li__main"><button class="chat-link" data-deptinfo="' + d.id + '">' + esc(d.name) +
+      '</button><span class="chat-li__dept">' + subCount(d) + " sub-agents</span></div>" +
+      '<div class="chat-li__chips">' + chip(d.agents.length + " agents", "brand") + "</div></div>").join("") + "</div>";
+    const html =
+      '<div class="drawer__head">' +
+        '<div class="drawer__eyebrow"><span class="drawer__dept">Programme overview</span>' +
+          '<button class="close-x" data-close-drawer>' + icon("close") + "</button></div>" +
+        "<h2>Agentic Transformation</h2>" +
+        '<div class="drawer__chips">' + chip(g.total + " agents", "brand") + chip(g.depts + " departments", "slate") + chip(g.subs + " sub-agents", "gold") + "</div>" +
+      "</div>" +
+      '<div class="drawer__body">' +
+        '<div class="scorebox" style="grid-template-columns:repeat(2,1fr)">' +
+          scoreCell("Main agents", g.total) + scoreCell("Sub-agents", g.subs) +
+          scoreCell("Departments", g.depts) + scoreCell("Avg complexity", g.avg.toFixed(1) + " / 4") + "</div>" +
+        field("Process vs Extras", "layers", chip(proc + " Process", "brand") + " " + chip((g.total - proc) + " Extras", "gold")) +
+        field("Profile", "gauge", chip(g.high + " high-complexity", "amber") + " " + chip(g.review + " need review", "slate")) +
+        '<div class="divider"></div>' +
+        '<div class="field__label">' + icon("dept") + "Departments (" + g.depts + ")</div>" +
+        '<div style="margin-top:8px">' + deptRows + "</div>" +
+      "</div>" +
+      '<div class="drawer__foot">' +
+        '<button class="btn" data-close-drawer>Close</button>' +
+        '<button class="btn btn--primary" data-nav="overview">Open Overview</button>' +
+      "</div>";
+    showDrawer(html);
   }
   function closeDrawer() {
     $("#drawer").classList.remove("is-open");
@@ -1194,7 +1275,8 @@
     const t = e.target.closest("[data-nav],[data-goto-dept],[data-agent],[data-edit],[data-save]," +
       "[data-close-drawer],[data-close-modal],[data-add],[data-export],[data-share],[data-reset]," +
       "[data-filter-toggle],[data-filter],[data-apply-filters],[data-clear-filters],[data-menu]," +
-      "[data-suggest],[data-chat-clear],[data-mind],[data-mindsubs],[data-mindlinks],[data-zoom],[data-mindfull]");
+      "[data-suggest],[data-chat-clear],[data-mind],[data-mindsubs],[data-mindlinks],[data-zoom],[data-mindfull]," +
+      "[data-deptinfo],[data-proginfo]");
     if (!t) {
       // close filter popover on outside click
       if (STATE.filterOpen && !e.target.closest(".has-pop")) { STATE.filterOpen = false; renderHeader(); }
@@ -1208,6 +1290,8 @@
     else if (t.hasAttribute("data-mindfull")) { setMindFull(!STATE.mindFull); }
     else if (t.dataset.suggest) { sendChat(t.dataset.suggest); }
     else if (t.hasAttribute("data-chat-clear")) { STATE.chat = []; renderBody(); setTimeout(focusChat, 30); }
+    else if (t.dataset.deptinfo) { openDeptDetail(t.dataset.deptinfo); }
+    else if (t.hasAttribute("data-proginfo")) { openProgrammeDetail(); }
     else if (t.dataset.gotoDept) { go("department", t.dataset.gotoDept); }
     else if (t.dataset.agent) { openAgent(t.dataset.agent); }
     else if (t.dataset.edit) { e.stopPropagation(); openEdit(t.dataset.edit); }
