@@ -2272,7 +2272,7 @@ const PM_AGENTS = [
     complexity: "High", impact: "High", feasibility: "Medium",
     status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on scoring and analysis; funding and prioritisation decisions stay with leadership.",
     risks: "Leadership decides what to fund; the agent scores and recommends.", nextAction: "",
-    talksTo: ["pm-1", "pm-3", "pm-7"],
+    talksTo: ["pm-1", "pm-3", "pm-7", "pm-8"],
     subAgents: [{ name: "Project Scorer", desc: "Scores projects by value, risk, effort and strategic fit.", complexity: "High", type: "Reporting", deps: "Power BI", status: "In Progress" }, { name: "Pipeline Balancer", desc: "Balances the pipeline and flags over-commitment.", complexity: "Medium", type: "Validation", deps: "Oracle", status: "In Progress" }, { name: "Review Pack Builder", desc: "Prepares portfolio-review packs for leadership.", complexity: "Medium", type: "Drafting", deps: "SharePoint", status: "In Progress" }]
   },
   {
@@ -2286,7 +2286,7 @@ const PM_AGENTS = [
     complexity: "Medium", impact: "High", feasibility: "High",
     status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on tracking, chasing and escalation; risk-acceptance decisions stay with the project board.",
     risks: "The project board accepts or mitigates risk; the agent tracks and escalates.", nextAction: "",
-    talksTo: ["pm-1", "pm-2", "pm-4", "pm-6"],
+    talksTo: ["pm-1", "pm-2", "pm-4"],
     subAgents: [{ name: "Risk Register", desc: "Keeps the risk and issue register live and assessed.", complexity: "Medium", type: "Reporting", deps: "SharePoint", status: "Ready" }, { name: "Mitigation Chaser", desc: "Chases overdue mitigations and owners.", complexity: "Low", type: "Monitoring", deps: "Email", status: "In Progress" }, { name: "Escalation Packager", desc: "Builds decision-ready escalation packages for high risks.", complexity: "Medium", type: "Drafting", deps: "SharePoint", status: "In Progress" }]
   },
   {
@@ -2328,7 +2328,7 @@ const PM_AGENTS = [
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
     status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on preparation, scheduling and tracking; gate and approval decisions stay with the board.",
     risks: "The project board decides at each gate; the agent prepares and tracks.", nextAction: "",
-    talksTo: ["pm-3", "pm-4", "pm-7"],
+    talksTo: ["pm-4", "pm-8"],
     subAgents: [{ name: "Steering Pack Builder", desc: "Drafts steering-committee packs and minutes.", complexity: "Medium", type: "Drafting", deps: "SharePoint", status: "In Progress" }, { name: "Gate Tracker", desc: "Tracks gate reviews and approvals.", complexity: "Medium", type: "Validation", deps: "GovSign", status: "In Progress" }, { name: "Decision & Action Log", desc: "Logs decisions and chases actions to closure.", complexity: "Low", type: "Orchestration", deps: "Email", status: "In Progress" }]
   },
   {
@@ -2342,8 +2342,22 @@ const PM_AGENTS = [
     complexity: "High", impact: "High", feasibility: "Medium",
     status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on tracking, forecasting and alerts; budget decisions stay with Finance and the project board.",
     risks: "Finance and the board own the budget; the agent tracks and forecasts.", nextAction: "",
-    talksTo: ["pm-2", "pm-6"],
+    talksTo: ["pm-2", "pm-8"],
     subAgents: [{ name: "Spend Tracker", desc: "Tracks budget, commitments and actual spend.", complexity: "Medium", type: "Validation", deps: "Oracle", status: "In Progress" }, { name: "EAC Forecaster", desc: "Forecasts cost at completion and flags overruns.", complexity: "High", type: "Reporting", deps: "Power BI", status: "In Progress" }, { name: "Benefits Monitor", desc: "Tracks promised benefits through to realisation.", complexity: "Medium", type: "Monitoring", deps: "SharePoint", status: "In Progress" }]
+  },
+  {
+    id: "pm-8", name: "Project Overlap & Synergy Agent", kind: "core", tier: "Core",
+    purpose: "Stop the organisation paying twice — continuously scan every project and scope of work as it is created, spot the ones that overlap or duplicate, and flag to leadership where teams should join forces, consolidate or reuse instead of rebuilding.",
+    responsibilities: "Reads every new project request and scope of work; compares objectives, deliverables, systems, vendors and beneficiaries against the live portfolio; scores similarity and overlap; flags duplicate or near-duplicate efforts; recommends consolidation, shared delivery or reuse and names the teams that should collaborate; estimates the avoided spend; surfaces a decision-ready package to leadership.",
+    process: "Project Management — overlap & duplication detection (scope comparison, similarity scoring, consolidation & reuse recommendations, avoided-spend estimate)",
+    inputs: ["New project requests", "scopes of work", "the live project portfolio", "objectives & deliverables", "vendors & budgets", "beneficiary departments"],
+    systems: ["Power BI", "SharePoint", "Oracle", "Email"],
+    outputs: ["Overlap & duplication alerts", "similarity scores", "consolidation & collaboration recommendations", "avoided-spend estimate", "leadership decision packages"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on scanning, matching and recommendations; the decision to merge, stop or fund a project stays with leadership and the PMO.",
+    risks: "Leadership and the PMO decide whether to consolidate or stop a project; the agent surfaces the overlap and the case.", nextAction: "",
+    talksTo: ["pm-2", "pm-6", "pm-7"],
+    subAgents: [{ name: "Scope Comparator", desc: "Compares each new scope of work against the portfolio on objectives, deliverables, systems and vendors.", complexity: "High", type: "Validation", deps: "Power BI", status: "In Progress" }, { name: "Similarity Scorer", desc: "Scores how close two projects are and flags duplicates and near-duplicates.", complexity: "High", type: "Reporting", deps: "Power BI", status: "In Progress" }, { name: "Consolidation Recommender", desc: "Recommends consolidation, shared delivery or reuse and names the teams to collaborate.", complexity: "Medium", type: "Drafting", deps: "SharePoint", status: "In Progress" }, { name: "Avoided-Spend Estimator", desc: "Estimates the money saved by not building the same thing twice.", complexity: "Medium", type: "Reporting", deps: "Oracle", status: "In Progress" }]
   }
 ];
 
