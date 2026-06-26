@@ -173,7 +173,7 @@
     return "<p><b>" + esc(a.name) + "</b> has <b>" + subs.length + "</b> sub-agents:</p>" +
       '<div class="table-wrap" style="margin-top:6px"><table class="subtbl"><thead><tr>' +
       "<th>Sub-Agent</th><th>Type</th><th>Complexity</th><th>Status</th></tr></thead><tbody>" +
-      subs.map((s) => "<tr><td><div class=\"sa-name\">" + esc(s.name) + "</div>" +
+      subs.map((s, i) => '<tr class="subrow" data-sub="' + a.id + "|" + i + '"><td><div class="sa-name">' + esc(s.name) + "</div>" +
         '<div class="cell-sub">' + esc(s.desc) + "</div></td>" +
         "<td>" + oChip(s.type) + "</td>" +
         "<td>" + cChip(s.complexity) + "</td><td>" + sChip(s.status) + "</td></tr>").join("") +

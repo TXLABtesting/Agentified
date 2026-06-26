@@ -522,6 +522,9 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
 .subtbl td { padding: 10px; border-bottom: 1px solid var(--line-2); color: var(--ink-2); vertical-align: top; }
 .subtbl tr:last-child td { border-bottom: none; }
 .subtbl .sa-name { font-weight: 600; color: var(--ink); }
+.subtbl tr.subrow { cursor: pointer; transition: background .12s; }
+.subtbl tr.subrow:hover { background: var(--brand-tint); }
+.subtbl tr.subrow:hover .sa-name { color: var(--brand); }
 
 /* ---- Modal (edit) -------------------------------------------------------- */
 .modal-scrim { position: fixed; inset: 0; background: rgba(20,24,31,.5); display: grid; place-items: center; z-index: 70; padding: var(--sp-5); opacity: 0; pointer-events: none; transition: opacity .2s; }

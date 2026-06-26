@@ -672,14 +672,14 @@
       const progKids = programmeAgents().map((a) => ({
         type: "agent", prog: true, id: a.id, label: a.name, status: a.status, complexity: a.complexity, kind: a.kind, tier: a.tier,
         systems: a.systems, talksTo: a.talksTo,
-        children: subs ? (a.subAgents || []).map((s) => ({ type: "sub", parentId: a.id, label: s.name, status: s.status, complexity: s.complexity })) : []
+        children: subs ? (a.subAgents || []).map((s, i) => ({ type: "sub", parentId: a.id, subIdx: i, label: s.name, status: s.status, complexity: s.complexity })) : []
       }));
       const deptKids = DATA.departments.filter((d) => d.agents.length).map((d) => ({
         type: "dept", id: d.id, label: d.name, meta: d.agents.length + " agents",
         children: d.agents.map((a) => ({
           type: "agent", id: a.id, label: a.name, status: a.status, complexity: a.complexity, kind: a.kind, tier: a.tier,
           systems: a.systems, talksTo: a.talksTo,
-          children: subs ? (a.subAgents || []).map((s) => ({ type: "sub", parentId: a.id, label: s.name, status: s.status, complexity: s.complexity })) : []
+          children: subs ? (a.subAgents || []).map((s, i) => ({ type: "sub", parentId: a.id, subIdx: i, label: s.name, status: s.status, complexity: s.complexity })) : []
         }))
       }));
       root = { type: "root", label: "Agentic Transformation", meta: g.depts + " departments · " + g.total + " agents",
@@ -692,7 +692,7 @@
         children: d.agents.map((a) => ({
           type: "agent", id: a.id, label: a.name, status: a.status, complexity: a.complexity, kind: a.kind, tier: a.tier,
           systems: a.systems, talksTo: a.talksTo,
-          children: subs ? (a.subAgents || []).map((s) => ({ type: "sub", parentId: a.id, label: s.name, status: s.status, complexity: s.complexity })) : []
+          children: subs ? (a.subAgents || []).map((s, i) => ({ type: "sub", parentId: a.id, subIdx: i, label: s.name, status: s.status, complexity: s.complexity })) : []
         })) };
     }
 
@@ -792,7 +792,7 @@
           "</div>" + foot + badge + "</div>";
       }
       // sub-agent = junior member chip
-      return '<div class="mm-node mm-rep" data-agent="' + n.parentId + '" title="' + esc(n.label) +
+      return '<div class="mm-node mm-rep" data-sub="' + n.parentId + "|" + n.subIdx + '" title="' + esc(n.label) +
         '" style="' + pos + '"><span class="mm-av mm-av--rep">' + esc(initials(n.label)) + "</span>" +
         '<b>' + esc(n.label) + "</b></div>";
     }).join("");
@@ -982,8 +982,8 @@
       '<div class="field__value' + (strong ? " is-strong" : "") + '">' + value + "</div></div>";
     const tags = (arr) => '<div class="taglist">' + (arr || []).map((t) => '<span class="tag">' + esc(t) + "</span>").join("") + "</div>";
 
-    const subRows = (a.subAgents || []).map((s) =>
-      "<tr><td><div class=\"sa-name\">" + esc(s.name) + "</div><div class=\"cell-sub\">" + esc(s.desc) + "</div></td>" +
+    const subRows = (a.subAgents || []).map((s, i) =>
+      '<tr class="subrow" data-sub="' + a.id + "|" + i + '"><td><div class="sa-name">' + esc(s.name) + "</div><div class=\"cell-sub\">" + esc(s.desc) + "</div></td>" +
       '<td><span class="chip chip--outline">' + esc(s.type) + "</span></td>" +
       "<td>" + cplxChip(s.complexity) + "</td>" +
       '<td class="cell-sub">' + esc(s.deps) + "</td>" +
@@ -1108,6 +1108,52 @@
       '<div class="drawer__foot">' +
         '<button class="btn" data-close-drawer>Close</button>' +
         '<button class="btn btn--primary" data-nav="overview">Open Overview</button>' +
+      "</div>";
+    showDrawer(html);
+  }
+
+  // Sub-agent details — mirrors the agent drawer, enriched with parent context
+  function openSubAgent(parentId, idx) {
+    const parent = findAgent(parentId); if (!parent) return;
+    const s = (parent.subAgents || [])[idx]; if (!s) return;
+    const deptName = parent.deptName || (findDept(parent.deptId) || {}).name || "";
+    const field = (label, ic, value, strong) =>
+      '<div class="field"><div class="field__label">' + (ic ? icon(ic) : "") + esc(label) + "</div>" +
+      '<div class="field__value' + (strong ? " is-strong" : "") + '">' + value + "</div></div>";
+    const tags = (arr) => '<div class="taglist">' + (arr || []).filter(Boolean).map((t) => '<span class="tag">' + esc(t) + "</span>").join("") + "</div>";
+    const siblings = (parent.subAgents || []).map((x, i) => ({ x: x, i: i })).filter((o) => o.i !== idx);
+    const html =
+      '<div class="drawer__head">' +
+        '<div class="drawer__eyebrow"><span class="drawer__dept">Sub-agent · under ' + esc(parent.name) + "</span>" +
+          '<button class="close-x" data-close-drawer>' + icon("close") + "</button></div>" +
+        "<h2>" + esc(s.name) + "</h2>" +
+        '<div class="drawer__chips">' + chip(s.type, "brand") + cplxChip(s.complexity) + statusChip(s.status) + "</div>" +
+      "</div>" +
+      '<div class="drawer__body">' +
+        '<div class="scorebox">' +
+          '<div class="score"><b>Task type</b>' + chip(s.type, "brand") + "</div>" +
+          '<div class="score"><b>Complexity</b>' + cplxChip(s.complexity) + "</div>" +
+          '<div class="score"><b>Status</b>' + statusChip(s.status) + "</div></div>" +
+        field("What it does", "target", esc(s.desc), true) +
+        field("Primary system / dependency", "link", tags([s.deps])) +
+        '<div class="divider"></div>' +
+        '<div class="callout callout--action">' + icon("user") +
+          "<div><b>Reports to</b><p>" + '<button class="chat-link" data-agent="' + parent.id + '">' + esc(parent.name) + "</button> · " + esc(deptName) + "</p></div></div>" +
+        '<div style="height:12px"></div>' +
+        field("Part of the process", "layers", esc(parent.process || "—")) +
+        field("Why it exists (parent's purpose)", "target", esc(parent.purpose)) +
+        field("Systems available through the parent", "link", tags(parent.systems)) +
+        (siblings.length ?
+          '<div class="divider"></div>' +
+          '<div class="field__label">' + icon("sub") + "Sibling sub-agents (" + siblings.length + ")</div>" +
+          '<div class="chat-list" style="margin-top:8px">' + siblings.map((o) =>
+            '<div class="chat-li"><div class="chat-li__main"><button class="chat-link" data-sub="' + parent.id + "|" + o.i + '">' + esc(o.x.name) +
+            '</button><span class="chat-li__dept">' + esc(o.x.type) + "</span></div>" +
+            '<div class="chat-li__chips">' + cplxChip(o.x.complexity) + statusChip(o.x.status) + "</div></div>").join("") + "</div>" : "") +
+      "</div>" +
+      '<div class="drawer__foot">' +
+        '<button class="btn" data-close-drawer>Close</button>' +
+        '<button class="btn btn--primary" data-agent="' + parent.id + '">Open parent agent</button>' +
       "</div>";
     showDrawer(html);
   }
@@ -1293,7 +1339,7 @@
       "[data-close-drawer],[data-close-modal],[data-add],[data-export],[data-share],[data-reset]," +
       "[data-filter-toggle],[data-filter],[data-apply-filters],[data-clear-filters],[data-menu]," +
       "[data-suggest],[data-chat-clear],[data-mind],[data-mindsubs],[data-mindlinks],[data-zoom],[data-mindfull]," +
-      "[data-deptinfo],[data-proginfo]");
+      "[data-deptinfo],[data-proginfo],[data-sub]");
     if (!t) {
       // close filter popover on outside click
       if (STATE.filterOpen && !e.target.closest(".has-pop")) { STATE.filterOpen = false; renderHeader(); }
@@ -1307,6 +1353,7 @@
     else if (t.hasAttribute("data-mindfull")) { setMindFull(!STATE.mindFull); }
     else if (t.dataset.suggest) { sendChat(t.dataset.suggest); }
     else if (t.hasAttribute("data-chat-clear")) { STATE.chat = []; renderBody(); setTimeout(focusChat, 30); }
+    else if (t.dataset.sub) { const ps = t.dataset.sub.split("|"); openSubAgent(ps[0], +ps[1]); }
     else if (t.dataset.deptinfo) { openDeptDetail(t.dataset.deptinfo); }
     else if (t.hasAttribute("data-proginfo")) { openProgrammeDetail(); }
     else if (t.dataset.gotoDept) { go("department", t.dataset.gotoDept); }
