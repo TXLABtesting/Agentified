@@ -102,9 +102,32 @@
     return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
   }
 
+  /* ---- Delivery model ---------------------------------------------------
+     Every agent is a DESIGN moving through a delivery lifecycle. "Readiness"
+     means delivery progress toward Live — nothing fictional.
+       Blueprinted (designed)  -> Approved -> In Development -> Live
+     The blueprint "phase" is the strategic Delivery Wave (what to build first). */
+  const STAGES = ["Blueprinted", "Approved", "In Development", "Live"];
+  const STAGE_WEIGHT = { "Blueprinted": 25, "Approved": 50, "In Development": 75, "Live": 100 };
+  const STAGE_ORDER = { "Blueprinted": 0, "Approved": 1, "In Development": 2, "Live": 3 };
+  const STAGE_NEXT = {
+    "Blueprinted": "Approve it to start delivery",
+    "Approved": "Begin development",
+    "In Development": "Finish build and go Live",
+    "Live": "Live"
+  };
+  // Delivery wave (strategic sequence) derived from the blueprint phase/priority
+  const WAVE = {
+    "Quick Win":    { n: 1, label: "Wave 1 · Quick Win" },
+    "Strategic":    { n: 2, label: "Wave 2 · Strategic" },
+    "Complex":      { n: 3, label: "Wave 3 · Complex" },
+    "Future Phase": { n: 4, label: "Wave 4 · Future" }
+  };
+  const waveOf = (p) => WAVE[p] || { n: 2, label: "Wave 2 · Strategic" };
+
   /* ---- Chip renderers --------------------------------------------------- */
   const COLOR = {
-    status:     { "Ready": "green", "Needs Review": "amber", "In Progress": "blue" },
+    status:     { "Blueprinted": "slate", "Approved": "blue", "In Development": "amber", "Live": "green" },
     complexity: { "Low": "green", "Medium": "blue", "High": "amber", "Very High": "red" },
     level:      { "High": "green", "Medium": "amber", "Low": "slate" },
     priority:   { "Quick Win": "green", "Strategic": "blue", "Complex": "amber", "Future Phase": "slate" }
@@ -113,7 +136,7 @@
     '<span class="chip chip--' + color + '">' + (dot ? '<span class="chip-dot"></span>' : "") + esc(label) + "</span>";
   const statusChip = (s) => chip(s, COLOR.status[s] || "slate", true);
   const cplxChip = (c) => chip(c, COLOR.complexity[c] || "slate");
-  const prioChip = (p) => chip(p, COLOR.priority[p] || "slate");
+  const prioChip = (p) => chip(waveOf(p).label, COLOR.priority[p] || "slate");
   /* ---- Process vs Extras classification --------------------------------- */
   // Agents grounded in the documented processes are "Process"; value-add
   // agents (and anything explicitly "beyond the documented" processes) are
@@ -142,34 +165,36 @@
     const agents = d.agents;
     const subs = subCount(d);
     const cdist = { "Low": 0, "Medium": 0, "High": 0, "Very High": 0 };
-    let scoreSum = 0;
-    let ready = 0, review = 0, prog = 0;
+    let scoreSum = 0, live = 0, dev = 0, approved = 0, blueprinted = 0;
     agents.forEach((a) => {
       cdist[a.complexity] = (cdist[a.complexity] || 0) + 1;
       scoreSum += CSCORE[a.complexity] || 0;
-      if (a.status === "Ready") ready++;
-      else if (a.status === "Needs Review") review++;
-      else prog++;
+      if (a.status === "Live") live++;
+      else if (a.status === "In Development") dev++;
+      else if (a.status === "Approved") approved++;
+      else blueprinted++;
     });
     const avg = agents.length ? scoreSum / agents.length : 0;
-    // readiness: Ready=100%, In Progress=55%, Needs Review=35%
+    // delivery readiness = progress toward Live (Blueprinted 25 … Live 100)
     const readiness = agents.length
-      ? Math.round((ready * 100 + prog * 55 + review * 35) / agents.length) : 0;
-    let deptStatus = "In Progress";
+      ? Math.round(agents.reduce((n, a) => n + (STAGE_WEIGHT[a.status] || 25), 0) / agents.length) : 0;
+    let deptStatus = "Blueprinted";
     if (!agents.length) deptStatus = "Awaiting";
-    else if (review / Math.max(agents.length, 1) >= 0.4) deptStatus = "Needs Review";
-    else if (ready / Math.max(agents.length, 1) >= 0.6) deptStatus = "Ready";
-    return { count: agents.length, subs, cdist, avg, readiness, ready, review, prog, deptStatus };
+    else if (live === agents.length) deptStatus = "Live";
+    else if (live + dev > 0) deptStatus = "In Development";
+    else if (approved > 0) deptStatus = "Approved";
+    return { count: agents.length, subs, cdist, avg, readiness, live, dev, approved, blueprinted, deptStatus };
   }
   function globalStats() {
     const agents = allAgents();
     const subs = agents.reduce((n, a) => n + ((a.subAgents || []).length), 0);
     const high = agents.filter((a) => a.complexity === "High" || a.complexity === "Very High").length;
-    const review = agents.filter((a) => a.status === "Needs Review").length;
-    const ready = agents.filter((a) => a.status === "Ready").length;
-    const prog = agents.filter((a) => a.status === "In Progress").length;
+    const live = agents.filter((a) => a.status === "Live").length;
+    const inFlight = agents.filter((a) => a.status === "Approved" || a.status === "In Development").length;
+    const quickWins = agents.filter((a) => a.priority === "Quick Win").length;
+    const readiness = agents.length ? Math.round(agents.reduce((n, a) => n + (STAGE_WEIGHT[a.status] || 25), 0) / agents.length) : 0;
     const avg = agents.reduce((s, a) => s + (CSCORE[a.complexity] || 0), 0) / Math.max(agents.length, 1);
-    return { total: agents.length, depts: DATA.departments.length, subs, high, review, ready, prog, avg };
+    return { total: agents.length, depts: DATA.departments.length, subs, high, live, inFlight, quickWins, readiness, avg };
   }
 
   /* ---- Charts (inline SVG) --------------------------------------------- */
@@ -299,8 +324,9 @@
     const groups = [
       { key: "category", title: "Type", opts: ["process", "extras"], labels: { "process": "Process", "extras": "Extras" } },
       { key: "complexity", title: "Complexity", opts: ["Low", "Medium", "High", "Very High"] },
-      { key: "status", title: "Status", opts: ["Ready", "In Progress", "Needs Review"] },
-      { key: "priority", title: "Priority", opts: ["Quick Win", "Strategic", "Complex", "Future Phase"] }
+      { key: "status", title: "Delivery stage", opts: ["Blueprinted", "Approved", "In Development", "Live"] },
+      { key: "priority", title: "Delivery wave", opts: ["Quick Win", "Strategic", "Complex", "Future Phase"],
+        labels: { "Quick Win": "Wave 1 · Quick Win", "Strategic": "Wave 2 · Strategic", "Complex": "Wave 3 · Complex", "Future Phase": "Wave 4 · Future" } }
     ];
     return '<div class="popover' + (STATE.filterOpen ? " is-open" : "") + '" id="filterPop">' +
       groups.map((g) =>
@@ -340,40 +366,17 @@
   function viewOverview() {
     const g = globalStats();
     const kpis = [
-      { v: g.total, l: "Total Agents", icon: "agents", cls: "is-violet", sub: g.ready + " ready · " + g.prog + " in progress" },
+      { v: g.total, l: "Total Agents", icon: "agents", cls: "is-violet", sub: g.subs + " sub-agents · all designed" },
       { v: g.depts, l: "Departments Covered", icon: "dept", cls: "is-green", sub: "Across corporate & support functions" },
-      { v: g.subs, l: "Total Sub-Agents", icon: "sub", cls: "is-blue", sub: "Specialised task agents" },
-      { v: g.high, l: "High-Complexity Agents", icon: "bolt", cls: "is-amber", sub: "High & very-high complexity" },
-      { v: g.review, l: "Agents Pending Review", icon: "review", cls: "is-rose", sub: "Awaiting leadership decision" },
-      { v: g.avg.toFixed(1), l: "Avg. Complexity Score", icon: "gauge", cls: "is-gold", sub: "Scale 1 (Low) – 4 (Very High)" }
+      { v: g.quickWins, l: "Wave 1 — Quick Wins", icon: "bolt", cls: "is-blue", sub: "Recommended to deliver first" },
+      { v: g.high, l: "High-Complexity Agents", icon: "gauge", cls: "is-amber", sub: "Plan extra effort & time" },
+      { v: g.live + " / " + g.total, l: "Agents Live", icon: "check", cls: "is-rose", sub: g.inFlight + " in delivery" },
+      { v: g.readiness + "%", l: "Delivery Readiness", icon: "pulse", cls: "is-gold", sub: "Progress from design to Live" }
     ];
     const kpiHTML = '<div class="kpi-grid">' + kpis.map((k) =>
       '<div class="kpi ' + k.cls + '"><div class="kpi__icon ' + k.cls + '">' + icon(k.icon) + "</div>" +
       '<div class="kpi__value">' + k.v + "</div><div class=\"kpi__label\">" + k.l + "</div>" +
       '<div class="kpi__sub">' + esc(k.sub) + "</div></div>").join("") + "</div>";
-
-    // charts
-    const barRows = DATA.departments.map((d) => ({ id: d.id, label: d.short, value: d.agents.length }))
-      .sort((a, b) => b.value - a.value);
-    const cdistAll = { "Low": 0, "Medium": 0, "High": 0, "Very High": 0 };
-    allAgents().forEach((a) => cdistAll[a.complexity]++);
-    const donutSeg = [
-      { label: "Low", value: cdistAll["Low"], color: CPLX_COLORS["Low"] },
-      { label: "Medium", value: cdistAll["Medium"], color: CPLX_COLORS["Medium"] },
-      { label: "High", value: cdistAll["High"], color: CPLX_COLORS["High"] },
-      { label: "Very High", value: cdistAll["Very High"], color: CPLX_COLORS["Very High"] }
-    ].filter((s) => s.value > 0);
-
-    const charts =
-      '<div class="charts-grid">' +
-        '<div class="card"><div class="card__head"><h3>Agents per Department</h3>' +
-          '<span class="hint">Click a bar to drill in</span></div>' +
-          '<div class="card__body">' + barChart(barRows) + "</div></div>" +
-        '<div class="card"><div class="card__head"><h3>Complexity Distribution</h3></div>' +
-          '<div class="card__body">' + donut(donutSeg, g.total, "agents") + "</div></div>" +
-        '<div class="card"><div class="card__head"><h3>Status Distribution</h3></div>' +
-          '<div class="card__body">' + stackedStatus(g) + "</div></div>" +
-      "</div>";
 
     // department table
     const rows = DATA.departments.map((d) => {
@@ -491,11 +494,11 @@
             '<div class="mini-stat"><b>' + s.count + "</b><span>Main agents</span></div>" +
             '<div class="mini-stat"><b>' + s.subs + "</b><span>Sub-agents</span></div>" +
             '<div class="mini-stat"><b>' + s.avg.toFixed(1) + "</b><span>Avg complexity</span></div>" +
-            '<div class="mini-stat"><b>' + s.review + "</b><span>Needs review</span></div>" +
+            '<div class="mini-stat"><b>' + s.live + " / " + s.count + "</b><span>Live</span></div>" +
           "</div>" +
         "</div>" +
         '<div class="dept-readiness">' +
-          '<div class="dept-readiness__top"><span>Department readiness</span><b>' + s.readiness + "%</b></div>" +
+          '<div class="dept-readiness__top"><span>Delivery readiness</span><b>' + s.readiness + "%</b></div>" +
           '<div class="readiness-track"><i style="width:' + s.readiness + '%"></i></div>' +
         "</div>" +
       "</div></div>";
@@ -511,27 +514,26 @@
         '<div class="agent-grid">' + agentCards + "</div></div></div>";
   }
 
-  // Checklist of what's left to reach 100% readiness (= every agent "Ready")
+  // The path to 100% delivery readiness: advance every agent to Live.
   function readinessChecklist(d, s) {
     if (!d.agents.length) return "";
-    const order = { "Needs Review": 0, "In Progress": 1, "Ready": 2 };
-    const items = d.agents.slice().sort((a, b) => (order[a.status] - order[b.status]) || a.name.localeCompare(b.name));
-    const readyN = d.agents.filter((a) => a.status === "Ready").length;
-    const need = d.agents.length - readyN;
+    const items = d.agents.slice().sort((a, b) => (STAGE_ORDER[a.status] - STAGE_ORDER[b.status]) || a.name.localeCompare(b.name));
+    const liveN = d.agents.filter((a) => a.status === "Live").length;
+    const need = d.agents.length - liveN;
     const head = need === 0
-      ? '<div class="rchk__done">' + icon("check") + "All " + d.agents.length + " agents are Ready — this department is at 100%.</div>"
-      : '<p class="rchk__sub"><b>' + readyN + "</b> of <b>" + d.agents.length + "</b> agents Ready · make <b>" + need + "</b> more Ready to reach 100%.</p>";
+      ? '<div class="rchk__done">' + icon("check") + "All " + d.agents.length + " agents are Live — this department is at 100%.</div>"
+      : '<p class="rchk__sub"><b>' + liveN + "</b> of <b>" + d.agents.length + "</b> agents Live · <b>" + need +
+        "</b> still to deliver. Each agent moves <b>Blueprinted → Approved → In Development → Live</b>; readiness reaches 100% when all are Live.</p>";
     const rows = items.map((a) => {
-      const done = a.status === "Ready";
-      const note = done ? "Ready"
-        : (a.status === "Needs Review" ? "Resolve the review, then mark Ready" : "Move from In Progress to Ready");
+      const done = a.status === "Live";
       return '<button class="rchk__item' + (done ? " is-done" : "") + '" data-agent="' + a.id + '">' +
         '<span class="rchk__box">' + (done ? icon("check") : "") + "</span>" +
         '<span class="rchk__name">' + esc(a.name) + "</span>" +
-        '<span class="rchk__note">' + (done ? statusChip("Ready") : statusChip(a.status) + " " + esc(note)) + "</span></button>";
+        '<span class="rchk__note">' + statusChip(a.status) +
+          (done ? "" : ' <span class="rchk__next">Next: ' + esc(STAGE_NEXT[a.status] || STAGE_NEXT.Blueprinted) + "</span>") + "</span></button>";
     }).join("");
-    return '<div class="card rchk-card"><div class="card__head"><h3>Readiness checklist — to reach 100%</h3>' +
-      '<span class="hint">Readiness reaches 100% when every agent is Ready</span></div>' +
+    return '<div class="card rchk-card"><div class="card__head"><h3>Path to 100% — deliver every agent</h3>' +
+      '<span class="hint">Readiness = delivery progress to Live</span></div>' +
       '<div class="card__body">' + head + '<div class="rchk">' + rows + "</div></div></div>";
   }
 
@@ -551,7 +553,7 @@
       "</div>" +
       '<p class="acard__desc">' + esc(a.purpose) + "</p>" +
       '<div class="acard__tags">' +
-        '<span class="acard__tag">' + esc(a.priority) + "</span>" +
+        '<span class="acard__tag">' + esc(waveOf(a.priority).label) + "</span>" +
         (catOf(a) === "extras"
           ? '<span class="acard__tag is-extras">Extras</span>'
           : '<span class="acard__tag is-process">' + esc(procTagOf(a)) + "</span>") +
@@ -633,27 +635,28 @@
   }
 
   function viewReview() {
-    const list = allAgents().filter((a) => a.status === "Needs Review")
+    const list = allAgents().filter((a) => a.status === "Approved" || a.status === "In Development")
       .filter((a) => !STATE.search || agentMatches(a))
-      .sort((a, b) => CSCORE[b.complexity] - CSCORE[a.complexity]);
+      .sort((a, b) => STAGE_ORDER[b.status] - STAGE_ORDER[a.status]);
     const byDept = {};
     list.forEach((a) => { (byDept[a.deptName] = byDept[a.deptName] || []).push(a); });
     const body = list.length ? Object.keys(byDept).map((dn) =>
       '<div class="section"><div class="section__head"><h3>' + esc(dn) +
-      '</h3><span class="hint">' + byDept[dn].length + " agent" + (byDept[dn].length > 1 ? "s" : "") + " to review</span></div>" +
+      '</h3><span class="hint">' + byDept[dn].length + " in delivery</span></div>" +
       '<div class="agent-grid">' + byDept[dn].map((a) => agentRow(a)).join("") + "</div></div>"
-    ).join("") : '<div class="card"><div class="card__body">' + emptyState("Nothing pending review", "All agents have been reviewed or are in progress.") + "</div></div>";
-    return '<div class="page"><div class="page__head"><h2>Pending Review</h2>' +
-      "<p>Agents flagged for leadership review, update or refinement — highest complexity first.</p></div>" + body + "</div>";
+    ).join("") : '<div class="card"><div class="card__body">' + emptyState("Nothing in delivery yet", "Agents that are Approved or In Development will appear here. Open any agent and set its delivery stage to begin.") + "</div></div>";
+    return '<div class="page"><div class="page__head"><h2>Delivery pipeline</h2>' +
+      "<p>Agents currently being delivered — Approved and In Development.</p></div>" + body + "</div>";
   }
 
   /* ---- Mind map / team structure --------------------------------------- */
   const MM = { col: [24, 320, 648, 952], width: [226, 268, 250, 214], rowH: 56, pad: 26 };
-  const statusVar = { "Ready": "var(--green)", "In Progress": "var(--blue)", "Needs Review": "var(--amber)" };
+  const statusVar = { "Blueprinted": "var(--slate)", "Approved": "var(--blue)", "In Development": "var(--amber)", "Live": "var(--green)" };
   const STATUS_TINT = {
-    "Ready": ["var(--green)", "var(--green-bg)"],
-    "In Progress": ["var(--blue)", "var(--blue-bg)"],
-    "Needs Review": ["var(--amber)", "var(--amber-bg)"]
+    "Blueprinted": ["var(--slate)", "var(--slate-bg)"],
+    "Approved": ["var(--blue)", "var(--blue-bg)"],
+    "In Development": ["var(--amber)", "var(--amber-bg)"],
+    "Live": ["var(--green)", "var(--green-bg)"]
   };
   // canonical external systems an agent may depend on (order = match priority)
   const SYSREG = [
@@ -842,11 +845,11 @@
 
     const legend =
       '<div class="mm-legend">' +
-        '<span><i style="background:var(--green)"></i>Ready</span>' +
-        '<span><i style="background:var(--blue)"></i>In progress</span>' +
-        '<span><i style="background:var(--amber)"></i>Needs review</span>' +
-        (isAll ? "" : '<span class="mm-leg-arrow">' + icon("mindmap") + "Speaks to another agent</span>" +
-          '<span class="mm-leg-sys">' + icon("db") + "Needs a system (e.g. Oracle, Email)</span>") +
+        '<span><i style="background:var(--slate)"></i>Blueprinted</span>' +
+        '<span><i style="background:var(--blue)"></i>Approved</span>' +
+        '<span><i style="background:var(--amber)"></i>In Development</span>' +
+        '<span><i style="background:var(--green)"></i>Live</span>' +
+        (isAll ? "" : '<span class="mm-leg-arrow">' + icon("mindmap") + "Speaks to another agent</span>") +
         '<span class="muted">Click any member to open its agent</span>' +
       "</div>";
 
@@ -1122,7 +1125,7 @@
           scoreCell("Main agents", g.total) + scoreCell("Sub-agents", g.subs) +
           scoreCell("Departments", g.depts) + scoreCell("Avg complexity", g.avg.toFixed(1) + " / 4") + "</div>" +
         field("Process vs Extras", "layers", chip(proc + " Process", "brand") + " " + chip((g.total - proc) + " Extras", "gold")) +
-        field("Profile", "gauge", chip(g.high + " high-complexity", "amber") + " " + chip(g.review + " need review", "slate")) +
+        field("Profile", "gauge", chip(g.high + " high-complexity", "amber") + " " + chip(g.quickWins + " Wave-1 quick wins", "green") + " " + chip(g.live + " live", "slate")) +
         '<div class="divider"></div>' +
         '<div class="field__label">' + icon("dept") + "Departments (" + g.depts + ")</div>" +
         '<div style="margin-top:8px">' + deptRows + "</div>" +
@@ -1209,8 +1212,8 @@
         sel("complexity", "Complexity", ["Low", "Medium", "High", "Very High"], a.complexity) +
         sel("impact", "Impact", ["Low", "Medium", "High"], a.impact) +
         sel("feasibility", "Feasibility", ["Low", "Medium", "High"], a.feasibility) +
-        sel("priority", "Priority", ["Quick Win", "Strategic", "Complex", "Future Phase"], a.priority) +
-        sel("status", "Status", ["Ready", "In Progress", "Needs Review"], a.status, true) +
+        sel("priority", "Delivery wave", ["Quick Win", "Strategic", "Complex", "Future Phase"], a.priority) +
+        sel("status", "Delivery stage", ["Blueprinted", "Approved", "In Development", "Live"], a.status, true) +
         '<div class="form-field col-2"><label>Sub-Agents (one per line)</label><textarea class="textarea" name="subs">' + esc(subText) + "</textarea></div>" +
         '<div class="form-field col-2"><label>Recommended Next Action</label><textarea class="textarea" name="nextAction">' + esc(a.nextAction) + "</textarea></div>" +
         '<div class="form-field col-2"><label>Notes / Risks &amp; Dependencies</label><textarea class="textarea" name="risks">' + esc(a.risks) + "</textarea></div>" +
@@ -1256,7 +1259,7 @@
     const existing = a.subAgents || [];
     a.subAgents = lines.map((nm) => {
       const prev = existing.find((s) => s.name.toLowerCase() === nm.toLowerCase());
-      return prev || { name: nm, desc: "Newly added sub-agent — pending definition.", complexity: "Medium", type: "Task", deps: "—", status: "In Progress" };
+      return prev || { name: nm, desc: "Newly added sub-agent — pending definition.", complexity: "Medium", type: "Task", deps: "—", status: "Blueprinted" };
     });
     // move department if changed
     if (newDept && newDept !== a.deptId) {
@@ -1473,7 +1476,7 @@
       id: "new-" + Date.now(), name: "New Agent", kind: "core", tier: "New · To be classified",
       purpose: "", responsibilities: "", process: "", inputs: [], systems: [], outputs: [],
       complexity: "Medium", impact: "Medium", feasibility: "Medium",
-      status: "In Progress", priority: "Strategic", autonomy: "To be defined",
+      status: "Blueprinted", priority: "Strategic", autonomy: "To be defined",
       risks: "", nextAction: "", subAgents: []
     };
     dept.agents.push(newAgent);

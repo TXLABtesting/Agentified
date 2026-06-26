@@ -446,6 +446,7 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rchk__item.is-done .rchk__name { color: var(--ink-3); text-decoration: line-through; }
 .rchk__note { font-size: var(--fs-2xs); color: var(--ink-3); flex: none; display: flex; align-items: center; gap: 6px; }
+.rchk__next { color: var(--ink-2); font-weight: 600; }
 @media (max-width: 720px) { .rchk { grid-template-columns: 1fr; } }
 
 /* ---- Agent cards (listing-style) — 2-column grid ------------------------- */

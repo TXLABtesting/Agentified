@@ -29,8 +29,9 @@
   /* ---- formatting helpers (mirror dashboard CSS classes) ---------------- */
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const STAGE_WEIGHT = { "Blueprinted": 25, "Approved": 50, "In Development": 75, "Live": 100 };
   const COLOR = {
-    status: { "Ready": "green", "Needs Review": "amber", "In Progress": "blue" },
+    status: { "Blueprinted": "slate", "Approved": "blue", "In Development": "amber", "Live": "green" },
     complexity: { "Low": "green", "Medium": "blue", "High": "amber", "Very High": "red" },
     level: { "High": "green", "Medium": "amber", "Low": "slate" },
     priority: { "Quick Win": "green", "Strategic": "blue", "Complex": "amber", "Future Phase": "slate" }
@@ -61,10 +62,7 @@
   }
   function readiness(agents) {
     if (!agents.length) return 0;
-    const r = agents.filter((a) => a.status === "Ready").length;
-    const p = agents.filter((a) => a.status === "In Progress").length;
-    const v = agents.filter((a) => a.status === "Needs Review").length;
-    return Math.round((r * 100 + p * 55 + v * 35) / agents.length);
+    return Math.round(agents.reduce((n, a) => n + (STAGE_WEIGHT[a.status] || 25), 0) / agents.length);
   }
   function systemUsage() {
     const map = {};
@@ -269,22 +267,13 @@
         "</b> main agents across <b>" + D().departments.length + "</b> departments. Open any agent to see its sub-agents.</p>";
     }
 
-    /* needs review */
-    if (has(/needs? review|pending|to review|refine|attention|needs work|awaiting/) ||
-      (has(/review/) && !has(/overview/))) {
-      let list = agents.filter((a) => a.status === "Needs Review");
-      if (dept) list = list.filter((a) => a.deptId === dept.id);
-      list.sort((a, b) => CSCORE[b.complexity] - CSCORE[a.complexity]);
-      if (!list.length) return "<p>Good news — no agents are currently flagged <b>Needs Review</b>" + (dept ? " in " + esc(dept.name) : "") + ".</p>";
-      return "<p><b>" + list.length + "</b> agent" + (list.length > 1 ? "s" : "") + (dept ? " in " + esc(dept.name) : "") +
-        " need" + (list.length > 1 ? "" : "s") + " review" + (dept ? "" : ", highest complexity first") + ":</p>" + agentLineList(list);
-    }
-
-    /* status: ready / in progress */
-    if (has(/\bready\b|live|completed|finished/) && (has(/depart/) || has(/which (department|team)/))) return readinessBars();
-    if (has(/\bready\b|completed|finished/)) return statusList("Ready", agents, dept);
-    if (has(/in.?progress|ongoing|being built|in development|wip|underway/)) return statusList("In Progress", agents, dept);
-    if (has(/which (departments?|teams?) (are )?(ready|complete|furthest)/) || (has(/readiness|how ready/))) return readinessBars();
+    /* delivery stage lists */
+    if (has(/\blive\b|deployed|operational/) && (has(/depart/) || has(/which (department|team)/))) return readinessBars();
+    if (has(/\blive\b|deployed|operational|completed|finished/)) return statusList("Live", agents, dept);
+    if (has(/in.?development|being built|under construction|in build/)) return statusList("In Development", agents, dept);
+    if (has(/approved|greenlit|green-lit/)) return statusList("Approved", agents, dept);
+    if (has(/blueprint|designed|not (yet )?started|on paper/)) return statusList("Blueprinted", agents, dept);
+    if (has(/which (departments?|teams?) (are )?(ready|furthest|most advanced)/) || (has(/readiness|how ready|delivery progress/))) return readinessBars();
 
     /* average complexity */
     if (has(/aver|avg|mean/) && has(/complex/)) {
@@ -389,12 +378,13 @@
         return "<p>Of <b>" + agents.length + "</b> agents, <b>" + proc + "</b> are <b>Process</b> (from the documented processes) and <b>" + (agents.length - proc) + "</b> are <b>Extras</b> (enhancements).</p>";
       }
       const high = agents.filter((a) => a.complexity === "High" || a.complexity === "Very High").length;
-      const rev = agents.filter((a) => a.status === "Needs Review").length;
+      const live = agents.filter((a) => a.status === "Live").length;
+      const qw = agents.filter((a) => a.priority === "Quick Win").length;
       const proc = agents.filter((a) => catOf(a) === "process").length;
       return "<p>There are <b>" + agents.length + "</b> main agents across <b>" + D().departments.length +
         "</b> departments, with <b>" + totalSubs() + "</b> sub-agents.</p>" +
         "<p style=\"margin-top:6px\">" + proc + " are Process · " + (agents.length - proc) + " are Extras · " + high +
-        " are high-complexity · " + rev + " need review.</p>" + navBtn("agents", "Open Agents");
+        " are high-complexity · " + qw + " are Wave-1 quick wins · " + live + " are Live.</p>" + navBtn("agents", "Open Agents");
     }
 
     /* department overview */
@@ -428,7 +418,7 @@
   }
   function readinessBars() {
     const rows = D().departments.map((d) => ({ label: d.short, value: readiness(d.agents) })).sort((a, b) => b.value - a.value);
-    return "<p>Department readiness (Ready = 100%, In Progress = 55%, Needs Review = 35%):</p>" + rankBars(rows);
+    return "<p>Delivery readiness — progress from design to Live (Blueprinted 25% · Approved 50% · In Development 75% · Live 100%):</p>" + rankBars(rows);
   }
 
   function explainCats() {
@@ -458,7 +448,7 @@
 
   function capabilities() {
     return "<p>I'm the <b>Agent Assistant</b>. I know the whole agent inventory — every agent's purpose, process, systems, inputs/outputs, sub-agents, who they collaborate with, plus complexity, status and priority. Ask me things like:</p>" + suggestionsHTML() +
-      "<p style=\"margin-top:8px\" class=\"muted\">Tip: name a department (e.g. Finance), an agent, a system (Oracle), or a quality (high-impact, needs review, quick win) and I'll pull it up.</p>";
+      "<p style=\"margin-top:8px\" class=\"muted\">Tip: name a department (e.g. Finance), an agent, a system (Oracle), a delivery stage (Blueprinted, Live) or a wave (quick wins) and I'll pull it up.</p>";
   }
 
   Assistant.suggestions = function () {
@@ -472,7 +462,7 @@
       "How many agents are there in total?",
       "Give me an overview of Finance",
       "What does " + name + " do?",
-      "Which agents need review?",
+      "Which departments are furthest along?",
       "Show the high-impact agents",
       "Which agents use Oracle?",
       "What's the difference between Process and Extras?",
