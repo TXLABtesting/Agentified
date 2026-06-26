@@ -780,12 +780,17 @@
         '<b>' + esc(n.label) + "</b></div>";
     }).join("");
 
-    const pills = ['<button class="mm-pill' + (isAll ? " is-on" : "") + '" data-mind="all">All departments</button>']
-      .concat(DATA.departments.map((d) =>
-        '<button class="mm-pill' + (STATE.mindDept === d.id ? " is-on" : "") + '" data-mind="' + d.id + '">' + esc(d.short) + "</button>")).join("");
+    const deptPicker =
+      '<label class="mm-pick"><span class="mm-pick__lbl">Team</span>' +
+        '<select class="select mm-select" data-mindselect>' +
+          '<option value="all"' + (isAll ? " selected" : "") + ">All departments</option>" +
+          DATA.departments.map((d) =>
+            '<option value="' + d.id + '"' + (!isAll && STATE.mindDept === d.id ? " selected" : "") + ">" +
+            esc(d.name) + "</option>").join("") +
+        "</select></label>";
 
     const controls =
-      '<div class="mm-controls"><div class="mm-pills">' + pills + "</div>" +
+      '<div class="mm-controls"><div class="mm-pills">' + deptPicker + "</div>" +
       '<div class="flex gap-2">' +
       (isAll ? "" :
         '<button class="btn btn--sm' + (STATE.mindLinks ? " btn--primary" : "") + '" data-mindlinks>' +
@@ -1323,6 +1328,12 @@
     document.body.style.overflow = on ? "hidden" : "";
     renderBody();
   }
+  // department dropdown on the mind map
+  document.addEventListener("change", function (e) {
+    const sel = e.target.closest("[data-mindselect]");
+    if (sel) { STATE.mindDept = sel.value; renderBody(); }
+  });
+
   // drag anywhere in the canvas to pan freely (both axes); transform-based
   let mmPan = null;
   document.addEventListener("pointerdown", function (e) {
