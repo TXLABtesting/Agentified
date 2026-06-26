@@ -2131,79 +2131,283 @@ const ADMIN_AGENTS = [
   }
 ];
 
-const DEPARTMENTS = [
+const TX_AGENTS = [
   {
-    id: "hr", name: "Human Resources", short: "HR", nameAr: "الموارد البشرية",
-    description: "People & HR agents under one orchestrator — covering the employee journey, performance, leave and case work — wrapping the human-judgment layer on top of Oracle HCM.",
-    owner: "Total Experience Team — Corporate Support Services", focal: "Aisha Al Mansoori · Director, HR Transformation", lastUpdated: "2026-06-24", agents: HR_AGENTS
-  },
-  {
-    id: "procurement", name: "Procurement, Travel & Vendor", short: "Procurement", nameAr: "المشتريات والسفر",
-    description: "Procure-to-pay, travel and vendor agents — intake, sourcing, vendor validation, contract drafting and approvals — over Oracle, NER and ICP.",
-    owner: "Corporate Support Services — Procurement", focal: "Mohammed Al Hashimi · Head of Procurement", lastUpdated: "2026-06-24", agents: PROCUREMENT_AGENTS
-  },
-  {
-    id: "finance", name: "Finance & Accounting", short: "Finance", nameAr: "المالية والمحاسبة",
-    description: "Finance & accounting agents — AP/AR, payments, payroll, reconciliations, VAT, budgeting, period-close and reporting — with payments and the close kept human-approved.",
-    owner: "Corporate Support Services — Finance", focal: "Fatima Al Zaabi · Director of Finance", lastUpdated: "2026-06-24", agents: FINANCE_AGENTS
-  },
-  {
-    id: "knowledge", name: "Knowledge & Content", short: "Knowledge", nameAr: "المعرفة والمحتوى",
-    description: "Knowledge & content agents — translation & interpretation, authoring, proofreading, publishing and documentation — over Email, Events Now and SharePoint.",
-    owner: "Government Communication & Knowledge", focal: "Layla Al Hammadi · Head of Knowledge & Content", lastUpdated: "2026-06-24", agents: KNOWLEDGE_AGENTS
-  },
-  {
-    id: "legal", name: "Legal", short: "Legal", nameAr: "الشؤون القانونية",
-    description: "Legal agents — contract and clause review, regulatory tracking, legal research and matter coordination — with every opinion kept with counsel.",
-    owner: "Legal Affairs", focal: "Noura Al Kaabi · Legal Counsel", lastUpdated: "2026-06-24", agents: LEGAL_AGENTS
-  },
-  {
-    id: "comms", name: "Events & Communication", short: "Events", nameAr: "الفعاليات والاتصال",
-    description: "Event coordination, creative & production, and media & communications agents — with publishing and external messaging human-approved.",
-    owner: "Government Communication", focal: "Omar Al Marri · Director of Communications", lastUpdated: "2026-06-24", agents: COMMS_AGENTS
-  },
-  {
-    id: "cyber", name: "Cyber Security", short: "Cyber", nameAr: "الأمن السيبراني",
-    description: "Security operations (SOC), clearance & GRC and related agents — triaging threats and governance, with incident response kept human-decided.",
-    owner: "Digital & Technology — Cyber Security", focal: "Rashid Al Balushi · Chief Information Security Officer", lastUpdated: "2026-06-24", agents: CYBER_AGENTS
-  },
-  {
-    id: "it", name: "IT Operations", short: "IT Ops", nameAr: "العمليات التقنية",
-    description: "IT service desk, access & identity, and operations & change agents — keeping IT responsive and controlled, with privileged access human-approved.",
-    owner: "Digital & Technology", focal: "Khalid Al Suwaidi · Chief Information Officer", lastUpdated: "2026-06-24", agents: IT_AGENTS
-  },
-  {
-    id: "protocol", name: "Protocol", short: "Protocol", nameAr: "المراسم",
-    description: "Protocol & VIP coordination and movement protocol agents — orchestrating visits and delegations, with judgment kept human.",
-    owner: "Office of the Minister — Protocol", focal: "Mariam Al Shamsi · Head of Protocol", lastUpdated: "2026-06-24", agents: PROTOCOL_AGENTS
-  },
-  {
-    id: "admin", name: "Admin Services", short: "Admin", nameAr: "الخدمات الإدارية",
-    description: "Workplace & hospitality and admin asset-management agents — running day-to-day corporate services with judgment kept human.",
-    owner: "Corporate Support Services — Administration", focal: "Saeed Al Nuaimi · Head of Admin Services", lastUpdated: "2026-06-24", agents: ADMIN_AGENTS
-  }
-];
-
-const PROGRAMME_AGENTS = [
-  {
-    id: "zgb-1", name: "Zero Bureaucracy Agent", kind: "core", tier: "Programme",
+    id: "tx-1", name: "Zero Bureaucracy Agent", kind: "core", tier: "Core",
     purpose: "Drive the Zero Government Bureaucracy mandate across every department — continuously hunt down redundant steps, approvals, documents and waiting time, and turn each service into the fewest possible steps.",
     responsibilities: "Maps every service journey across the departments; flags duplicate data requests, unnecessary approvals, redundant documents and dead waiting time; proposes eliminations and merges with an impact estimate; routes each proposal to the owning department and the Zero-Bureaucracy committee; tracks procedures removed, steps cut and time saved.",
-    process: "Cross-government — Zero Government Bureaucracy (step elimination, approval reduction, document removal, requirement simplification, time-to-service)",
+    process: "Total Experience — Zero Government Bureaucracy (step elimination, approval reduction, document removal, requirement simplification, time-to-service)",
     inputs: ["Service-journey maps", "approval matrices", "required-document lists", "processing times", "customer feedback", "every department process"],
     systems: ["MOCA Smart", "Oracle", "SharePoint", "Email"],
     outputs: ["Elimination proposals", "simplified service journeys", "procedures removed", "steps and approvals cut", "time saved", "a live bureaucracy-reduction scorecard"],
     complexity: "High", impact: "High", feasibility: "Medium",
     status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on detection, analysis and proposals; every elimination decision stays with the owning department and the Zero-Bureaucracy committee.",
     risks: "Departments and the Zero-Bureaucracy committee approve each removal; nothing is eliminated without sign-off.", nextAction: "",
-    talksTo: [],
-    subAgents: [
-      { name: "Process X-Ray", desc: "Maps and decomposes each service journey into its individual steps, approvals and documents.", complexity: "Medium", type: "Reporting", deps: "MOCA Smart", status: "In Progress" },
-      { name: "Redundancy Detector", desc: "Flags duplicate data requests, unnecessary approvals and redundant documents across services.", complexity: "High", type: "Validation", deps: "Oracle", status: "In Progress" },
-      { name: "Elimination Proposer", desc: "Drafts step, approval and document removals with an effort and time-saved estimate.", complexity: "Medium", type: "Drafting", deps: "SharePoint", status: "In Progress" },
-      { name: "Reduction Scorecard", desc: "Tracks procedures removed, steps cut and customer time saved across the programme.", complexity: "Medium", type: "Reporting", deps: "MOCA Smart", status: "In Progress" }
-    ]
+    talksTo: ["tx-3", "tx-5", "tx-6"],
+    subAgents: [{ name: "Process X-Ray", desc: "Maps and decomposes each service journey into its individual steps, approvals and documents.", complexity: "Medium", type: "Reporting", deps: "MOCA Smart", status: "In Progress" }, { name: "Redundancy Detector", desc: "Flags duplicate data requests, unnecessary approvals and redundant documents across services.", complexity: "High", type: "Validation", deps: "Oracle", status: "In Progress" }, { name: "Elimination Proposer", desc: "Drafts step, approval and document removals with an effort and time-saved estimate.", complexity: "Medium", type: "Drafting", deps: "SharePoint", status: "In Progress" }, { name: "Reduction Scorecard", desc: "Tracks procedures removed, steps cut and customer time saved across the programme.", complexity: "Medium", type: "Reporting", deps: "MOCA Smart", status: "In Progress" }]
+  },
+  {
+    id: "tx-2", name: "Digital & App Experience Agent", kind: "core", tier: "Core",
+    purpose: "Watch over the experience of every app and digital service we build — catch usability friction, drop-offs, errors and accessibility gaps, and turn them into concrete design fixes before users feel the pain.",
+    responsibilities: "Monitors digital journeys across the apps and portals; detects friction points, broken flows, slow screens and high drop-off steps; runs accessibility checks against the design system; drafts prioritised UX improvement tickets for product and IT; tracks task-success and ease-of-use over time.",
+    process: "Total Experience — digital & app experience (usability, accessibility, journey analytics, design-system compliance)",
+    inputs: ["App & portal analytics", "user-session data", "accessibility scans", "design-system guidelines", "support tickets"],
+    systems: ["MOCA APP", "MOCA Smart", "SharePoint", "Power BI"],
+    outputs: ["Prioritised UX fixes", "accessibility findings", "journey-friction reports", "task-success metrics"],
+    complexity: "Medium", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on detection, analysis and UX tickets; design and release decisions stay with product and IT.",
+    risks: "Product owners and IT decide what ships; the agent recommends, it does not deploy.", nextAction: "",
+    talksTo: ["tx-3", "tx-7"],
+    subAgents: [{ name: "Journey Analytics", desc: "Tracks user journeys and flags drop-off and friction points.", complexity: "Medium", type: "Reporting", deps: "MOCA APP", status: "In Progress" }, { name: "Accessibility Checker", desc: "Scans screens against accessibility standards and lists gaps.", complexity: "Medium", type: "Validation", deps: "MOCA APP", status: "In Progress" }, { name: "UX Fix Drafter", desc: "Drafts prioritised design-improvement tickets from the findings.", complexity: "Medium", type: "Drafting", deps: "SharePoint", status: "In Progress" }]
+  },
+  {
+    id: "tx-3", name: "Service & Process Experience Agent", kind: "core", tier: "Core",
+    purpose: "Make every service feel effortless — map each service journey end to end, measure how it feels to the people using it, and surface the moments that frustrate so they can be fixed.",
+    responsibilities: "Maps internal and external service journeys; measures CSAT and effort at each touchpoint; flags slow, confusing or repetitive steps; correlates complaints with journey stages; recommends process-experience improvements and routes them to the owning department; tracks the experience score over time.",
+    process: "Total Experience — service & process experience (journey mapping, CSAT/CES, touchpoint analysis, improvement follow-up)",
+    inputs: ["Service catalogues", "journey maps", "satisfaction surveys", "complaints", "processing times"],
+    systems: ["MOCA Smart", "Oracle", "SharePoint", "Power BI"],
+    outputs: ["Service-experience scores", "journey pain-point maps", "improvement recommendations", "trend reports"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on measurement, analysis and recommendations; service redesign stays with the owning department.",
+    risks: "Each department owns its service; the agent measures and recommends.", nextAction: "",
+    talksTo: ["tx-1", "tx-2"],
+    subAgents: [{ name: "Journey Mapper", desc: "Maps each service journey and its touchpoints end to end.", complexity: "High", type: "Reporting", deps: "MOCA Smart", status: "In Progress" }, { name: "Satisfaction Pulse", desc: "Collects and scores CSAT and effort across touchpoints.", complexity: "Medium", type: "Reporting", deps: "MOCA Smart", status: "In Progress" }, { name: "Pain-Point Detector", desc: "Correlates complaints and delays with journey stages.", complexity: "Medium", type: "Validation", deps: "Oracle", status: "In Progress" }]
+  },
+  {
+    id: "tx-4", name: "Employee Experience & Wellbeing Agent", kind: "core", tier: "Core",
+    purpose: "Keep a finger on how it feels to work here — read engagement, wellbeing and workload signals at the team level and turn them into supportive, timely actions for managers and HR.",
+    responsibilities: "Aggregates team-level engagement, wellbeing, workload and recognition signals; tracks eNPS and sentiment trends; surfaces supportive nudges to managers; reports themes to HR and leadership; never scores or ranks individuals.",
+    process: "Total Experience — employee experience & wellbeing (engagement, eNPS, wellbeing signals; governed, team-level only)",
+    inputs: ["Team-level engagement & pulse surveys", "workload signals", "recognition data", "mobility-interest signals (expectation-passing only)"],
+    systems: ["Oracle HR", "MOCA Smart", "Email", "Power BI"],
+    outputs: ["eNPS & sentiment trends", "supportive manager nudges", "aggregate experience themes"],
+    complexity: "Medium", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on team-level signals and nudges only; never an individual decision; strict governance.",
+    risks: "Strictly team-level and governed; HR and managers own every action; individuals are never scored.", nextAction: "",
+    talksTo: ["tx-7", "tx-8"],
+    subAgents: [{ name: "Engagement Pulse", desc: "Tracks team-level engagement, eNPS and sentiment trends.", complexity: "Medium", type: "Reporting", deps: "Oracle HR", status: "In Progress" }, { name: "Wellbeing Signal Reader", desc: "Reads workload and wellbeing signals and pairs each with a supportive action.", complexity: "Medium", type: "Monitoring", deps: "MOCA Smart", status: "In Progress" }, { name: "Recognition Nudge", desc: "Prompts timely recognition where it is missing.", complexity: "Low", type: "Conversational", deps: "Email", status: "In Progress" }]
+  },
+  {
+    id: "tx-5", name: "Vendor Experience & Relations Agent", kind: "core", tier: "Core",
+    purpose: "Treat vendors as partners — keep the relationship healthy, the onboarding smooth and the issues resolved, so the people who serve us want to keep doing it well.",
+    responsibilities: "Tracks vendor relationship health and satisfaction; smooths vendor onboarding and the payments experience; monitors SLAs and issue-resolution time; flags at-risk relationships; runs vendor pulse surveys; coordinates with Procurement and Finance to close issues.",
+    process: "Total Experience — vendor experience & relations (vendor satisfaction, onboarding experience, SLA & issue follow-up)",
+    inputs: ["Vendor records", "onboarding status", "SLA & payment data", "vendor feedback", "issue logs"],
+    systems: ["Oracle", "NER", "ICP", "Email"],
+    outputs: ["Vendor-satisfaction scores", "at-risk-relationship alerts", "onboarding-experience reports", "resolved issues"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on monitoring, surveys and follow-up; commercial decisions stay with Procurement and Finance.",
+    risks: "Procurement and Finance own the vendor relationship commercially; the agent manages the experience.", nextAction: "",
+    talksTo: ["tx-1"],
+    subAgents: [{ name: "Vendor Pulse", desc: "Runs vendor satisfaction surveys and scores relationship health.", complexity: "Medium", type: "Reporting", deps: "Email", status: "In Progress" }, { name: "SLA & Issue Tracker", desc: "Monitors SLAs and issue-resolution time and flags breaches.", complexity: "Medium", type: "Monitoring", deps: "Oracle", status: "In Progress" }, { name: "Onboarding Smoother", desc: "Guides vendors through onboarding and chases missing steps.", complexity: "Medium", type: "Orchestration", deps: "ICP", status: "In Progress" }]
+  },
+  {
+    id: "tx-6", name: "Workplace Environment Agent", kind: "core", tier: "Core",
+    purpose: "Make the workplace somewhere people are glad to be — listen to how the environment feels, from facilities to ambiance to space, and turn the feedback into fixes.",
+    responsibilities: "Gathers feedback on the physical and hybrid work environment (facilities, comfort, meeting spaces, amenities); monitors space-utilisation and comfort signals; flags recurring environment issues; routes fixes to Admin Services; tracks workplace satisfaction over time.",
+    process: "Total Experience — workplace environment (facilities feedback, space & comfort, amenities satisfaction)",
+    inputs: ["Facilities feedback", "space-utilisation data", "amenity requests", "environment surveys"],
+    systems: ["MOCA Smart", "SharePoint", "Email"],
+    outputs: ["Workplace-satisfaction scores", "environment issue lists", "improvement requests to Admin"],
+    complexity: "Low", impact: "Medium", feasibility: "High",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on feedback gathering and routing; facilities changes stay with Admin Services.",
+    risks: "Admin Services owns the workplace; the agent listens and routes.", nextAction: "",
+    talksTo: ["tx-1", "tx-8"],
+    subAgents: [{ name: "Environment Pulse", desc: "Collects workplace and facilities feedback and scores it.", complexity: "Low", type: "Reporting", deps: "MOCA Smart", status: "Ready" }, { name: "Space Comfort Monitor", desc: "Watches space-utilisation and comfort signals.", complexity: "Low", type: "Monitoring", deps: "MOCA Smart", status: "In Progress" }, { name: "Fix Router", desc: "Routes environment issues to Admin Services and tracks closure.", complexity: "Low", type: "Orchestration", deps: "Email", status: "In Progress" }]
+  },
+  {
+    id: "tx-7", name: "Voice-of-Customer & Sentiment Agent", kind: "core", tier: "Core",
+    purpose: "Hear everyone, everywhere — pull feedback from every channel into one voice, read the sentiment, and surface the rising theme before it becomes a complaint.",
+    responsibilities: "Aggregates feedback across surveys, complaints, support tickets, app reviews and channels; runs sentiment and theme analysis; surfaces the top rising issues per service; alerts the owning department; feeds insights to the other experience agents.",
+    process: "Total Experience — voice of customer (multi-channel feedback aggregation, sentiment & theme analysis, alerting)",
+    inputs: ["Surveys", "complaints", "support tickets", "app reviews", "channel feedback"],
+    systems: ["MOCA Smart", "MOCA APP", "Power BI", "Email"],
+    outputs: ["Unified VoC dashboard", "sentiment & theme analysis", "rising-issue alerts", "insight feeds"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on aggregation, analysis and alerts; responses stay with the owning department.",
+    risks: "Departments own the response; the agent surfaces the signal.", nextAction: "",
+    talksTo: ["tx-2", "tx-4", "tx-8"],
+    subAgents: [{ name: "Channel Aggregator", desc: "Pulls feedback from every channel into one place.", complexity: "Medium", type: "Orchestration", deps: "MOCA Smart", status: "In Progress" }, { name: "Sentiment & Theme Analyzer", desc: "Scores sentiment and clusters feedback into themes.", complexity: "High", type: "Reporting", deps: "Power BI", status: "In Progress" }, { name: "Rising-Issue Alerter", desc: "Flags the top rising issue per service before it escalates.", complexity: "Medium", type: "Monitoring", deps: "Email", status: "In Progress" }]
+  },
+  {
+    id: "tx-8", name: "Satisfaction & Continuous-Improvement Agent", kind: "core", tier: "Core",
+    purpose: "Close the loop — once an experience issue is found, stay on it: follow up with the owning department, track the improvement to done, and prove satisfaction actually went up.",
+    responsibilities: "Turns experience findings into owned, dated improvement actions; follows up with departments until each action is closed; measures the before/after satisfaction impact; maintains a live experience-improvement scorecard for leadership.",
+    process: "Total Experience — continuous improvement (action tracking, department follow-up, satisfaction impact, scorecard)",
+    inputs: ["Experience findings", "improvement actions", "department owners", "before/after satisfaction data"],
+    systems: ["MOCA Smart", "SharePoint", "Email", "Power BI"],
+    outputs: ["Tracked improvement actions", "department follow-ups", "satisfaction-impact evidence", "a live experience scorecard"],
+    complexity: "Medium", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on tracking and follow-up; the improvement itself is delivered by the owning department.",
+    risks: "Departments deliver the improvement; the agent drives follow-through and measurement.", nextAction: "",
+    talksTo: ["tx-4", "tx-6", "tx-7"],
+    subAgents: [{ name: "Action Tracker", desc: "Turns findings into owned, dated improvement actions and tracks them to done.", complexity: "Medium", type: "Orchestration", deps: "SharePoint", status: "In Progress" }, { name: "Department Follow-up", desc: "Follows up with each department until actions close.", complexity: "Medium", type: "Conversational", deps: "Email", status: "In Progress" }, { name: "Impact Scorecard", desc: "Measures before/after satisfaction and maintains the scorecard.", complexity: "Medium", type: "Reporting", deps: "Power BI", status: "In Progress" }]
   }
 ];
 
-window.DASHBOARD_DATA = { departments: DEPARTMENTS, programmeAgents: PROGRAMME_AGENTS, complexityScore: COMPLEXITY_SCORE };
+const PM_AGENTS = [
+  {
+    id: "pm-1", name: "Project Planning & Scheduling Agent", kind: "core", tier: "Core",
+    purpose: "Turn every initiative into a real plan — build the schedule, the milestones and the dependencies, find the critical path, and keep the timeline honest as things change.",
+    responsibilities: "Drafts project plans, work-breakdown structures, schedules and milestones; maps dependencies and the critical path; detects slippage and re-baselines; keeps each plan current; produces the timeline view for the team and leadership.",
+    process: "Project Management — planning & scheduling (WBS, milestones, dependencies, critical path, baselining)",
+    inputs: ["Project scope", "deliverables", "team availability", "dependencies", "milestone dates"],
+    systems: ["MS Project", "SharePoint", "Power BI", "Email"],
+    outputs: ["Project plans & schedules", "milestone & dependency maps", "critical-path view", "slippage alerts"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on drafting, scheduling and alerts; scope and date commitments stay with the project manager.",
+    risks: "The project manager owns the plan and commitments; the agent drafts and maintains it.", nextAction: "",
+    talksTo: ["pm-2", "pm-3", "pm-5"],
+    subAgents: [{ name: "Schedule Builder", desc: "Builds the WBS, schedule and milestones from scope.", complexity: "High", type: "Drafting", deps: "MS Project", status: "In Progress" }, { name: "Dependency & Critical-Path Mapper", desc: "Maps dependencies and computes the critical path.", complexity: "High", type: "Reporting", deps: "MS Project", status: "In Progress" }, { name: "Slippage Watch", desc: "Detects slippage against baseline and alerts.", complexity: "Medium", type: "Monitoring", deps: "Power BI", status: "In Progress" }]
+  },
+  {
+    id: "pm-2", name: "Portfolio & Prioritisation Agent", kind: "core", tier: "Core",
+    purpose: "See all projects at once — keep one prioritised portfolio view so leadership funds the right work and nothing important is starved.",
+    responsibilities: "Maintains the portfolio of projects; scores and ranks by value, risk, effort and strategic fit; balances the pipeline; flags conflicts and over-commitment; prepares portfolio reviews for leadership.",
+    process: "Project Management — portfolio & prioritisation (scoring, ranking, pipeline balance, portfolio reviews)",
+    inputs: ["Project list", "value & effort estimates", "strategic priorities", "resource load"],
+    systems: ["Power BI", "SharePoint", "Oracle", "Email"],
+    outputs: ["Prioritised portfolio", "scoring & ranking", "pipeline-balance view", "portfolio-review packs"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on scoring and analysis; funding and prioritisation decisions stay with leadership.",
+    risks: "Leadership decides what to fund; the agent scores and recommends.", nextAction: "",
+    talksTo: ["pm-1", "pm-3", "pm-7"],
+    subAgents: [{ name: "Project Scorer", desc: "Scores projects by value, risk, effort and strategic fit.", complexity: "High", type: "Reporting", deps: "Power BI", status: "In Progress" }, { name: "Pipeline Balancer", desc: "Balances the pipeline and flags over-commitment.", complexity: "Medium", type: "Validation", deps: "Oracle", status: "In Progress" }, { name: "Review Pack Builder", desc: "Prepares portfolio-review packs for leadership.", complexity: "Medium", type: "Drafting", deps: "SharePoint", status: "In Progress" }]
+  },
+  {
+    id: "pm-3", name: "Risk & Issue Management Agent", kind: "core", tier: "Core",
+    purpose: "Stay ahead of trouble — keep a live risk and issue register for every project, push owners to act, and escalate the things that actually threaten delivery.",
+    responsibilities: "Maintains the risk and issue register per project; assesses likelihood and impact; tracks mitigations and owners; chases overdue actions; escalates high-exposure risks with a decision-ready package.",
+    process: "Project Management — risk & issue management (register, assessment, mitigation tracking, escalation)",
+    inputs: ["Risk & issue logs", "mitigation plans", "owners", "project status"],
+    systems: ["SharePoint", "Power BI", "Email"],
+    outputs: ["Live risk & issue register", "mitigation tracking", "escalation packages", "risk-trend view"],
+    complexity: "Medium", impact: "High", feasibility: "High",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on tracking, chasing and escalation; risk-acceptance decisions stay with the project board.",
+    risks: "The project board accepts or mitigates risk; the agent tracks and escalates.", nextAction: "",
+    talksTo: ["pm-1", "pm-2", "pm-4", "pm-6"],
+    subAgents: [{ name: "Risk Register", desc: "Keeps the risk and issue register live and assessed.", complexity: "Medium", type: "Reporting", deps: "SharePoint", status: "Ready" }, { name: "Mitigation Chaser", desc: "Chases overdue mitigations and owners.", complexity: "Low", type: "Monitoring", deps: "Email", status: "In Progress" }, { name: "Escalation Packager", desc: "Builds decision-ready escalation packages for high risks.", complexity: "Medium", type: "Drafting", deps: "SharePoint", status: "In Progress" }]
+  },
+  {
+    id: "pm-4", name: "Status Reporting & Insights Agent", kind: "core", tier: "Core",
+    purpose: "Kill the manual status report — assemble RAG status, progress and highlights automatically, so every project tells leadership the truth without a scramble.",
+    responsibilities: "Auto-generates project status reports and dashboards; rolls up RAG status, progress, milestones, risks and spend; writes the executive highlight; distributes on schedule; spots projects drifting before the report says so.",
+    process: "Project Management — status reporting (RAG roll-up, dashboards, executive highlights, distribution)",
+    inputs: ["Project plans", "actuals", "risks", "spend", "milestone status"],
+    systems: ["Power BI", "SharePoint", "Email"],
+    outputs: ["Status reports & dashboards", "RAG roll-up", "executive highlights", "drift alerts"],
+    complexity: "Medium", impact: "High", feasibility: "High",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on report assembly and distribution; the project manager owns the narrative.",
+    risks: "The project manager validates the status; the agent assembles it.", nextAction: "",
+    talksTo: ["pm-3", "pm-6"],
+    subAgents: [{ name: "RAG Roll-up", desc: "Rolls up status, progress and RAG across projects.", complexity: "Medium", type: "Reporting", deps: "Power BI", status: "Ready" }, { name: "Highlight Writer", desc: "Drafts the executive highlight for each report.", complexity: "Medium", type: "Drafting", deps: "SharePoint", status: "In Progress" }, { name: "Drift Detector", desc: "Spots projects drifting before the next report.", complexity: "Medium", type: "Monitoring", deps: "Power BI", status: "In Progress" }]
+  },
+  {
+    id: "pm-5", name: "Resource & Capacity Agent", kind: "core", tier: "Core",
+    purpose: "Match people to projects — keep a clear view of who is available, who is overloaded, and where the next capacity crunch is, so plans are staffed realistically.",
+    responsibilities: "Tracks resource allocation and utilisation across projects; forecasts capacity crunches; flags over- and under-allocation; supports resource levelling; coordinates with departments on assignments.",
+    process: "Project Management — resource & capacity (allocation, utilisation, capacity forecast, levelling)",
+    inputs: ["Resource assignments", "skills & availability", "project demand", "utilisation data"],
+    systems: ["MS Project", "Oracle HR", "Power BI"],
+    outputs: ["Capacity forecast", "allocation & utilisation view", "over/under-allocation flags", "levelling options"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on analysis and options; assignment decisions stay with managers.",
+    risks: "Managers assign people; the agent forecasts and recommends.", nextAction: "",
+    talksTo: ["pm-1"],
+    subAgents: [{ name: "Capacity Forecaster", desc: "Forecasts capacity crunches across the portfolio.", complexity: "Medium", type: "Reporting", deps: "Power BI", status: "In Progress" }, { name: "Allocation Monitor", desc: "Flags over- and under-allocation of people.", complexity: "Medium", type: "Monitoring", deps: "MS Project", status: "In Progress" }, { name: "Levelling Helper", desc: "Suggests resource-levelling options.", complexity: "Medium", type: "Task", deps: "MS Project", status: "In Progress" }]
+  },
+  {
+    id: "pm-6", name: "Stakeholder & Governance Agent", kind: "core", tier: "Core",
+    purpose: "Keep everyone aligned — prepare steering meetings, manage stakeholder communications and shepherd projects through governance gates so approvals never stall delivery.",
+    responsibilities: "Maps stakeholders and their interests; drafts steering-committee packs and minutes; manages gate reviews and approvals; tracks decisions and actions; keeps stakeholder communications timely and consistent.",
+    process: "Project Management — stakeholder & governance (steering packs, gate reviews, approvals, decisions & actions)",
+    inputs: ["Stakeholder map", "governance gates", "project status", "decision logs"],
+    systems: ["SharePoint", "GovSign", "Email", "Power BI"],
+    outputs: ["Steering packs & minutes", "gate-review status", "tracked decisions & actions", "stakeholder updates"],
+    complexity: "Medium", impact: "Medium", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on preparation, scheduling and tracking; gate and approval decisions stay with the board.",
+    risks: "The project board decides at each gate; the agent prepares and tracks.", nextAction: "",
+    talksTo: ["pm-3", "pm-4", "pm-7"],
+    subAgents: [{ name: "Steering Pack Builder", desc: "Drafts steering-committee packs and minutes.", complexity: "Medium", type: "Drafting", deps: "SharePoint", status: "In Progress" }, { name: "Gate Tracker", desc: "Tracks gate reviews and approvals.", complexity: "Medium", type: "Validation", deps: "GovSign", status: "In Progress" }, { name: "Decision & Action Log", desc: "Logs decisions and chases actions to closure.", complexity: "Low", type: "Orchestration", deps: "Email", status: "In Progress" }]
+  },
+  {
+    id: "pm-7", name: "Budget & Benefits Realisation Agent", kind: "core", tier: "Core",
+    purpose: "Prove the money was worth it — track each project's budget against spend and follow the promised benefits all the way to realised, not just delivered.",
+    responsibilities: "Tracks project budgets, commitments and actual spend; forecasts cost at completion; flags overruns early; defines and monitors benefit measures; confirms benefits are realised after go-live; coordinates with Finance.",
+    process: "Project Management — budget & benefits (budget vs spend, EAC, benefit definition & realisation)",
+    inputs: ["Project budgets", "commitments & actuals", "benefit measures", "post-go-live data"],
+    systems: ["Oracle", "Power BI", "SharePoint"],
+    outputs: ["Budget vs spend", "forecast at completion", "overrun alerts", "benefits-realisation tracking"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on tracking, forecasting and alerts; budget decisions stay with Finance and the project board.",
+    risks: "Finance and the board own the budget; the agent tracks and forecasts.", nextAction: "",
+    talksTo: ["pm-2", "pm-6"],
+    subAgents: [{ name: "Spend Tracker", desc: "Tracks budget, commitments and actual spend.", complexity: "Medium", type: "Validation", deps: "Oracle", status: "In Progress" }, { name: "EAC Forecaster", desc: "Forecasts cost at completion and flags overruns.", complexity: "High", type: "Reporting", deps: "Power BI", status: "In Progress" }, { name: "Benefits Monitor", desc: "Tracks promised benefits through to realisation.", complexity: "Medium", type: "Monitoring", deps: "SharePoint", status: "In Progress" }]
+  }
+];
+
+const DEPARTMENTS = [
+  {
+    id: "hr", name: "Human Resources", short: "HR", nameAr: "الموارد البشرية",
+    description: "People & HR agents under one orchestrator — covering the employee journey, performance, leave and case work — wrapping the human-judgment layer on top of Oracle HCM.",
+    owner: "Total Experience Team — Corporate Support Services", focal: "Aisha Al Mansoori · Director, HR Transformation", lastUpdated: "2026-06-26", agents: HR_AGENTS
+  },
+  {
+    id: "procurement", name: "Procurement, Travel & Vendor", short: "Procurement", nameAr: "المشتريات والسفر",
+    description: "Procure-to-pay, travel and vendor agents — intake, sourcing, vendor validation, contract drafting and approvals — over Oracle, NER and ICP.",
+    owner: "Corporate Support Services — Procurement", focal: "Mohammed Al Hashimi · Head of Procurement", lastUpdated: "2026-06-26", agents: PROCUREMENT_AGENTS
+  },
+  {
+    id: "finance", name: "Finance & Accounting", short: "Finance", nameAr: "المالية والمحاسبة",
+    description: "Finance & accounting agents — AP/AR, payments, payroll, reconciliations, VAT, budgeting, period-close and reporting — with payments and the close kept human-approved.",
+    owner: "Corporate Support Services — Finance", focal: "Fatima Al Zaabi · Director of Finance", lastUpdated: "2026-06-26", agents: FINANCE_AGENTS
+  },
+  {
+    id: "knowledge", name: "Knowledge & Content", short: "Knowledge", nameAr: "المعرفة والمحتوى",
+    description: "Knowledge & content agents — translation & interpretation, authoring, proofreading, publishing and documentation — over Email, Events Now and SharePoint.",
+    owner: "Government Communication & Knowledge", focal: "Layla Al Hammadi · Head of Knowledge & Content", lastUpdated: "2026-06-26", agents: KNOWLEDGE_AGENTS
+  },
+  {
+    id: "legal", name: "Legal", short: "Legal", nameAr: "الشؤون القانونية",
+    description: "Legal agents — contract and clause review, regulatory tracking, legal research and matter coordination — with every opinion kept with counsel.",
+    owner: "Legal Affairs", focal: "Noura Al Kaabi · Legal Counsel", lastUpdated: "2026-06-26", agents: LEGAL_AGENTS
+  },
+  {
+    id: "comms", name: "Events & Communication", short: "Events", nameAr: "الفعاليات والاتصال",
+    description: "Event coordination, creative & production, and media & communications agents — with publishing and external messaging human-approved.",
+    owner: "Government Communication", focal: "Omar Al Marri · Director of Communications", lastUpdated: "2026-06-26", agents: COMMS_AGENTS
+  },
+  {
+    id: "cyber", name: "Cyber Security", short: "Cyber", nameAr: "الأمن السيبراني",
+    description: "Security operations (SOC), clearance & GRC and related agents — triaging threats and governance, with incident response kept human-decided.",
+    owner: "Digital & Technology — Cyber Security", focal: "Rashid Al Balushi · Chief Information Security Officer", lastUpdated: "2026-06-26", agents: CYBER_AGENTS
+  },
+  {
+    id: "it", name: "IT Operations", short: "IT Ops", nameAr: "العمليات التقنية",
+    description: "IT service desk, access & identity, and operations & change agents — keeping IT responsive and controlled, with privileged access human-approved.",
+    owner: "Digital & Technology", focal: "Khalid Al Suwaidi · Chief Information Officer", lastUpdated: "2026-06-26", agents: IT_AGENTS
+  },
+  {
+    id: "protocol", name: "Protocol", short: "Protocol", nameAr: "المراسم",
+    description: "Protocol & VIP coordination and movement protocol agents — orchestrating visits and delegations, with judgment kept human.",
+    owner: "Office of the Minister — Protocol", focal: "Mariam Al Shamsi · Head of Protocol", lastUpdated: "2026-06-26", agents: PROTOCOL_AGENTS
+  },
+  {
+    id: "admin", name: "Admin Services", short: "Admin", nameAr: "الخدمات الإدارية",
+    description: "Workplace & hospitality and admin asset-management agents — running day-to-day corporate services with judgment kept human.",
+    owner: "Corporate Support Services — Administration", focal: "Saeed Al Nuaimi · Head of Admin Services", lastUpdated: "2026-06-26", agents: ADMIN_AGENTS
+  },
+  {
+    id: "tx", name: "Total Experience Center", short: "Experience", nameAr: "مركز التجربة الشاملة",
+    description: "The experience engine of the organisation — owning user & app experience, service and process experience, employee and vendor experience, the work environment and overall wellbeing, and following up with every department to lift satisfaction and continuously enhance their services.",
+    owner: "Total Experience Office", focal: "Hessa Al Falasi · Head of Total Experience", lastUpdated: "2026-06-26", agents: TX_AGENTS
+  },
+  {
+    id: "pm", name: "Project Management", short: "Projects", nameAr: "إدارة المشاريع",
+    description: "The delivery backbone — planning, prioritising, resourcing and governing projects across the organisation, with live risk, status and budget tracking so initiatives land on time, on value and on budget.",
+    owner: "Project Management Office (PMO)", focal: "Sultan Al Romaithi · Head of PMO", lastUpdated: "2026-06-26", agents: PM_AGENTS
+  }
+];
+
+window.DASHBOARD_DATA = { departments: DEPARTMENTS, programmeAgents: [], complexityScore: COMPLEXITY_SCORE };
