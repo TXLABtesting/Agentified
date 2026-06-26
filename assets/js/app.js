@@ -17,13 +17,16 @@
     filterOpen: false,
     chat: [],
     mindDept: "hr",
-    mindSubs: true,
+    mindSubs: false,
     mindLinks: false,
     mindZoom: 1,
+    mindPanX: 0,
+    mindPanY: 0,
     mindFull: false
   };
   let MM_COLLAB = {};   // agentId -> [path strings] for hover highlighting
   let MM_ADJ = {};      // agentId -> { connectedId: true }
+  let MM_VIEW = { rootX: 0, w: 0, h: 0 };  // last-rendered content metrics (for centering)
   /* expose live (edit-aware) data to the assistant engine */
   window.getDashboardData = function () { return DATA; };
 
@@ -408,7 +411,7 @@
     const head =
       '<div class="page__head page__head--hero">' +
         '<div class="eyebrow">UAE Government · Agentic Transformation Programme</div>' +
-        '<h2>Agentic Transformation Dashboard <span class="ar" dir="rtl">لوحة التحوّل الذكي</span></h2>' +
+        "<h2>Agentic Transformation Dashboard</h2>" +
         '<p>Overview of AI agents designed across departments · <span class="muted">Last updated ' +
           fmtDate("2026-06-22") + "</span></p></div>";
 
@@ -716,14 +719,17 @@
     // agent-to-agent "speaks to" links: built per-agent for hover; shown all only if toggled
     MM_COLLAB = {}; MM_ADJ = {}; let allCollab = "", collabCount = 0;
     if (!isAll) {
+      const seenEdge = {};
       nodes.forEach((n) => {
         if (n.type !== "agent" || !n.talksTo) return;
         n.talksTo.forEach((tid) => {
           const t = byId[tid]; if (!t) return;
-          collabCount++;
+          const key = n.id < tid ? n.id + "|" + tid : tid + "|" + n.id;
+          if (seenEdge[key]) return;       // undirected: draw each pair once
+          seenEdge[key] = 1; collabCount++;
           const sy = n.y - halfH(n), ty = t.y - halfH(t);
           const top = Math.min(sy, ty) - (38 + Math.min(80, Math.abs(n.x - t.x) / 5));
-          const path = '<path class="mm-clink" marker-end="url(#mm-arrow)" d="M' + n.x + ',' + sy +
+          const path = '<path class="mm-clink" d="M' + n.x + ',' + sy +
             ' C' + n.x + ',' + top + ' ' + t.x + ',' + top + ' ' + t.x + ',' + ty + '"/>';
           allCollab += path;
           (MM_COLLAB[n.id] = MM_COLLAB[n.id] || []).push(path);
@@ -765,7 +771,7 @@
             '<span class="mm-av" style="color:' + tint[0] + ";background:" + tint[1] + '">' + icon("cpu") + "</span>" +
             '<div class="mm-tx"><b>' + esc(n.label) + "</b>" +
             '<span class="mm-role"><i class="mm-dot" style="background:' + tint[0] + '"></i>' +
-            esc(roleFromTier(n.tier)) + " · " + esc(n.status) + "</span></div>" +
+            (n.kind === "value-add" ? "Extras" : "Process") + " · " + esc(n.status) + "</span></div>" +
           "</div>" + foot + badge + "</div>";
       }
       // sub-agent = junior member chip
@@ -805,10 +811,11 @@
         (STATE.mindLinks && collabCount ? " (" + collabCount + " links)" : "") +
         ", and each card shows the systems it relies on.";
 
-    const z = STATE.mindZoom;
-    const innerW = Math.round(maxRight * z), innerH = Math.round(totalH * z);
+    // record content metrics so centerMindmap() can position the viewport
+    MM_VIEW = { rootX: root.x, w: maxRight, h: totalH };
+    const tf = "translate(" + STATE.mindPanX + "px," + STATE.mindPanY + "px) scale(" + STATE.mindZoom + ")";
     const stage =
-      '<div class="mm-stage" style="width:' + maxRight + "px;height:" + totalH + "px;transform:scale(" + z + ')">' +
+      '<div class="mm-stage" id="mmStage" style="width:' + maxRight + "px;height:" + totalH + "px;transform:" + tf + '">' +
         '<svg class="mm-svg" width="' + maxRight + '" height="' + totalH + '">' +
           '<defs><marker id="mm-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">' +
             '<path d="M0,0 L10,5 L0,10 z" fill="var(--gold-ink)"/></marker></defs>' +
@@ -816,10 +823,10 @@
       "</div>";
     const stageWrap =
       '<div class="mm-stagewrap">' +
-        '<div class="mm-canvas"><div class="mm-inner" style="width:' + innerW + "px;height:" + innerH + 'px">' + stage + "</div></div>" +
+        '<div class="mm-canvas" id="mmCanvas">' + stage + "</div>" +
         '<div class="mm-zoom">' +
           '<button class="mm-zbtn" data-zoom="out" title="Zoom out" aria-label="Zoom out">−</button>' +
-          '<button class="mm-zbtn mm-zlevel" data-zoom="reset" title="Reset zoom">' + Math.round(z * 100) + "%</button>" +
+          '<button class="mm-zbtn mm-zlevel" data-zoom="reset" title="Reset zoom">' + Math.round(STATE.mindZoom * 100) + "%</button>" +
           '<button class="mm-zbtn" data-zoom="in" title="Zoom in" aria-label="Zoom in">+</button>' +
         "</div>" +
         '<div class="mm-pan-hint">' + icon("mindmap") + "Drag to move · use ± to zoom</div>" +
@@ -1154,9 +1161,27 @@
     if (v === "assistant") { const sc = $("#chatScroll"); if (sc) sc.scrollTop = sc.scrollHeight; setTimeout(focusChat, 40); }
     if (v === "mindmap") centerMindmap();
   }
+  // apply the current pan/zoom to the stage without re-rendering (smooth)
+  function applyMM() {
+    const s = document.getElementById("mmStage"); if (!s) return;
+    s.style.transform = "translate(" + STATE.mindPanX + "px," + STATE.mindPanY + "px) scale(" + STATE.mindZoom + ")";
+    const lvl = document.querySelector(".mm-zlevel"); if (lvl) lvl.textContent = Math.round(STATE.mindZoom * 100) + "%";
+  }
+  // position the viewport so the tree root sits centred near the top
   function centerMindmap() {
-    const c = $(".mm-canvas"); if (!c) return;
-    c.scrollLeft = Math.max(0, (c.scrollWidth - c.clientWidth) / 2);
+    const c = document.getElementById("mmCanvas"); if (!c) return;
+    STATE.mindPanX = Math.round(c.clientWidth / 2 - MM_VIEW.rootX * STATE.mindZoom);
+    STATE.mindPanY = 28;
+    applyMM();
+  }
+  // zoom toward a focal point (default: viewport centre) keeping it stationary
+  function zoomAt(nz, fx, fy) {
+    nz = Math.max(0.3, Math.min(2.2, +nz.toFixed(2)));
+    const z0 = STATE.mindZoom; if (nz === z0) return;
+    STATE.mindPanX = fx - (fx - STATE.mindPanX) * (nz / z0);
+    STATE.mindPanY = fy - (fy - STATE.mindPanY) * (nz / z0);
+    STATE.mindZoom = nz;
+    applyMM();
   }
 
   /* ---- Events (delegated) ---------------------------------------------- */
@@ -1288,32 +1313,48 @@
 
   /* ---- Mind map zoom / full screen / pan -------------------------------- */
   function zoomMap(dir) {
-    const z = STATE.mindZoom;
-    STATE.mindZoom = dir === "in" ? Math.min(2, +(z + 0.15).toFixed(2))
-      : dir === "out" ? Math.max(0.4, +(z - 0.15).toFixed(2)) : 1;
-    renderBody();
+    if (dir === "reset") { STATE.mindZoom = 1; centerMindmap(); return; }
+    const c = document.getElementById("mmCanvas"); if (!c) return;
+    const step = dir === "in" ? 0.2 : -0.2;
+    zoomAt(STATE.mindZoom + step, c.clientWidth / 2, c.clientHeight / 2);
   }
   function setMindFull(on) {
     STATE.mindFull = on;
     document.body.style.overflow = on ? "hidden" : "";
     renderBody();
   }
-  // drag-to-pan inside the mind-map canvas (works across re-renders)
+  // drag anywhere in the canvas to pan freely (both axes); transform-based
   let mmPan = null;
   document.addEventListener("pointerdown", function (e) {
     const canvas = e.target.closest(".mm-canvas");
-    if (!canvas || e.target.closest(".mm-node, button, a, input")) return;
-    mmPan = { c: canvas, x: e.clientX, y: e.clientY, sl: canvas.scrollLeft, st: canvas.scrollTop };
-    canvas.classList.add("is-grabbing");
+    if (!canvas || e.button !== 0 || e.target.closest("button, a, input")) return;
+    mmPan = { c: canvas, x: e.clientX, y: e.clientY, px: STATE.mindPanX, py: STATE.mindPanY, moved: false };
   });
   document.addEventListener("pointermove", function (e) {
     if (!mmPan) return;
-    mmPan.c.scrollLeft = mmPan.sl - (e.clientX - mmPan.x);
-    mmPan.c.scrollTop = mmPan.st - (e.clientY - mmPan.y);
+    const dx = e.clientX - mmPan.x, dy = e.clientY - mmPan.y;
+    if (!mmPan.moved && Math.abs(dx) + Math.abs(dy) > 4) { mmPan.moved = true; mmPan.c.classList.add("is-grabbing"); }
+    if (!mmPan.moved) return;
+    STATE.mindPanX = mmPan.px + dx;
+    STATE.mindPanY = mmPan.py + dy;
+    applyMM();
   });
   function endPan() { if (mmPan) { mmPan.c.classList.remove("is-grabbing"); mmPan = null; } }
   document.addEventListener("pointerup", endPan);
-  document.addEventListener("pointerleave", endPan);
+  document.addEventListener("pointercancel", endPan);
+  // suppress the click that follows a real drag (so panning doesn't open an agent)
+  document.addEventListener("click", function (e) {
+    if (mmDragged) { mmDragged = false; e.stopPropagation(); e.preventDefault(); }
+  }, true);
+  let mmDragged = false;
+  document.addEventListener("pointerup", function () { if (mmPan && mmPan.moved) mmDragged = true; }, true);
+  // wheel / trackpad to zoom toward the cursor
+  document.addEventListener("wheel", function (e) {
+    const canvas = e.target.closest(".mm-canvas"); if (!canvas) return;
+    e.preventDefault();
+    const r = canvas.getBoundingClientRect();
+    zoomAt(STATE.mindZoom * (e.deltaY < 0 ? 1.1 : 0.9), e.clientX - r.left, e.clientY - r.top);
+  }, { passive: false });
 
   // hover an agent to reveal only its "speaks to" links (keeps the canvas clean)
   let mmHover = null;

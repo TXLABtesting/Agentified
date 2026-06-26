@@ -651,14 +651,14 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
 
 .mm-stagewrap { position: relative; }
 .mm-canvas {
-  position: relative; overflow: auto; border: 1px solid var(--line); border-radius: var(--r-md);
-  background: var(--surface); box-shadow: var(--sh-1); max-height: calc(100vh - 250px);
+  position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--surface); box-shadow: var(--sh-1);
+  height: calc(100vh - 268px); min-height: 440px;
   background-image: radial-gradient(var(--line) 1px, transparent 1px); background-size: 22px 22px;
-  cursor: grab;
+  cursor: grab; touch-action: none;
 }
 .mm-canvas.is-grabbing { cursor: grabbing; }
-.mm-inner { position: relative; }
-.mm-stage { position: relative; transform-origin: 0 0; user-select: none; }
+.mm-stage { position: absolute; top: 0; left: 0; transform-origin: 0 0; user-select: none; will-change: transform; }
 .mm-svg { position: absolute; top: 0; left: 0; pointer-events: none; }
 
 /* zoom + pan controls (overlay the canvas viewport) */
@@ -678,7 +678,7 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
 .mm-pan-hint svg { width: 13px; height: 13px; }
 .mm-link { fill: none; stroke: #D3DAE4; stroke-width: 1.4; }
 .mm-link--d0 { stroke: #C2C9D5; stroke-width: 1.6; }
-.mm-clink { fill: none; stroke: var(--gold-ink); stroke-width: 1.8; opacity: .85; }
+.mm-clink { fill: none; stroke: var(--gold-ink); stroke-width: 1.6; stroke-dasharray: 2 5; stroke-linecap: round; opacity: .9; }
 /* hover focus */
 .mm-member { transition: box-shadow .15s, transform .12s, opacity .15s; }
 .mm-member.is-dim { opacity: .32; }
