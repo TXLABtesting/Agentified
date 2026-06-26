@@ -13,7 +13,7 @@
     view: "overview",
     deptId: null,
     search: "",
-    filters: { complexity: [], status: [], priority: [], kind: [] },
+    filters: { complexity: [], status: [], priority: [], category: [] },
     filterOpen: false,
     chat: [],
     mindDept: "hr",
@@ -110,9 +110,28 @@
   const statusChip = (s) => chip(s, COLOR.status[s] || "slate", true);
   const cplxChip = (c) => chip(c, COLOR.complexity[c] || "slate");
   const prioChip = (p) => chip(p, COLOR.priority[p] || "slate");
-  const kindChip = (k) => k === "value-add"
-    ? '<span class="chip chip--gold">Value-Add</span>'
-    : '<span class="chip chip--brand">Core</span>';
+  /* ---- Process vs Extras classification --------------------------------- */
+  // Agents grounded in the documented processes are "Process"; value-add
+  // agents (and anything explicitly "beyond the documented" processes) are
+  // enhancements — "Extras".
+  function catOf(a) {
+    return (a.kind === "value-add" || /beyond the documented/i.test(a.process || "")) ? "extras" : "process";
+  }
+  // A short tag taken from the agent's documented process (e.g. "Onboarding").
+  // Falls back to a plain "Process" tag when the process is a long enumeration.
+  function procTagOf(a) {
+    var p = a.process || "";
+    var i = p.indexOf("—"); // strip the "Dept —" prefix
+    if (i >= 0) p = p.slice(i + 1);
+    p = p.split(/[(:;]/)[0].trim();          // first clause only
+    if (p.indexOf(",") >= 0) p = p.split(",")[0].trim();
+    if (!p || p.indexOf("/") >= 0 || p.length > 24) return "Process";
+    return p.charAt(0).toUpperCase() + p.slice(1);
+  }
+  const catLabel = (a) => catOf(a) === "extras" ? "Extras" : "Process";
+  const catChip = (a) => catOf(a) === "extras"
+    ? '<span class="chip chip--gold">Extras</span>'
+    : '<span class="chip chip--brand">Process</span>';
 
   /* ---- Aggregations ----------------------------------------------------- */
   function deptStats(d) {
@@ -253,7 +272,7 @@
   }
   function renderHeader() {
     const f = STATE.filters;
-    const activeFilters = f.complexity.length + f.status.length + f.priority.length + f.kind.length;
+    const activeFilters = f.complexity.length + f.status.length + f.priority.length + f.category.length;
     $("#header").innerHTML =
       '<div class="topbar">' +
         '<button class="btn btn--icon btn--ghost menu-toggle" data-menu>' + icon("menu") + "</button>" +
@@ -275,7 +294,7 @@
   }
   function filterPopover() {
     const groups = [
-      { key: "kind", title: "Type", opts: ["core", "value-add"], labels: { "core": "Core", "value-add": "Value-Add" } },
+      { key: "category", title: "Type", opts: ["process", "extras"], labels: { "process": "Process", "extras": "Extras" } },
       { key: "complexity", title: "Complexity", opts: ["Low", "Medium", "High", "Very High"] },
       { key: "status", title: "Status", opts: ["Ready", "In Progress", "Needs Review"] },
       { key: "priority", title: "Priority", opts: ["Quick Win", "Strategic", "Complex", "Future Phase"] }
@@ -294,7 +313,7 @@
   /* ---- Filtering logic -------------------------------------------------- */
   function agentMatches(a) {
     const f = STATE.filters;
-    if (f.kind.length && !f.kind.includes(a.kind)) return false;
+    if (f.category.length && !f.category.includes(catOf(a))) return false;
     if (f.complexity.length && !f.complexity.includes(a.complexity)) return false;
     if (f.status.length && !f.status.includes(a.status)) return false;
     if (f.priority.length && !f.priority.includes(a.priority)) return false;
@@ -308,7 +327,7 @@
   }
   const hasFilters = () => {
     const f = STATE.filters;
-    return STATE.search || f.complexity.length || f.status.length || f.priority.length || f.kind.length;
+    return STATE.search || f.complexity.length || f.status.length || f.priority.length || f.category.length;
   };
 
   /* ====================================================================== */
@@ -497,7 +516,9 @@
       '<p class="acard__desc">' + esc(a.purpose) + "</p>" +
       '<div class="acard__tags">' +
         '<span class="acard__tag">' + esc(a.priority) + "</span>" +
-        '<span class="acard__tag is-kind">' + (a.kind === "value-add" ? "Value-Add" : "Core") + "</span>" +
+        (catOf(a) === "extras"
+          ? '<span class="acard__tag is-extras">Extras</span>'
+          : '<span class="acard__tag is-process">' + esc(procTagOf(a)) + "</span>") +
       "</div>" +
       '<div class="acard__panel">' +
         '<div class="acard__info">' +
@@ -525,7 +546,7 @@
         '<td><div class="cell-strong">' + esc(a.name) + "</div>" +
           '<div class="cell-sub">' + esc(a.purpose.slice(0, 78)) + (a.purpose.length > 78 ? "…" : "") + "</div></td>" +
         "<td>" + esc(a.deptName) + "</td>" +
-        "<td>" + kindChip(a.kind) + "</td>" +
+        "<td>" + catChip(a) + "</td>" +
         "<td>" + cplxChip(a.complexity) + "</td>" +
         '<td class="cell-sub">' + esc(a.impact) + "</td>" +
         '<td class="cell-sub">' + esc(a.feasibility) + "</td>" +
@@ -819,7 +840,7 @@
         '<div class="card"><div class="card__head"><h3>Programme</h3></div><div class="card__body">' +
           '<div class="set-row"><div><b>Programme name</b><span>Display title</span></div><span class="muted">Agentic Transformation</span></div>' +
           '<div class="set-row"><div><b>Audience</b><span>Primary readership</span></div><span class="muted">H.E. & Senior Leadership</span></div>' +
-          '<div class="set-row"><div><b>Data source</b><span>Current dataset</span></div>' + kindChip("core") + '</div>' +
+          '<div class="set-row"><div><b>Data source</b><span>Current dataset</span></div><span class="chip chip--brand">Blueprints</span></div>' +
           '<div class="set-row"><div><b>Last updated</b><span>Dataset date</span></div><span class="muted">' + fmtDate("2026-06-22") + "</span></div>" +
         "</div></div>" +
         '<div class="card"><div class="card__head"><h3>Dataset Overview</h3></div><div class="card__body">' +
@@ -941,10 +962,10 @@
 
     const html =
       '<div class="drawer__head">' +
-        '<div class="drawer__eyebrow"><span class="drawer__dept">' + esc(a.deptName) + " · " + esc(a.tier) + "</span>" +
+        '<div class="drawer__eyebrow"><span class="drawer__dept">' + esc(a.deptName) + " · " + esc(catLabel(a)) + "</span>" +
           '<button class="close-x" data-close-drawer>' + icon("close") + "</button></div>" +
         "<h2>" + esc(a.name) + "</h2>" +
-        '<div class="drawer__chips">' + kindChip(a.kind) + statusChip(a.status) + prioChip(a.priority) + "</div>" +
+        '<div class="drawer__chips">' + catChip(a) + statusChip(a.status) + prioChip(a.priority) + "</div>" +
       "</div>" +
       '<div class="drawer__body">' +
         '<div class="scorebox">' + score + "</div>" +
@@ -1003,7 +1024,10 @@
         '<div class="form-field col-2"><label>Agent Name</label><input class="input" name="name" value="' + esc(a.name) + '" required /></div>' +
         '<div class="form-field col-2"><label>Purpose / Description</label><textarea class="textarea" name="purpose">' + esc(a.purpose) + "</textarea></div>" +
         '<div class="form-field"><label>Department</label><select class="select" name="deptId">' + deptOpts + "</select></div>" +
-        sel("kind", "Type", ["core", "value-add"], a.kind) +
+        '<div class="form-field"><label>Type</label><select class="select" name="kind">' +
+          '<option value="core"' + (a.kind !== "value-add" ? " selected" : "") + ">Process</option>" +
+          '<option value="value-add"' + (a.kind === "value-add" ? " selected" : "") + ">Extras</option>" +
+        "</select></div>" +
         sel("complexity", "Complexity", ["Low", "Medium", "High", "Very High"], a.complexity) +
         sel("impact", "Impact", ["Low", "Medium", "High"], a.impact) +
         sel("feasibility", "Feasibility", ["Low", "Medium", "High"], a.feasibility) +
@@ -1232,7 +1256,7 @@
     renderHeader(); render();
   }
   function clearFilters() {
-    STATE.filters = { complexity: [], status: [], priority: [], kind: [] };
+    STATE.filters = { complexity: [], status: [], priority: [], category: [] };
     STATE.search = ""; STATE.filterOpen = false;
     renderHeader(); render();
   }

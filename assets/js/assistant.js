@@ -39,7 +39,8 @@
   const sChip = (s) => chip(s, COLOR.status[s] || "slate", true);
   const cChip = (c) => chip(c, COLOR.complexity[c] || "slate");
   const pChip = (p) => chip(p, COLOR.priority[p] || "slate");
-  const kChip = (k) => k === "value-add" ? '<span class="chip chip--gold">Value-Add</span>' : '<span class="chip chip--brand">Core</span>';
+  const catOf = (a) => (a.kind === "value-add" || /beyond the documented/i.test(a.process || "")) ? "extras" : "process";
+  const kChip = (a) => catOf(a) === "extras" ? '<span class="chip chip--gold">Extras</span>' : '<span class="chip chip--brand">Process</span>';
   const aLink = (a) => '<button class="chat-link" data-agent="' + a.id + '">' + esc(a.name) + "</button>";
 
   /* ---- dataset helpers -------------------------------------------------- */
@@ -113,7 +114,7 @@
   }
   function agentProfile(a) {
     return '<div class="chat-profile">' +
-      '<div class="chat-profile__head">' + aLink(a) + kChip(a.kind) + "</div>" +
+      '<div class="chat-profile__head">' + aLink(a) + kChip(a) + "</div>" +
       '<div class="chat-profile__meta">' + esc(a.deptName) + " · " + esc(a.tier) + "</div>" +
       "<p>" + esc(a.purpose) + "</p>" +
       '<div class="chat-li__chips" style="margin:8px 0">' + cChip(a.complexity) +
@@ -220,11 +221,11 @@
     if (has(/strateg/) && has(/agent|priorit/)) return prioList("Strategic", agents, dept);
     if (has(/future|enhance|later phase/)) return prioList("Future Phase", agents, dept);
 
-    /* value-add */
-    if (has(/value.?add|enhanc/)) {
-      let list = agents.filter((a) => a.kind === "value-add");
+    /* extras (enhancements) */
+    if (has(/value.?add|enhanc|extra/)) {
+      let list = agents.filter((a) => catOf(a) === "extras");
       if (dept) list = list.filter((a) => a.deptId === dept.id);
-      return "<p>There are <b>" + list.length + "</b> value-add (enhancement) agents" + (dept ? " in " + esc(dept.name) : "") + ":</p>" + agentLineList(list);
+      return "<p>There are <b>" + list.length + "</b> Extras (enhancement) agents" + (dept ? " in " + esc(dept.name) : "") + ":</p>" + agentLineList(list);
     }
 
     /* systems / integrations */
@@ -295,7 +296,7 @@
       "Tell me about the Payroll Validation agent",
       "What sub-agents are under Onboarding Orchestration?",
       "Which departments are ready?",
-      "List the value-add agents"
+      "List the Extras agents"
     ];
   };
   function suggestionsHTML() {

@@ -435,6 +435,8 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
 .acard__tag { font-size: 10px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
   padding: 4px 11px; border-radius: var(--r-full); background: var(--gold-soft); color: #8A6A22; }
 .acard__tag.is-kind { background: var(--brand-tint); color: var(--brand); }
+.acard__tag.is-process { background: var(--sage-bg); color: var(--sage); text-transform: none; letter-spacing: .2px; }
+.acard__tag.is-extras  { background: var(--gold-soft); color: var(--gold-ink); }
 .acard__panel { background: var(--surface-2); border: 1px solid var(--line-2); border-radius: var(--r-md); padding: 14px; display: flex; flex-direction: column; gap: 12px; }
 .acard__info { display: flex; flex-direction: column; gap: 8px; }
 .acard__inforow { display: flex; align-items: flex-start; gap: 8px; font-size: var(--fs-sm); color: var(--ink-2); }
