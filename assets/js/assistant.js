@@ -48,7 +48,9 @@
 
   /* ---- dataset helpers -------------------------------------------------- */
   function allAgents() {
-    return D().departments.flatMap((d) => d.agents.map((a) => Object.assign({ deptId: d.id, deptName: d.name }, a)));
+    const dept = D().departments.flatMap((d) => d.agents.map((a) => Object.assign({ deptId: d.id, deptName: d.name }, a)));
+    const prog = (D().programmeAgents || []).map((a) => Object.assign({ deptId: "programme", deptName: "Programme-wide" }, a));
+    return dept.concat(prog);
   }
   function agentById(id) { return allAgents().find((a) => a.id === id) || null; }
   function subsOf(a) { return a.subAgents || []; }

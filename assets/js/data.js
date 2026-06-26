@@ -2184,4 +2184,26 @@ const DEPARTMENTS = [
   }
 ];
 
-window.DASHBOARD_DATA = { departments: DEPARTMENTS, complexityScore: COMPLEXITY_SCORE };
+const PROGRAMME_AGENTS = [
+  {
+    id: "zgb-1", name: "Zero Bureaucracy Agent", kind: "core", tier: "Programme",
+    purpose: "Drive the Zero Government Bureaucracy mandate across every department — continuously hunt down redundant steps, approvals, documents and waiting time, and turn each service into the fewest possible steps.",
+    responsibilities: "Maps every service journey across the departments; flags duplicate data requests, unnecessary approvals, redundant documents and dead waiting time; proposes eliminations and merges with an impact estimate; routes each proposal to the owning department and the Zero-Bureaucracy committee; tracks procedures removed, steps cut and time saved.",
+    process: "Cross-government — Zero Government Bureaucracy (step elimination, approval reduction, document removal, requirement simplification, time-to-service)",
+    inputs: ["Service-journey maps", "approval matrices", "required-document lists", "processing times", "customer feedback", "every department process"],
+    systems: ["MOCA Smart", "Oracle", "SharePoint", "Email"],
+    outputs: ["Elimination proposals", "simplified service journeys", "procedures removed", "steps and approvals cut", "time saved", "a live bureaucracy-reduction scorecard"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on detection, analysis and proposals; every elimination decision stays with the owning department and the Zero-Bureaucracy committee.",
+    risks: "Departments and the Zero-Bureaucracy committee approve each removal; nothing is eliminated without sign-off.", nextAction: "",
+    talksTo: [],
+    subAgents: [
+      { name: "Process X-Ray", desc: "Maps and decomposes each service journey into its individual steps, approvals and documents.", complexity: "Medium", type: "Reporting", deps: "MOCA Smart", status: "In Progress" },
+      { name: "Redundancy Detector", desc: "Flags duplicate data requests, unnecessary approvals and redundant documents across services.", complexity: "High", type: "Validation", deps: "Oracle", status: "In Progress" },
+      { name: "Elimination Proposer", desc: "Drafts step, approval and document removals with an effort and time-saved estimate.", complexity: "Medium", type: "Drafting", deps: "SharePoint", status: "In Progress" },
+      { name: "Reduction Scorecard", desc: "Tracks procedures removed, steps cut and customer time saved across the programme.", complexity: "Medium", type: "Reporting", deps: "MOCA Smart", status: "In Progress" }
+    ]
+  }
+];
+
+window.DASHBOARD_DATA = { departments: DEPARTMENTS, programmeAgents: PROGRAMME_AGENTS, complexityScore: COMPLEXITY_SCORE };

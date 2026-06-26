@@ -238,6 +238,20 @@ a { color: inherit; text-decoration: none; }
 .crumbs .current { color: var(--ink); font-weight: 600; }
 
 /* ---- KPI cards ----------------------------------------------------------- */
+.prog-banner { display: flex; align-items: center; gap: var(--sp-4); margin-top: var(--sp-4);
+  padding: 16px 18px; border-radius: var(--r-lg); cursor: pointer;
+  background: linear-gradient(100deg, var(--gold-soft) 0%, var(--surface) 70%);
+  border: 1px solid var(--gold); box-shadow: var(--sh-1); transition: box-shadow .15s, transform .12s; }
+.prog-banner:hover { box-shadow: var(--sh-2); transform: translateY(-1px); }
+.prog-banner__icon { width: 42px; height: 42px; border-radius: 12px; flex: none; display: grid; place-items: center;
+  background: var(--gold); color: #fff; }
+.prog-banner__icon svg { width: 22px; height: 22px; }
+.prog-banner__tx { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.prog-banner__tx b { font-size: var(--fs-h3); color: var(--ink); }
+.prog-banner__tx span { font-size: var(--fs-sm); color: var(--ink-2); overflow: hidden; text-overflow: ellipsis;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.prog-banner__cta { flex: none; margin-left: auto; }
+
 .kpi-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--sp-4); }
 .kpi {
   background: var(--surface); border: 1px solid transparent; border-radius: var(--r-lg);
@@ -683,6 +697,8 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
 .mm-link { fill: none; stroke: #D3DAE4; stroke-width: 1.4; }
 .mm-link--d0 { stroke: #C2C9D5; stroke-width: 1.6; }
 .mm-clink { fill: none; stroke: var(--gold-ink); stroke-width: 1.6; stroke-dasharray: 2 5; stroke-linecap: round; opacity: .9; }
+.mm-prog { border: 1.5px solid var(--gold); box-shadow: 0 6px 16px rgba(198,162,74,.22); }
+.mm-prog .mm-av { background: var(--gold-soft); color: var(--gold-ink); }
 /* hover focus */
 .mm-member { transition: box-shadow .15s, transform .12s, opacity .15s; }
 .mm-member.is-dim { opacity: .32; }

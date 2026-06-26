@@ -90,8 +90,9 @@
   const $ = (s, r) => (r || document).querySelector(s);
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const programmeAgents = () => (DATA.programmeAgents || []).map((a) => Object.assign({ deptId: "programme", deptName: "Programme-wide" }, a));
   const allAgents = () => DATA.departments.flatMap((d) =>
-    d.agents.map((a) => Object.assign({ deptId: d.id, deptName: d.name }, a)));
+    d.agents.map((a) => Object.assign({ deptId: d.id, deptName: d.name }, a))).concat(programmeAgents());
   const findAgent = (id) => allAgents().find((a) => a.id === id);
   const findDept = (id) => DATA.departments.find((d) => d.id === id);
   const subCount = (d) => d.agents.reduce((n, a) => n + (a.subAgents ? a.subAgents.length : 0), 0);
@@ -162,7 +163,7 @@
   }
   function globalStats() {
     const agents = allAgents();
-    const subs = DATA.departments.reduce((n, d) => n + subCount(d), 0);
+    const subs = agents.reduce((n, a) => n + ((a.subAgents || []).length), 0);
     const high = agents.filter((a) => a.complexity === "High" || a.complexity === "Very High").length;
     const review = agents.filter((a) => a.status === "Needs Review").length;
     const ready = agents.filter((a) => a.status === "Ready").length;
@@ -415,7 +416,17 @@
         '<p>Overview of AI agents designed across departments · <span class="muted">Last updated ' +
           fmtDate("2026-06-22") + "</span></p></div>";
 
-    return '<div class="page">' + head + kpiHTML + table + "</div>";
+    const zba = (DATA.programmeAgents || [])[0];
+    const zbaHTML = zba ?
+      '<div class="prog-banner" data-agent="' + zba.id + '">' +
+        '<span class="prog-banner__icon">' + icon("spark") + "</span>" +
+        '<div class="prog-banner__tx">' +
+          '<b>Programme-level · ' + esc(zba.name) + "</b>" +
+          "<span>" + esc(zba.purpose) + "</span></div>" +
+        '<button class="btn btn--sm prog-banner__cta" data-agent="' + zba.id + '">View details</button>' +
+      "</div>" : "";
+
+    return '<div class="page">' + head + kpiHTML + zbaHTML + table + "</div>";
   }
 
   function viewDepartments() {
@@ -658,15 +669,21 @@
     let root;
     if (isAll) {
       const subs = STATE.mindSubs;
+      const progKids = programmeAgents().map((a) => ({
+        type: "agent", prog: true, id: a.id, label: a.name, status: a.status, complexity: a.complexity, kind: a.kind, tier: a.tier,
+        systems: a.systems, talksTo: a.talksTo,
+        children: subs ? (a.subAgents || []).map((s) => ({ type: "sub", parentId: a.id, label: s.name, status: s.status, complexity: s.complexity })) : []
+      }));
+      const deptKids = DATA.departments.filter((d) => d.agents.length).map((d) => ({
+        type: "dept", id: d.id, label: d.name, meta: d.agents.length + " agents",
+        children: d.agents.map((a) => ({
+          type: "agent", id: a.id, label: a.name, status: a.status, complexity: a.complexity, kind: a.kind, tier: a.tier,
+          systems: a.systems, talksTo: a.talksTo,
+          children: subs ? (a.subAgents || []).map((s) => ({ type: "sub", parentId: a.id, label: s.name, status: s.status, complexity: s.complexity })) : []
+        }))
+      }));
       root = { type: "root", label: "Agentic Transformation", meta: g.depts + " departments · " + g.total + " agents",
-        children: DATA.departments.filter((d) => d.agents.length).map((d) => ({
-          type: "dept", id: d.id, label: d.name, meta: d.agents.length + " agents",
-          children: d.agents.map((a) => ({
-            type: "agent", id: a.id, label: a.name, status: a.status, complexity: a.complexity, kind: a.kind, tier: a.tier,
-            systems: a.systems, talksTo: a.talksTo,
-            children: subs ? (a.subAgents || []).map((s) => ({ type: "sub", parentId: a.id, label: s.name, status: s.status, complexity: s.complexity })) : []
-          }))
-        })) };
+        children: progKids.concat(deptKids) };
     } else {
       const d = findDept(STATE.mindDept) || DATA.departments[0];
       const subs = STATE.mindSubs;
@@ -766,12 +783,12 @@
               '<span class="mm-sysi mm-sys--' + x.key + '" title="' + esc(x.label) + '">' + icon(x.icon) + "</span>").join("") + "</span>" +
             '<span class="mm-details">Details ' + icon("chevR") + "</span>" +
           "</div>";
-        return '<div class="mm-node mm-member" data-agent="' + n.id + '" title="' + esc(n.label) + '" style="' + pos + '">' +
+        return '<div class="mm-node mm-member' + (n.prog ? " mm-prog" : "") + '" data-agent="' + n.id + '" title="' + esc(n.label) + '" style="' + pos + '">' +
           '<div class="mm-member__top">' +
-            '<span class="mm-av" style="color:' + tint[0] + ";background:" + tint[1] + '">' + icon("cpu") + "</span>" +
+            '<span class="mm-av"' + (n.prog ? "" : ' style="color:' + tint[0] + ";background:" + tint[1] + '"') + ">" + icon(n.prog ? "spark" : "cpu") + "</span>" +
             '<div class="mm-tx"><b>' + esc(n.label) + "</b>" +
-            '<span class="mm-role"><i class="mm-dot" style="background:' + tint[0] + '"></i>' +
-            (n.kind === "value-add" ? "Extras" : "Process") + " · " + esc(n.status) + "</span></div>" +
+            '<span class="mm-role"><i class="mm-dot" style="background:' + (n.prog ? "var(--gold)" : tint[0]) + '"></i>' +
+            (n.prog ? "Programme-wide" : (n.kind === "value-add" ? "Extras" : "Process")) + " · " + esc(n.status) + "</span></div>" +
           "</div>" + foot + badge + "</div>";
       }
       // sub-agent = junior member chip
