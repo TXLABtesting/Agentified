@@ -25,10 +25,10 @@ const HR_AGENTS = [
     systems: ["Oracle HR", "MOCA APP", "MOCA Smart", "GovSign", "SharePoint", "Email"],
     outputs: ["Validated", "routed requests", "issued letters/payslips", "answered queries", "fewer rejections"],
     complexity: "Medium", impact: "High", feasibility: "High",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on clean, in-policy requests; escalate exceptions",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on clean, in-policy requests; escalate exceptions",
     risks: "The matrix-defined approver decides; the employee confirms submissions", nextAction: "",
     talksTo: ["hr-h1", "hr-h10", "hr-h3", "hr-h4", "hr-h8", "hr-h9"],
-    subAgents: [{ name: "Handles ESS catalogue conversationally —", desc: "Handles the ESS catalogue conversationally — personal-info and bank-account updates, education-allowance and air-ticket claims,", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "In Progress" }, { name: "Validates each policy", desc: "validates each against policy", complexity: "Medium", type: "Validation", deps: "Oracle HR", status: "In Progress" }, { name: "Pre-fills forms", desc: "pre-fills forms", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "In Progress" }]
+    subAgents: [{ name: "Handles ESS catalogue conversationally —", desc: "Handles the ESS catalogue conversationally — personal-info and bank-account updates, education-allowance and air-ticket claims,", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "Ready" }, { name: "Validates each policy", desc: "validates each against policy", complexity: "Medium", type: "Validation", deps: "Oracle HR", status: "Ready" }, { name: "Pre-fills forms", desc: "pre-fills forms", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "Ready" }]
   },
   {
     id: "hr-h3", name: "HR Operations & Lifecycle Agent", kind: "core", tier: "Core",
@@ -39,10 +39,10 @@ const HR_AGENTS = [
     systems: ["Oracle HR", "GovSign", "MOCA Smart", "Email"],
     outputs: ["Processed lifecycle changes", "renewed/closed contracts", "EOS package", "updated records"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on validation & record updates; escalate pay, renewal and termination decisions",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on validation & record updates; escalate pay, renewal and termination decisions",
     risks: "HR Director (HR 2) and Entity Head approve per delegation; Finance settles EOS", nextAction: "",
     talksTo: ["hr-h1", "hr-h2", "hr-h4", "hr-h9"],
-    subAgents: [{ name: "Validates processes change-pay,", desc: "Validates and processes change-pay, change-manager and update-employment", complexity: "Medium", type: "Validation", deps: "Oracle HR", status: "In Progress" }, { name: "Manages permanent outsource contract", desc: "manages permanent and outsource contract renewals", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "In Progress" }, { name: "Runs termination/end-of-service gratuity", desc: "runs termination/end-of-service and gratuity coordination with Finance", complexity: "Medium", type: "Orchestration", deps: "Oracle HR", status: "In Progress" }]
+    subAgents: [{ name: "Validates processes change-pay,", desc: "Validates and processes change-pay, change-manager and update-employment", complexity: "Medium", type: "Validation", deps: "Oracle HR", status: "Needs Review" }, { name: "Manages permanent outsource contract", desc: "manages permanent and outsource contract renewals", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "Needs Review" }, { name: "Runs termination/end-of-service gratuity", desc: "runs termination/end-of-service and gratuity coordination with Finance", complexity: "Medium", type: "Orchestration", deps: "Oracle HR", status: "Needs Review" }]
   },
   {
     id: "hr-h4", name: "Performance Management Agent", kind: "core", tier: "Core",
@@ -53,10 +53,10 @@ const HR_AGENTS = [
     systems: ["Oracle HR (Talent)", "MOCA Smart", "Email", "Excel"],
     outputs: ["Drafted objectives", "tracked cycle", "consolidated reviews and outcomes"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on drafting, tracking & consolidation; ratings and outcomes stay human",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on drafting, tracking & consolidation; ratings and outcomes stay human",
     risks: "Employee, manager and ED own the objectives and ratings; HR validates the cycle", nextAction: "",
     talksTo: ["hr-h2", "hr-h3"],
-    subAgents: [{ name: "Opens tracks each cycle stage", desc: "Opens and tracks each cycle stage", complexity: "Medium", type: "Monitoring", deps: "Oracle HR (Talent)", status: "In Progress" }, { name: "Drafts objectives role, level history", desc: "drafts objectives from role, level and history for the employee to refine", complexity: "Medium", type: "Drafting", deps: "Oracle HR (Talent)", status: "In Progress" }, { name: "Assembles review inputs", desc: "assembles review inputs", complexity: "Medium", type: "Orchestration", deps: "Oracle HR (Talent)", status: "In Progress" }]
+    subAgents: [{ name: "Opens tracks each cycle stage", desc: "Opens and tracks each cycle stage", complexity: "Medium", type: "Monitoring", deps: "Oracle HR (Talent)", status: "Needs Review" }, { name: "Drafts objectives role, level history", desc: "drafts objectives from role, level and history for the employee to refine", complexity: "Medium", type: "Drafting", deps: "Oracle HR (Talent)", status: "Needs Review" }, { name: "Assembles review inputs", desc: "assembles review inputs", complexity: "Medium", type: "Orchestration", deps: "Oracle HR (Talent)", status: "Needs Review" }]
   },
   {
     id: "hr-h5", name: "Workforce Planning & Succession Agent", kind: "core", tier: "Core",
@@ -67,7 +67,7 @@ const HR_AGENTS = [
     systems: ["Oracle HR", "the agent ecosystem", "dashboards"],
     outputs: ["Workforce-gap forecast", "succession maps", "key-person-risk register", "planning scenarios"],
     complexity: "High", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on analysis & drafting; planning decisions stay human",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on analysis & drafting; planning decisions stay human",
     risks: "HR leadership and entity heads own the plan and succession decisions", nextAction: "",
     talksTo: ["hr-h7", "hr-v10"],
     subAgents: [{ name: "Analyses headcount, skills, tenure", desc: "Analyses headcount, skills, tenure and pipeline per entity", complexity: "Medium", type: "Reporting", deps: "Oracle HR", status: "In Progress" }, { name: "Forecasts gaps turnover/retirement", desc: "forecasts gaps and turnover/retirement exposure", complexity: "Medium", type: "Reporting", deps: "Oracle HR", status: "In Progress" }, { name: "Maps succession depth critical roles", desc: "maps succession depth for critical roles", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "In Progress" }]
@@ -81,7 +81,7 @@ const HR_AGENTS = [
     systems: ["Oracle HR (Talent/Learning)", "the agent ecosystem"],
     outputs: ["Personalised growth paths", "training recommendations", "mobility suggestions", "tracked plans"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on suggestions & tracking; choices stay human",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on suggestions & tracking; choices stay human",
     risks: "Employee and manager own the development choices", nextAction: "",
     talksTo: [],
     subAgents: [{ name: "Suggests career paths internal-mobility", desc: "Suggests career paths and internal-mobility options from role, skills and history", complexity: "Medium", type: "Task", deps: "Oracle HR (Talent/Learning)", status: "In Progress" }, { name: "Recommends targeted training", desc: "recommends targeted training and certifications", complexity: "Medium", type: "Task", deps: "Oracle HR (Talent/Learning)", status: "In Progress" }, { name: "Surfaces stretch assignments mentors", desc: "surfaces stretch assignments and mentors", complexity: "Medium", type: "Task", deps: "Oracle HR (Talent/Learning)", status: "In Progress" }]
@@ -95,7 +95,7 @@ const HR_AGENTS = [
     systems: ["Oracle HR", "engagement surveys", "the agent ecosystem"],
     outputs: ["Team-level engagement insight", "supportive manager nudges paired with actions", "aggregate themes"],
     complexity: "High", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on team-level signals & nudges only; never an individual decision; strict governance",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on team-level signals & nudges only; never an individual decision; strict governance",
     risks: "Managers act on nudges; HR governs the model; individual decisions are never automated", nextAction: "",
     talksTo: ["hr-h5"],
     subAgents: [{ name: "Monitors team-level signals (workload,", desc: "Monitors team-level signals (workload, leave patterns, recognition gaps, engagement-survey trends, mobility interest)", complexity: "Medium", type: "Monitoring", deps: "Oracle HR", status: "In Progress" }, { name: "Surfaces supportive nudges managers", desc: "surfaces supportive nudges to managers", complexity: "Medium", type: "Monitoring", deps: "Oracle HR", status: "In Progress" }, { name: "Always pairs signal positive action", desc: "always pairs a signal with a positive action (a check-in, a workload rebalance, a recognition prompt)", complexity: "Medium", type: "Validation", deps: "Oracle HR", status: "In Progress" }]
@@ -109,10 +109,10 @@ const HR_AGENTS = [
     systems: ["Oracle HR", "IT (access)", "SPAN/Admin (assets)", "Finance", "SharePoint"],
     outputs: ["Revoked access", "returned assets", "settled EOS", "captured knowledge", "closed record"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on the checklist, access/asset coordination & knowledge capture; escalate EOS",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on the checklist, access/asset coordination & knowledge capture; escalate EOS",
     risks: "HR and Finance approve EOS; managers confirm handover", nextAction: "",
     talksTo: ["hr-h1", "hr-h2"],
-    subAgents: [{ name: "Orchestrates leaver checklist HR, Admin", desc: "Orchestrates the leaver checklist across HR, IT and Admin", complexity: "Medium", type: "Validation", deps: "Oracle HR", status: "In Progress" }, { name: "Triggers access revocation Admin asset", desc: "triggers IT access revocation and Admin asset return", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "In Progress" }, { name: "Coordinates end-of-service gratuity", desc: "coordinates end-of-service and gratuity with Finance", complexity: "Medium", type: "Orchestration", deps: "Oracle HR", status: "In Progress" }]
+    subAgents: [{ name: "Orchestrates leaver checklist HR, Admin", desc: "Orchestrates the leaver checklist across HR, IT and Admin", complexity: "Medium", type: "Validation", deps: "Oracle HR", status: "Needs Review" }, { name: "Triggers access revocation Admin asset", desc: "triggers IT access revocation and Admin asset return", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "Needs Review" }, { name: "Coordinates end-of-service gratuity", desc: "coordinates end-of-service and gratuity with Finance", complexity: "Medium", type: "Orchestration", deps: "Oracle HR", status: "Needs Review" }]
   },
   {
     id: "hr-h9", name: "Attendance & Leave Agent", kind: "core", tier: "Core",
@@ -123,10 +123,10 @@ const HR_AGENTS = [
     systems: ["Oracle ERP/HR", "MOCA APP", "MOCA Smart", "Email", "GovSign", "Talent Management System"],
     outputs: ["Validated & decided leave per type", "corrected attendance records", "a clean violations report", "employee outreach & reminders", "escalations", "year-end carry-over offset"],
     complexity: "Medium", impact: "High", feasibility: "High",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on clean leave decisions, justification corrections, report compilation & cleaning, outreach & reminders; escalate exceptions, repeat violations and document-required types",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on clean leave decisions, justification corrections, report compilation & cleaning, outreach & reminders; escalate exceptions, repeat violations and document-required types",
     risks: "Line Manager/matrix approvers decide where required; HR Director acts on escalated/repeat violations; HR validates documents for sick/maternity/Hajj", nextAction: "",
     talksTo: ["hr-g1", "hr-h2", "hr-h3"],
-    subAgents: [{ name: "Takes leave requests applies each", desc: "Takes leave requests and applies each type's own rules (e.g. compensation leave only after annual is used", complexity: "Medium", type: "Task", deps: "Oracle ERP/HR", status: "In Progress" }, { name: "Document validation sick, maternity Hajj", desc: "document validation for sick, maternity and Hajj", complexity: "Medium", type: "Validation", deps: "Oracle ERP/HR", status: "In Progress" }, { name: "Correct balance deduction accrual", desc: "correct balance deduction and accrual", complexity: "Medium", type: "Task", deps: "Oracle ERP/HR", status: "In Progress" }]
+    subAgents: [{ name: "Takes leave requests applies each", desc: "Takes leave requests and applies each type's own rules (e.g. compensation leave only after annual is used", complexity: "Medium", type: "Task", deps: "Oracle ERP/HR", status: "Ready" }, { name: "Document validation sick, maternity Hajj", desc: "document validation for sick, maternity and Hajj", complexity: "Medium", type: "Validation", deps: "Oracle ERP/HR", status: "Ready" }, { name: "Correct balance deduction accrual", desc: "correct balance deduction and accrual", complexity: "Medium", type: "Task", deps: "Oracle ERP/HR", status: "Ready" }]
   },
   {
     id: "hr-h10", name: "Employee Relations Agent", kind: "core", tier: "Core",
@@ -137,10 +137,10 @@ const HR_AGENTS = [
     systems: ["HR Services email", "Emanasa", "MOCA APP", "MOCA Smart", "SharePoint"],
     outputs: ["Answered inquiries", "triaged & routed complaints with SLA", "tracked resolutions", "theme insights"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on intake, routine answers, triage & routing; complaints and grievances handled by humans",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on intake, routine answers, triage & routing; complaints and grievances handled by humans",
     risks: "HR handles complaints, grievances and sensitive/special cases; the agent intakes, answers routine and routes", nextAction: "",
     talksTo: ["hr-g1", "hr-h2"],
-    subAgents: [{ name: "Intakes HR inquiries,", desc: "Intakes HR inquiries, complaints/grievances and special-case requests from HR Services email, Emanasa, the MOCA App and other ch", complexity: "Medium", type: "Task", deps: "HR Services email", status: "In Progress" }, { name: "Answers policy questions knowledge base", desc: "answers policy questions from the knowledge base", complexity: "Medium", type: "Conversational", deps: "HR Services email", status: "In Progress" }, { name: "Triages routes complaints right HR", desc: "triages and routes complaints to the right HR owner with full context and an SLA", complexity: "Medium", type: "Orchestration", deps: "HR Services email", status: "In Progress" }]
+    subAgents: [{ name: "Intakes HR inquiries,", desc: "Intakes HR inquiries, complaints/grievances and special-case requests from HR Services email, Emanasa, the MOCA App and other ch", complexity: "Medium", type: "Task", deps: "HR Services email", status: "Needs Review" }, { name: "Answers policy questions knowledge base", desc: "answers policy questions from the knowledge base", complexity: "Medium", type: "Conversational", deps: "HR Services email", status: "Needs Review" }, { name: "Triages routes complaints right HR", desc: "triages and routes complaints to the right HR owner with full context and an SLA", complexity: "Medium", type: "Orchestration", deps: "HR Services email", status: "Needs Review" }]
   },
   {
     id: "hr-g1", name: "Approval Concierge", kind: "core", tier: "Core",
@@ -151,10 +151,10 @@ const HR_AGENTS = [
     systems: ["Oracle", "MOCA Smart", "MOCA APP", "Teams", "Email SharePoint", "MOCAverse"],
     outputs: ["Pushed decision packages", "captured decisions written back", "full audit trail"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on capture, simplification & answering; leads validate Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on answering, routing & reminders; escalate exceptions Act-and-notify on answering, routine outbound calls & logging; warm-transfer sensitive matters Act-and-notify on collection & analysis; humans own improvements Act-and-notify on assembly, team view & pre-fill; decisions stay human Act-and-notify on briefing & analysis; recommendations only Act-and-notify on maintaining rules, flagging gaps & bottlenecks; the delegation policy stays human-owned",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on capture, simplification & answering; leads validate Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on answering, routing & reminders; escalate exceptions Act-and-notify on answering, routine outbound calls & logging; warm-transfer sensitive matters Act-and-notify on collection & analysis; humans own improvements Act-and-notify on assembly, team view & pre-fill; decisions stay human Act-and-notify on briefing & analysis; recommendations only Act-and-notify on maintaining rules, flagging gaps & bottlenecks; the delegation policy stays human-owned",
     risks: "The matrix-defined approver always decides Team leads validate captured knowledge and simplified policy Risk owners and reviewers decide; the agent reviews and recommends Managers decide on staffing and cover; the agent surfaces and recommends Specialist teams handle exceptions; the employee confirms actions Staff take warm transfers; sensitive/binding matters are human Process owners act on the backlog; management reviews the pulse The manager decides; the companion prepares Leadership decides; the agent informs and recommends Governance and leadership own the delegation policy; the agent maintains and applies it", nextAction: "",
     talksTo: ["hr-h10", "hr-h9", "hr-v1", "hr-v2"],
-    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "In Progress" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }]
+    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "Ready" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }]
   },
   {
     id: "hr-v4", name: "Knowledge-Capture & Policy-Simplifier", kind: "value-add", tier: "Value-add",
@@ -322,7 +322,7 @@ const PROCUREMENT_AGENTS = [
     systems: ["Oracle (Sourcing/Supplier Portal)", "historical bid data", "Email"],
     outputs: ["Configured RFQ", "surrogate quotes", "like-for-like benchmark", "ranking", "drafted award"],
     complexity: "High", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on assembly, comparison & benchmarking; escalate all award and one-bid decisions",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on assembly, comparison & benchmarking; escalate all award and one-bid decisions",
     risks: "Scoring team scores; Procurement/ED/Sector/Entity/Chief approve the award", nextAction: "",
     talksTo: [],
     subAgents: [{ name: "Assembles negotiation (scoring criteria,", desc: "Assembles the negotiation (scoring criteria, supplier list, T&Cs)", complexity: "Medium", type: "Orchestration", deps: "Oracle (Sourcing/Supplier Portal)", status: "In Progress" }, { name: "Manages supplier portal, clarifications", desc: "manages the supplier portal, clarifications and surrogate quotes", complexity: "Medium", type: "Task", deps: "Oracle (Sourcing/Supplier Portal)", status: "In Progress" }, { name: "Normalises proposals comparison matrix", desc: "normalises proposals into a comparison matrix", complexity: "Medium", type: "Task", deps: "Oracle (Sourcing/Supplier Portal)", status: "In Progress" }]
@@ -336,7 +336,7 @@ const PROCUREMENT_AGENTS = [
     systems: ["Oracle (Purchasing)", "GovSign", "Word→PDF", "Email"],
     outputs: ["Drafted & signed contract", "dispatched PO/LOA", "approved work confirmation", "logged BG"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on drafting, issuing & tracking; escalate clause/legal judgement and signature",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on drafting, issuing & tracking; escalate clause/legal judgement and signature",
     risks: "Legal approves clause changes; authorised signatory & vendor sign; PM approves WC", nextAction: "",
     talksTo: [],
     subAgents: [{ name: "Drafts bilingual contracts/amendments", desc: "Drafts bilingual contracts/amendments from templates and prior contracts", complexity: "Medium", type: "Drafting", deps: "Oracle (Purchasing)", status: "In Progress" }, { name: "Routes them through GovSign", desc: "routes them through GovSign", complexity: "Medium", type: "Orchestration", deps: "Oracle (Purchasing)", status: "In Progress" }, { name: "Issues PO/PA/CO letter award", desc: "issues the PO/PA/CO and the letter of award", complexity: "Medium", type: "Task", deps: "Oracle (Purchasing)", status: "In Progress" }]
@@ -350,10 +350,10 @@ const PROCUREMENT_AGENTS = [
     systems: ["Oracle (Payables)", "Bank Portal", "Email"],
     outputs: ["Clean intake", "resolved exceptions", "packaged payment", "flagged anomalies"],
     complexity: "Medium", impact: "High", feasibility: "High",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on intake, matching & exception resolution; escalate disbursement",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on intake, matching & exception resolution; escalate disbursement",
     risks: "Payables Accountant validates exceptions; the approver per invoice type approves", nextAction: "",
     talksTo: [],
-    subAgents: [{ name: "Captures invoices email/portal, logs", desc: "Captures invoices from email/portal, logs and uploads them", complexity: "Medium", type: "Task", deps: "Oracle (Payables)", status: "In Progress" }, { name: "Lets Oracle run three-way match", desc: "lets Oracle run the three-way match and works only the holds/exceptions", complexity: "Medium", type: "Validation", deps: "Oracle (Payables)", status: "In Progress" }, { name: "Validates non-PO/utility invoices", desc: "validates non-PO/utility invoices", complexity: "Medium", type: "Validation", deps: "Oracle (Payables)", status: "In Progress" }]
+    subAgents: [{ name: "Captures invoices email/portal, logs", desc: "Captures invoices from email/portal, logs and uploads them", complexity: "Medium", type: "Task", deps: "Oracle (Payables)", status: "Ready" }, { name: "Lets Oracle run three-way match", desc: "lets Oracle run the three-way match and works only the holds/exceptions", complexity: "Medium", type: "Validation", deps: "Oracle (Payables)", status: "Ready" }, { name: "Validates non-PO/utility invoices", desc: "validates non-PO/utility invoices", complexity: "Medium", type: "Validation", deps: "Oracle (Payables)", status: "Ready" }]
   },
   {
     id: "pc-p6", name: "Vendor Evaluation Agent", kind: "core", tier: "Core",
@@ -364,10 +364,10 @@ const PROCUREMENT_AGENTS = [
     systems: ["Oracle (master report)", "Excel", "Email"],
     outputs: ["Vendor performance report", "ranking", "flagged vendors for review"],
     complexity: "Medium", impact: "Medium", feasibility: "High",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on compilation & ranking; escalate inactivation decisions",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on compilation & ranking; escalate inactivation decisions",
     risks: "Chief reviews; inactivation/category change stays a human decision", nextAction: "",
     talksTo: [],
-    subAgents: [{ name: "Compiles per-vendor performance", desc: "Compiles per-vendor performance (delivery, quality, compliance), produces the monthly Chief report (total/active/inactive, award", complexity: "Medium", type: "Reporting", deps: "Oracle (master report)", status: "In Progress" }]
+    subAgents: [{ name: "Compiles per-vendor performance", desc: "Compiles per-vendor performance (delivery, quality, compliance), produces the monthly Chief report (total/active/inactive, award", complexity: "Medium", type: "Reporting", deps: "Oracle (master report)", status: "Needs Review" }]
   },
   {
     id: "pc-p7", name: "Business-Mission (Travel) Agent", kind: "core", tier: "Core",
@@ -378,10 +378,10 @@ const PROCUREMENT_AGENTS = [
     systems: ["Oracle (Business Mission)", "Email"],
     outputs: ["Approved trip", "quotes", "per-diems", "leave entries", "payment dates", "completion"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on creation, quotes, per-diems & leave; escalate the approval chain",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on creation, quotes, per-diems & leave; escalate the approval chain",
     risks: "Sector/Entity/Chief/Budget Heads approve; HR & Finance review", nextAction: "",
     talksTo: [],
-    subAgents: [{ name: "Guides request creation", desc: "Guides request creation (traveller/companion/guest variants)", complexity: "Medium", type: "Conversational", deps: "Oracle (Business Mission)", status: "In Progress" }, { name: "Gathers enters quotations", desc: "gathers and enters quotations", complexity: "Medium", type: "Task", deps: "Oracle (Business Mission)", status: "In Progress" }, { name: "Drives multi-level approval chain (Sector", desc: "drives the multi-level approval chain (Sector Head → Entity Head → Chief → Budget Entity Head)", complexity: "Medium", type: "Task", deps: "Oracle (Business Mission)", status: "In Progress" }]
+    subAgents: [{ name: "Guides request creation", desc: "Guides request creation (traveller/companion/guest variants)", complexity: "Medium", type: "Conversational", deps: "Oracle (Business Mission)", status: "Needs Review" }, { name: "Gathers enters quotations", desc: "gathers and enters quotations", complexity: "Medium", type: "Task", deps: "Oracle (Business Mission)", status: "Needs Review" }, { name: "Drives multi-level approval chain (Sector", desc: "drives the multi-level approval chain (Sector Head → Entity Head → Chief → Budget Entity Head)", complexity: "Medium", type: "Task", deps: "Oracle (Business Mission)", status: "Needs Review" }]
   },
   {
     id: "pc-p8", name: "Supplier Experience Agent", kind: "core", tier: "Core",
@@ -406,7 +406,7 @@ const PROCUREMENT_AGENTS = [
     systems: ["Oracle (Sourcing)", "historical award data", "Email"],
     outputs: ["Negotiation brief", "levers & targets", "draft counter-offers", "recorded outcomes"],
     complexity: "High", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Suggest by default; act only within an explicit low-value, low-risk mandate; escalate binding offers",
+    status: "In Progress", priority: "Future Phase", autonomy: "Suggest by default; act only within an explicit low-value, low-risk mandate; escalate binding offers",
     risks: "Buyer/Procurement approve the strategy and any binding offer outside the low-risk mandate", nextAction: "",
     talksTo: [],
     subAgents: [{ name: "Builds negotiation brief benchmark", desc: "Builds the negotiation brief from the benchmark (estimate, old bids, market)", complexity: "Medium", type: "Reporting", deps: "Oracle (Sourcing)", status: "In Progress" }, { name: "Identifies levers target/walk-away points", desc: "identifies levers and target/walk-away points", complexity: "Medium", type: "Task", deps: "Oracle (Sourcing)", status: "In Progress" }, { name: "Drafts counter-offers buyer sends", desc: "drafts counter-offers a buyer sends", complexity: "Medium", type: "Drafting", deps: "Oracle (Sourcing)", status: "In Progress" }]
@@ -420,7 +420,7 @@ const PROCUREMENT_AGENTS = [
     systems: ["Oracle", "the agent ecosystem", "dashboards"],
     outputs: ["Per-entity savings opportunities", "maverick-spend flags", "price-variance alerts", "cross-entity FYI for leadership"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on analysis & recommendations; spend decisions stay human",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on analysis & recommendations; spend decisions stay human",
     risks: "Entity owners decide on their savings actions; the Chief decides on any voluntary coordination", nextAction: "",
     talksTo: ["pc-g1"],
     subAgents: [{ name: "Analyses spend per entity own", desc: "Analyses spend per entity against its own history", complexity: "Medium", type: "Reporting", deps: "Oracle", status: "In Progress" }, { name: "Finds duplicate fragmented buying,", desc: "finds duplicate and fragmented buying, maverick spend and price variance", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }, { name: "Recommends renewal leverage framework", desc: "recommends renewal leverage and framework opportunities within the entity", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }]
@@ -434,10 +434,10 @@ const PROCUREMENT_AGENTS = [
     systems: ["Oracle", "MOCA Smart", "MOCA APP", "Teams", "Email Oracle (read)", "the agent ecosystem"],
     outputs: ["Pushed decision packages", "captured decisions written back", "full audit trail"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on answering, routine outbound calls & logging; warm-transfer sensitive matters Act-and-notify on information, requirements, status & on-behalf handling; escalate exceptions Act-and-notify on assembly, team view & pre-fill; decisions stay human Act-and-notify on briefing & analysis; recommendations only Act-and-notify on testing, remediation prep & pack assembly; humans approve fixes & sign-off Act-and-notify on tracking, flagging & reporting; re-planning and project decisions stay human Act-and-notify on maintaining rules, flagging gaps & bottlenecks; the delegation policy stays human-owned",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on answering, routine outbound calls & logging; warm-transfer sensitive matters Act-and-notify on information, requirements, status & on-behalf handling; escalate exceptions Act-and-notify on assembly, team view & pre-fill; decisions stay human Act-and-notify on briefing & analysis; recommendations only Act-and-notify on testing, remediation prep & pack assembly; humans approve fixes & sign-off Act-and-notify on tracking, flagging & reporting; re-planning and project decisions stay human Act-and-notify on maintaining rules, flagging gaps & bottlenecks; the delegation policy stays human-owned",
     risks: "The matrix-defined approver always decides Risk owners and reviewers decide; the agent reviews and recommends Managers decide on staffing and cover; the agent surfaces and recommends Staff take warm transfers; sensitive/binding matters are human Staff handle exceptions; the recipient confirms key submissions The manager decides; the companion prepares Leadership decides; the agent informs and recommends Governance, CISO/GRC and auditors own findings & sign-off Project owners and leadership own decisions and re-planning; the agent tracks, flags and reports Governance and leadership own the delegation policy; the agent maintains and applies it", nextAction: "",
     talksTo: ["pc-p10", "pc-v2", "pc-v8"],
-    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "In Progress" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }]
+    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "Ready" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }]
   },
   {
     id: "pc-v9", name: "Continuous Risk & Quality Assurance", kind: "value-add", tier: "Value-add",
@@ -577,10 +577,10 @@ const FINANCE_AGENTS = [
     systems: ["Oracle EBS", "Excel", "FTA Portal", "Bank", "SharePoint"],
     outputs: ["Classified VAT", "reconciled net position", "submitted return", "settlement", "archive"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on extract, calculation & reconciliation; escalate the return approval & submission",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on extract, calculation & reconciliation; escalate the return approval & submission",
     risks: "Finance Head approves the return before submission", nextAction: "",
     talksTo: ["fn-f5", "fn-f7"],
-    subAgents: [{ name: "Extracts AR/AP/GL data", desc: "Extracts AR/AP/GL data", complexity: "Medium", type: "Task", deps: "Oracle EBS", status: "In Progress" }, { name: "Recalculates classifies VAT", desc: "recalculates and classifies VAT", complexity: "Medium", type: "Task", deps: "Oracle EBS", status: "In Progress" }, { name: "Reconciles net VAT", desc: "reconciles net VAT", complexity: "Medium", type: "Validation", deps: "Oracle EBS", status: "In Progress" }]
+    subAgents: [{ name: "Extracts AR/AP/GL data", desc: "Extracts AR/AP/GL data", complexity: "Medium", type: "Task", deps: "Oracle EBS", status: "Needs Review" }, { name: "Recalculates classifies VAT", desc: "recalculates and classifies VAT", complexity: "Medium", type: "Task", deps: "Oracle EBS", status: "Needs Review" }, { name: "Reconciles net VAT", desc: "reconciles net VAT", complexity: "Medium", type: "Validation", deps: "Oracle EBS", status: "Needs Review" }]
   },
   {
     id: "fn-f2", name: "AR & Collections Agent", kind: "core", tier: "Core",
@@ -591,10 +591,10 @@ const FINANCE_AGENTS = [
     systems: ["Oracle (Receivables)", "Bank", "Email/Phone"],
     outputs: ["Validated customers", "drafted invoices/CMs", "applied receipts", "collections trail"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on drafting, receipts & reminders; escalate reversals and disputes",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on drafting, receipts & reminders; escalate reversals and disputes",
     risks: "AR Accountant/MoCA Champion approve; reversals & disputes confirmed by a person", nextAction: "",
     talksTo: [],
-    subAgents: [{ name: "Validates customer registration", desc: "Validates customer registration (licence/TRN)", complexity: "Medium", type: "Validation", deps: "Oracle (Receivables)", status: "In Progress" }, { name: "Drafts AR invoices credit memos", desc: "drafts AR invoices and credit memos", complexity: "Medium", type: "Drafting", deps: "Oracle (Receivables)", status: "In Progress" }, { name: "Creates applies receipts bank", desc: "creates and applies receipts from bank confirmations", complexity: "Medium", type: "Task", deps: "Oracle (Receivables)", status: "In Progress" }]
+    subAgents: [{ name: "Validates customer registration", desc: "Validates customer registration (licence/TRN)", complexity: "Medium", type: "Validation", deps: "Oracle (Receivables)", status: "Needs Review" }, { name: "Drafts AR invoices credit memos", desc: "drafts AR invoices and credit memos", complexity: "Medium", type: "Drafting", deps: "Oracle (Receivables)", status: "Needs Review" }, { name: "Creates applies receipts bank", desc: "creates and applies receipts from bank confirmations", complexity: "Medium", type: "Task", deps: "Oracle (Receivables)", status: "Needs Review" }]
   },
   {
     id: "fn-f3", name: "Fixed Assets Agent", kind: "core", tier: "Core",
@@ -605,10 +605,10 @@ const FINANCE_AGENTS = [
     systems: ["Oracle (Assets)", "SPAN APIs", "Excel"],
     outputs: ["Reconciled register", "capitalised assets", "posted depreciation", "FA reports"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on GRN, additions, reconciliation & reporting; escalate retirement/disposal",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on GRN, additions, reconciliation & reporting; escalate retirement/disposal",
     risks: "Asset Approver, Asset Committee and Management approve retirements/disposals", nextAction: "",
     talksTo: [],
-    subAgents: [{ name: "Handles asset PO approval GRN", desc: "Handles asset PO approval and GRN", complexity: "Medium", type: "Task", deps: "Oracle (Assets)", status: "In Progress" }, { name: "Reconciles nightly SPAN↔Oracle integration", desc: "reconciles the nightly SPAN↔Oracle integration", complexity: "Medium", type: "Validation", deps: "Oracle (Assets)", status: "In Progress" }, { name: "Prepares posts mass additions CIP", desc: "prepares and posts mass additions and CIP capitalisation", complexity: "Medium", type: "Drafting", deps: "Oracle (Assets)", status: "In Progress" }]
+    subAgents: [{ name: "Handles asset PO approval GRN", desc: "Handles asset PO approval and GRN", complexity: "Medium", type: "Task", deps: "Oracle (Assets)", status: "Needs Review" }, { name: "Reconciles nightly SPAN↔Oracle integration", desc: "reconciles the nightly SPAN↔Oracle integration", complexity: "Medium", type: "Validation", deps: "Oracle (Assets)", status: "Needs Review" }, { name: "Prepares posts mass additions CIP", desc: "prepares and posts mass additions and CIP capitalisation", complexity: "Medium", type: "Drafting", deps: "Oracle (Assets)", status: "Needs Review" }]
   },
   {
     id: "fn-f4", name: "Cash & Bank Reconciliation Agent", kind: "core", tier: "Core",
@@ -619,10 +619,10 @@ const FINANCE_AGENTS = [
     systems: ["Bank Portal", "Oracle (Cash Management)"],
     outputs: ["Reconciled bank position", "cleared exceptions", "BRS report"],
     complexity: "Medium", impact: "Medium", feasibility: "High",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on import, auto-match & report; escalate unresolved exceptions",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on import, auto-match & report; escalate unresolved exceptions",
     risks: "CM User confirms manual matches and unusual items", nextAction: "",
     talksTo: [],
-    subAgents: [{ name: "Receives uploads bank statement", desc: "Receives and uploads the bank statement", complexity: "Medium", type: "Task", deps: "Bank Portal", status: "In Progress" }, { name: "Imports Cash Management", desc: "imports it into Cash Management", complexity: "Medium", type: "Task", deps: "Bank Portal", status: "In Progress" }, { name: "Runs AutoReconciliation program", desc: "runs the AutoReconciliation program", complexity: "Medium", type: "Validation", deps: "Bank Portal", status: "In Progress" }]
+    subAgents: [{ name: "Receives uploads bank statement", desc: "Receives and uploads the bank statement", complexity: "Medium", type: "Task", deps: "Bank Portal", status: "Needs Review" }, { name: "Imports Cash Management", desc: "imports it into Cash Management", complexity: "Medium", type: "Task", deps: "Bank Portal", status: "Needs Review" }, { name: "Runs AutoReconciliation program", desc: "runs the AutoReconciliation program", complexity: "Medium", type: "Validation", deps: "Bank Portal", status: "Needs Review" }]
   },
   {
     id: "fn-f5", name: "Budgeting & FP&A Agent", kind: "core", tier: "Core",
@@ -633,10 +633,10 @@ const FINANCE_AGENTS = [
     systems: ["Oracle", "Excel", "PowerPoint", "SharePoint", "Email"],
     outputs: ["Answered enquiries", "planning packs", "performance reports", "validated transfers/uploads"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on enquiries, drafting & validation; escalate the budget memo & approvals",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on enquiries, drafting & validation; escalate the budget memo & approvals",
     risks: "Budget Lead/Finance Manager approve; Sector/Entity Heads own decisions", nextAction: "",
     talksTo: ["fn-f1", "fn-f7", "fn-f8"],
-    subAgents: [{ name: "Logs answers budget smart-enquiries data", desc: "Logs and answers budget smart-enquiries from data and policy", complexity: "Medium", type: "Conversational", deps: "Oracle", status: "In Progress" }, { name: "Supports annual budget planning", desc: "supports annual budget planning and consolidation", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }, { name: "Drafts performance reports", desc: "drafts performance reports", complexity: "Medium", type: "Drafting", deps: "Oracle", status: "In Progress" }]
+    subAgents: [{ name: "Logs answers budget smart-enquiries data", desc: "Logs and answers budget smart-enquiries from data and policy", complexity: "Medium", type: "Conversational", deps: "Oracle", status: "Needs Review" }, { name: "Supports annual budget planning", desc: "supports annual budget planning and consolidation", complexity: "Medium", type: "Task", deps: "Oracle", status: "Needs Review" }, { name: "Drafts performance reports", desc: "drafts performance reports", complexity: "Medium", type: "Drafting", deps: "Oracle", status: "Needs Review" }]
   },
   {
     id: "fn-f6", name: "Budget Commitment Monitor", kind: "core", tier: "Core",
@@ -647,10 +647,10 @@ const FINANCE_AGENTS = [
     systems: ["Oracle", "Email/MOCA Smart"],
     outputs: ["Early overrun alerts", "commitment-vs-ceiling view"],
     complexity: "Low", impact: "High", feasibility: "High",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on monitoring & alerting; reallocation stays human",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on monitoring & alerting; reallocation stays human",
     risks: "Budget team acts on alerts; reallocation is a human decision", nextAction: "",
     talksTo: [],
-    subAgents: [{ name: "Monitors commitments vs approved ceiling", desc: "Monitors commitments vs the approved ceiling per entity and category every week", complexity: "Low", type: "Monitoring", deps: "Oracle", status: "In Progress" }, { name: "Alerts owners before breach", desc: "alerts owners before a breach", complexity: "Low", type: "Monitoring", deps: "Oracle", status: "In Progress" }, { name: "Feeds performance report leadership view", desc: "feeds the performance report and the leadership view.", complexity: "Low", type: "Reporting", deps: "Oracle", status: "In Progress" }]
+    subAgents: [{ name: "Monitors commitments vs approved ceiling", desc: "Monitors commitments vs the approved ceiling per entity and category every week", complexity: "Low", type: "Monitoring", deps: "Oracle", status: "Ready" }, { name: "Alerts owners before breach", desc: "alerts owners before a breach", complexity: "Low", type: "Monitoring", deps: "Oracle", status: "Ready" }, { name: "Feeds performance report leadership view", desc: "feeds the performance report and the leadership view.", complexity: "Low", type: "Reporting", deps: "Oracle", status: "Ready" }]
   },
   {
     id: "fn-f7", name: "Period-Close Orchestration Agent", kind: "core", tier: "Core",
@@ -661,10 +661,10 @@ const FINANCE_AGENTS = [
     systems: ["Oracle", "Excel", "Teams", "SharePoint"],
     outputs: ["Sequenced close", "completed checklist", "closed period"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on sequencing & checklist; escalate the close sign-off",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on sequencing & checklist; escalate the close sign-off",
     risks: "Financial Accounting & Reporting team confirm; ED of Operations signs the close", nextAction: "",
     talksTo: ["fn-f1", "fn-f5", "fn-f8", "fn-f9"],
-    subAgents: [{ name: "Closes submodules order", desc: "Closes the submodules in order", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }, { name: "Runs trial balance", desc: "runs the trial balance", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }, { name: "Tracks closing checklist", desc: "tracks the closing checklist", complexity: "Medium", type: "Validation", deps: "Oracle", status: "In Progress" }]
+    subAgents: [{ name: "Closes submodules order", desc: "Closes the submodules in order", complexity: "Medium", type: "Task", deps: "Oracle", status: "Needs Review" }, { name: "Runs trial balance", desc: "runs the trial balance", complexity: "Medium", type: "Task", deps: "Oracle", status: "Needs Review" }, { name: "Tracks closing checklist", desc: "tracks the closing checklist", complexity: "Medium", type: "Validation", deps: "Oracle", status: "Needs Review" }]
   },
   {
     id: "fn-f8", name: "Reconciliation, Accruals & Lease Agent", kind: "core", tier: "Core",
@@ -675,7 +675,7 @@ const FINANCE_AGENTS = [
     systems: ["Oracle", "Excel", "SharePoint", "SPAN"],
     outputs: ["Reconciliations", "drafted accrual/lease/ECL/IC journals", "variance notes"],
     complexity: "High", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on reconciliation & drafting; escalate every posting",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on reconciliation & drafting; escalate every posting",
     risks: "Accountants approve every posting; ECL & adjustments are approved before posting", nextAction: "",
     talksTo: ["fn-f5", "fn-f7", "fn-f9"],
     subAgents: [{ name: "Reconciles AP/AR/FA GL", desc: "Reconciles AP/AR/FA to GL", complexity: "Medium", type: "Validation", deps: "Oracle", status: "In Progress" }, { name: "Calculates records accruals", desc: "calculates and records accruals", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }, { name: "Reviews prepaid suspense", desc: "reviews prepaid and suspense", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }]
@@ -689,7 +689,7 @@ const FINANCE_AGENTS = [
     systems: ["Oracle", "Excel", "Word", "DocuSign", "SharePoint"],
     outputs: ["Closing report", "drafted statements", "consolidation", "disclosures", "auditor pack"],
     complexity: "High", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on drafting & consolidation; escalate every posting and the FS sign-off",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on drafting & consolidation; escalate every posting and the FS sign-off",
     risks: "Governance & Financial Control review; ED/Head of Entity/Minister sign off", nextAction: "",
     talksTo: ["fn-f7", "fn-f8"],
     subAgents: [{ name: "Prepares monthly closing report", desc: "Prepares the monthly closing report", complexity: "Medium", type: "Drafting", deps: "Oracle", status: "In Progress" }, { name: "Drafts financial statements IPSAS", desc: "drafts the financial statements and IPSAS disclosures", complexity: "Medium", type: "Drafting", deps: "Oracle", status: "In Progress" }, { name: "Builds consolidation elimination entries", desc: "builds consolidation and elimination entries across entities", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }]
@@ -703,10 +703,10 @@ const FINANCE_AGENTS = [
     systems: ["Oracle HR", "Oracle EBS (GL)", "Bank Portal", "Pension Portal", "iExpense", "Excel"],
     outputs: ["Calculated payroll", "bank transfer", "posted journal", "pension remittance", "closed period"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on calculation, reconciliation & posting prep; escalate the run & payment approval",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on calculation, reconciliation & posting prep; escalate the run & payment approval",
     risks: "Finance Head approves the run; payment & closing approvals stay human", nextAction: "",
     talksTo: [],
-    subAgents: [{ name: "Receives payroll data HR", desc: "Receives payroll data from HR", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "In Progress" }, { name: "Applies deductions variable inputs", desc: "applies deductions and variable inputs", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "In Progress" }, { name: "Calculates net salary, allowances, ticket", desc: "calculates net salary, allowances, ticket value, leave encashment and gratuity", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "In Progress" }]
+    subAgents: [{ name: "Receives payroll data HR", desc: "Receives payroll data from HR", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "Needs Review" }, { name: "Applies deductions variable inputs", desc: "applies deductions and variable inputs", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "Needs Review" }, { name: "Calculates net salary, allowances, ticket", desc: "calculates net salary, allowances, ticket value, leave encashment and gratuity", complexity: "Medium", type: "Task", deps: "Oracle HR", status: "Needs Review" }]
   },
   {
     id: "fn-f11", name: "Anomaly & Fraud Detection Agent", kind: "core", tier: "Core",
@@ -717,7 +717,7 @@ const FINANCE_AGENTS = [
     systems: ["Oracle EBS", "the agent ecosystem"],
     outputs: ["Ranked anomaly alerts with evidence", "duplicate/fraud flags", "a continuous control view"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on detection & evidencing; investigation & action stay human",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on detection & evidencing; investigation & action stay human",
     risks: "Finance and Governance investigate and decide; the agent detects and evidences", nextAction: "",
     talksTo: ["fn-f12", "fn-f14"],
     subAgents: [{ name: "Continuously scans AP/AR/GL/payroll", desc: "Continuously scans AP/AR/GL/payroll transactions for duplicates, split transactions, round-sum and out-of-pattern entries, dupli", complexity: "Medium", type: "Task", deps: "Oracle EBS", status: "In Progress" }, { name: "Scores ranks anomalies evidence", desc: "scores and ranks anomalies with the evidence", complexity: "Medium", type: "Task", deps: "Oracle EBS", status: "In Progress" }, { name: "Routes right reviewer", desc: "routes to the right reviewer.", complexity: "Medium", type: "Orchestration", deps: "Oracle EBS", status: "In Progress" }]
@@ -731,7 +731,7 @@ const FINANCE_AGENTS = [
     systems: ["Oracle EBS", "Bank", "the agent ecosystem"],
     outputs: ["Rolling cash-flow forecast", "shortfall/surplus alerts", "decision cash-impact models"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on forecasting & flagging; treasury decisions stay human",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on forecasting & flagging; treasury decisions stay human",
     risks: "Treasury/Finance leadership decide; the agent forecasts and recommends", nextAction: "",
     talksTo: ["fn-f11", "fn-f14"],
     subAgents: [{ name: "Builds rolling cash-flow forecasts", desc: "Builds rolling cash-flow forecasts from receivables, payables, payroll, commitments and history per entity and consolidated", complexity: "Medium", type: "Reporting", deps: "Oracle EBS", status: "In Progress" }, { name: "Flags upcoming shortfalls surpluses", desc: "flags upcoming shortfalls and surpluses", complexity: "Medium", type: "Task", deps: "Oracle EBS", status: "In Progress" }, { name: "Models cash impact pending decisions", desc: "models the cash impact of pending decisions", complexity: "Medium", type: "Task", deps: "Oracle EBS", status: "In Progress" }]
@@ -745,7 +745,7 @@ const FINANCE_AGENTS = [
     systems: ["Oracle (Payables)", "Bank", "the cash-flow agent"],
     outputs: ["Optimised payment timing", "batched runs", "captured early-payment value", "protected cash"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Suggest the schedule; act only within policy bounds; disbursement always escalated",
+    status: "In Progress", priority: "Future Phase", autonomy: "Suggest the schedule; act only within policy bounds; disbursement always escalated",
     risks: "Finance approves the payment schedule; disbursement stays human", nextAction: "",
     talksTo: [],
     subAgents: [{ name: "Each approved payable, recommends optimal", desc: "For each approved payable, recommends the optimal payment date against terms, cash position, early-payment discounts and vendor-", complexity: "Medium", type: "Task", deps: "Oracle (Payables)", status: "In Progress" }, { name: "Batches payment runs accordingly", desc: "batches payment runs accordingly", complexity: "Medium", type: "Task", deps: "Oracle (Payables)", status: "In Progress" }, { name: "Never overrides approval due dates", desc: "never overrides approval or due dates without sign-off.", complexity: "Medium", type: "Task", deps: "Oracle (Payables)", status: "In Progress" }]
@@ -759,7 +759,7 @@ const FINANCE_AGENTS = [
     systems: ["Oracle EBS", "the agent ecosystem", "dashboards"],
     outputs: ["Scenario models", "option comparisons", "plain-language driver explanations"],
     complexity: "High", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on modelling & explanation; recommendations only",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on modelling & explanation; recommendations only",
     risks: "Leadership decides; the agent models and explains", nextAction: "",
     talksTo: ["fn-f11", "fn-f12"],
     subAgents: [{ name: "Models financial impact scenarios", desc: "Models the financial impact of scenarios (approving an initiative, a cost rising, a reallocation) across budget and cash per ent", complexity: "Medium", type: "Task", deps: "Oracle EBS", status: "In Progress" }, { name: "Compares options", desc: "compares options", complexity: "Medium", type: "Task", deps: "Oracle EBS", status: "In Progress" }, { name: "Explains drivers plain language", desc: "explains the drivers in plain language", complexity: "Medium", type: "Conversational", deps: "Oracle EBS", status: "In Progress" }]
@@ -773,10 +773,10 @@ const FINANCE_AGENTS = [
     systems: ["Oracle", "MOCA Smart", "MOCA APP", "Teams", "Email Oracle (read)", "the agent ecosystem"],
     outputs: ["Pushed decision packages", "captured decisions written back", "full audit trail"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on answering, routing & reminders; escalate exceptions Act-and-notify on answering, routine outbound calls & logging; warm-transfer sensitive matters Act-and-notify on information, requirements, status & on-behalf handling; escalate exceptions Act-and-notify on briefing & analysis; recommendations only Act-and-notify on surfacing, nudging & tracking; the owner acts Act-and-notify on testing, remediation prep & pack assembly; humans approve fixes & sign-off Act-and-notify on maintaining rules, flagging gaps & bottlenecks; the delegation policy stays human-owned",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on answering, routing & reminders; escalate exceptions Act-and-notify on answering, routine outbound calls & logging; warm-transfer sensitive matters Act-and-notify on information, requirements, status & on-behalf handling; escalate exceptions Act-and-notify on briefing & analysis; recommendations only Act-and-notify on surfacing, nudging & tracking; the owner acts Act-and-notify on testing, remediation prep & pack assembly; humans approve fixes & sign-off Act-and-notify on maintaining rules, flagging gaps & bottlenecks; the delegation policy stays human-owned",
     risks: "The matrix-defined approver always decides Risk owners and reviewers decide; the agent reviews and recommends Managers decide on staffing and cover; the agent surfaces and recommends Specialist teams handle exceptions; the employee confirms actions Staff take warm transfers; sensitive/binding matters are human Staff handle exceptions; the recipient confirms key submissions Leadership decides; the agent informs and recommends Owners action the items; the radar surfaces and tracks Governance, CISO/GRC and auditors own findings & sign-off Governance and leadership own the delegation policy; the agent maintains and applies it", nextAction: "",
     talksTo: ["fn-v1", "fn-v8"],
-    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "In Progress" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }]
+    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "Ready" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }]
   },
   {
     id: "fn-v9", name: "Continuous Risk & Quality Assurance", kind: "value-add", tier: "Value-add",
@@ -916,7 +916,7 @@ const KNOWLEDGE_AGENTS = [
     systems: ["MS Word", "SharePoint", "Email", "MOCA Smart"],
     outputs: ["Draft translations", "glossaries", "interpretation briefs"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on drafting & terminology; humans finalise",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on drafting & terminology; humans finalise",
     risks: "Translators & proofreaders review and finalise", nextAction: "",
     talksTo: ["kn-k2", "kn-k3"],
     subAgents: [{ name: "Pre-translates editorial content", desc: "Pre-translates editorial content against a bilingual term base", complexity: "Medium", type: "Drafting", deps: "MS Word", status: "In Progress" }, { name: "Flags terminology tone choices", desc: "flags terminology and tone choices", complexity: "Medium", type: "Task", deps: "MS Word", status: "In Progress" }, { name: "Prepares interpretation briefs glossaries", desc: "prepares interpretation briefs and glossaries", complexity: "Medium", type: "Drafting", deps: "MS Word", status: "In Progress" }]
@@ -930,7 +930,7 @@ const KNOWLEDGE_AGENTS = [
     systems: ["MS Word", "SharePoint", "Email"],
     outputs: ["Drafted", "proofed", "version-tracked content"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on drafting & proofing; humans approve",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on drafting & proofing; humans approve",
     risks: "Content Team Lead and proofreaders approve", nextAction: "",
     talksTo: ["kn-k1", "kn-k4"],
     subAgents: [{ name: "Drafts content briefs", desc: "Drafts content from briefs", complexity: "Medium", type: "Drafting", deps: "MS Word", status: "In Progress" }, { name: "Checks grammar, style bilingual", desc: "checks grammar, style and bilingual terminology", complexity: "Medium", type: "Validation", deps: "MS Word", status: "In Progress" }, { name: "Runs review proofreading passes", desc: "runs review and proofreading passes", complexity: "Medium", type: "Drafting", deps: "MS Word", status: "In Progress" }]
@@ -944,10 +944,10 @@ const KNOWLEDGE_AGENTS = [
     systems: ["Events Now", "MOCA Smart", "MOCAverse", "Website", "Social Media", "SharePoint"],
     outputs: ["Published content", "documented forms/publications", "coverage archive"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on scheduling, publishing & archiving; escalate publication approval",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on scheduling, publishing & archiving; escalate publication approval",
     risks: "Director of Events & Creative Content approves publication", nextAction: "",
     talksTo: ["kn-g1", "kn-k1", "kn-k5"],
-    subAgents: [{ name: "Schedules publishes media circulars", desc: "Schedules and publishes media and circulars through official channels", complexity: "Medium", type: "Orchestration", deps: "Events Now", status: "In Progress" }, { name: "Documents MOCA forms publications", desc: "documents MOCA forms and publications", complexity: "Medium", type: "Task", deps: "Events Now", status: "In Progress" }, { name: "Checks event venues", desc: "checks event venues", complexity: "Medium", type: "Validation", deps: "Events Now", status: "In Progress" }]
+    subAgents: [{ name: "Schedules publishes media circulars", desc: "Schedules and publishes media and circulars through official channels", complexity: "Medium", type: "Orchestration", deps: "Events Now", status: "Needs Review" }, { name: "Documents MOCA forms publications", desc: "documents MOCA forms and publications", complexity: "Medium", type: "Task", deps: "Events Now", status: "Needs Review" }, { name: "Checks event venues", desc: "checks event venues", complexity: "Medium", type: "Validation", deps: "Events Now", status: "Needs Review" }]
   },
   {
     id: "kn-k4", name: "Brand & Terminology Guardian", kind: "core", tier: "Core",
@@ -958,7 +958,7 @@ const KNOWLEDGE_AGENTS = [
     systems: ["SharePoint", "the agent ecosystem", "MS Word"],
     outputs: ["On-brand", "on-terminology bilingual content", "a maintained term base", "consistency flags"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on checking & flagging; final wording stays human",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on checking & flagging; final wording stays human",
     risks: "Content leads own the brand standard; the agent checks and suggests", nextAction: "",
     talksTo: ["kn-k2", "kn-k5", "kn-v4"],
     subAgents: [{ name: "Checks all outbound content documents", desc: "Checks all outbound content and documents against the brand guide, tone of voice and the approved bilingual terminology base", complexity: "Medium", type: "Validation", deps: "SharePoint", status: "In Progress" }, { name: "Flags inconsistencies off-message phrasing", desc: "flags inconsistencies and off-message phrasing", complexity: "Medium", type: "Task", deps: "SharePoint", status: "In Progress" }, { name: "Maintains term base", desc: "maintains the term base", complexity: "Medium", type: "Task", deps: "SharePoint", status: "In Progress" }]
@@ -972,10 +972,10 @@ const KNOWLEDGE_AGENTS = [
     systems: ["SharePoint", "MOCAverse", "the agent ecosystem"],
     outputs: ["Instant retrieval", "recommended assets at point of need", "gap & duplicate flags"],
     complexity: "Medium", impact: "Medium", feasibility: "High",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on retrieval & suggestions; sources validated by humans",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on retrieval & suggestions; sources validated by humans",
     risks: "Content leads validate sources; the agent retrieves and suggests", nextAction: "",
     talksTo: ["kn-k3", "kn-k4", "kn-v4"],
-    subAgents: [{ name: "Indexes content, templates, precedents", desc: "Indexes content, templates, precedents and assets", complexity: "Medium", type: "Task", deps: "SharePoint", status: "In Progress" }, { name: "Answers “do we have…” “how", desc: "answers “do we have…” and “how did we do…” across the sector", complexity: "Medium", type: "Conversational", deps: "SharePoint", status: "In Progress" }, { name: "Surfaces best existing asset point", desc: "surfaces the best existing asset at the point of a task", complexity: "Medium", type: "Task", deps: "SharePoint", status: "In Progress" }]
+    subAgents: [{ name: "Indexes content, templates, precedents", desc: "Indexes content, templates, precedents and assets", complexity: "Medium", type: "Task", deps: "SharePoint", status: "Needs Review" }, { name: "Answers “do we have…” “how", desc: "answers “do we have…” and “how did we do…” across the sector", complexity: "Medium", type: "Conversational", deps: "SharePoint", status: "Needs Review" }, { name: "Surfaces best existing asset point", desc: "surfaces the best existing asset at the point of a task", complexity: "Medium", type: "Task", deps: "SharePoint", status: "Needs Review" }]
   },
   {
     id: "kn-g1", name: "Approval Concierge", kind: "core", tier: "Core",
@@ -986,10 +986,10 @@ const KNOWLEDGE_AGENTS = [
     systems: ["Oracle", "MOCA Smart", "MOCA APP", "Teams", "Email SharePoint", "MOCAverse"],
     outputs: ["Pushed decision packages", "captured decisions written back", "full audit trail"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on capture, simplification & answering; leads validate Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on collection & analysis; humans own improvements Act-and-notify on information, requirements, status & on-behalf handling; escalate exceptions Act-and-notify on briefing & analysis; recommendations only Act-and-notify on surfacing, nudging & tracking; the owner acts",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on capture, simplification & answering; leads validate Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on collection & analysis; humans own improvements Act-and-notify on information, requirements, status & on-behalf handling; escalate exceptions Act-and-notify on briefing & analysis; recommendations only Act-and-notify on surfacing, nudging & tracking; the owner acts",
     risks: "The matrix-defined approver always decides Team leads validate captured knowledge and simplified policy Risk owners and reviewers decide; the agent reviews and recommends Managers decide on staffing and cover; the agent surfaces and recommends Process owners act on the backlog; management reviews the pulse Staff handle exceptions; the recipient confirms key submissions Leadership decides; the agent informs and recommends Owners action the items; the radar surfaces and tracks", nextAction: "",
     talksTo: ["kn-k3"],
-    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "In Progress" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }]
+    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "Ready" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }]
   },
   {
     id: "kn-v4", name: "Knowledge-Capture & Policy-Simplifier", kind: "value-add", tier: "Value-add",
@@ -1101,7 +1101,7 @@ const LEGAL_AGENTS = [
     systems: ["Word", "GovSign", "Taresh", "Shared folder", "Outlook"],
     outputs: ["Sourced bilingual draft", "precedent & regulation cross-check", "signed instrument"],
     complexity: "High", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on drafting & cross-check; escalate legal judgement and signature",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on drafting & cross-check; escalate legal judgement and signature",
     risks: "Head of Legal reviews & approves; authorised signatory signs", nextAction: "",
     talksTo: ["lg-l2", "lg-l3", "lg-v7"],
     subAgents: [{ name: "Studies request", desc: "Studies the request", complexity: "Medium", type: "Task", deps: "Word", status: "In Progress" }, { name: "Drafts instrument prior files templates", desc: "drafts the instrument from prior files and templates", complexity: "Medium", type: "Drafting", deps: "Word", status: "In Progress" }, { name: "Cross-checks internal policy, past", desc: "cross-checks against internal policy, past precedent and external regulation (federal gazette)", complexity: "Medium", type: "Validation", deps: "Word", status: "In Progress" }]
@@ -1115,7 +1115,7 @@ const LEGAL_AGENTS = [
     systems: ["Excel register", "Shared folder", "Outlook", "Teams"],
     outputs: ["Maintained case register", "met deadlines", "assembled packs", "recorded decisions"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on tracking & assembly; decisions stay human",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on tracking & assembly; decisions stay human",
     risks: "Head of Legal and committees own decisions", nextAction: "",
     talksTo: ["lg-l1"],
     subAgents: [{ name: "Maintains case files registers", desc: "Maintains case files and registers", complexity: "Medium", type: "Task", deps: "Excel register", status: "In Progress" }, { name: "Tracks dispute investigation deadlines", desc: "tracks dispute and investigation deadlines and SLAs", complexity: "Medium", type: "Monitoring", deps: "Excel register", status: "In Progress" }, { name: "Assembles case committee packs", desc: "assembles case and committee packs", complexity: "Medium", type: "Orchestration", deps: "Excel register", status: "In Progress" }]
@@ -1129,7 +1129,7 @@ const LEGAL_AGENTS = [
     systems: ["Word", "Shared folder", "Taresh", "Ministry of Economy/MoJ channels", "Federal Gazette"],
     outputs: ["Regulatory-change alerts mapped to affected policies", "legal studies", "IP records", "searchable archive"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on monitoring, impact-mapping, study drafting & archiving; positions stay human",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on monitoring, impact-mapping, study drafting & archiving; positions stay human",
     risks: "Head of Legal validates studies and compliance positions", nextAction: "",
     talksTo: ["lg-l1"],
     subAgents: [{ name: "Monitors central regulations, federal", desc: "Monitors central regulations, the federal gazette and policy changes and flags which internal policies, decisions and contracts", complexity: "Medium", type: "Monitoring", deps: "Word", status: "In Progress" }, { name: "Supports legal studies & consultations", desc: "supports legal studies & consultations", complexity: "Medium", type: "Task", deps: "Word", status: "In Progress" }, { name: "Manages IP-protection records", desc: "manages IP-protection records", complexity: "Medium", type: "Task", deps: "Word", status: "In Progress" }]
@@ -1143,7 +1143,7 @@ const LEGAL_AGENTS = [
     systems: ["Word", "the policy library", "the agent ecosystem"],
     outputs: ["Clause-risk review", "flagged issues", "suggested positions", "a faster Legal turnaround"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on review & drafting; legal positions stay human",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on review & drafting; legal positions stay human",
     risks: "Legal reviews and decides every position; the agent flags and drafts", nextAction: "",
     talksTo: ["lg-v7"],
     subAgents: [{ name: "Reviews third-party contracts, agreements", desc: "Reviews third-party contracts, agreements and MoUs against a clause-risk library and internal policy", complexity: "Medium", type: "Task", deps: "Word", status: "In Progress" }, { name: "Flags unfavourable, missing non-standard", desc: "flags unfavourable, missing or non-standard clauses (liability, termination, indemnity, IP, data, payment)", complexity: "Medium", type: "Task", deps: "Word", status: "In Progress" }, { name: "Drafts suggested positions", desc: "drafts suggested positions", complexity: "Medium", type: "Drafting", deps: "Word", status: "In Progress" }]
@@ -1157,10 +1157,10 @@ const LEGAL_AGENTS = [
     systems: ["Oracle", "MOCA Smart", "MOCA APP", "Teams", "Email SharePoint", "MOCAverse"],
     outputs: ["Pushed decision packages", "captured decisions written back", "full audit trail"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on capture, simplification & answering; leads validate Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on information, requirements, status & on-behalf handling; escalate exceptions Act-and-notify on briefing & analysis; recommendations only Act-and-notify on testing, remediation prep & pack assembly; humans approve fixes & sign-off Act-and-notify on drafting & cross-check; legal/policy judgement stays human",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on capture, simplification & answering; leads validate Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on information, requirements, status & on-behalf handling; escalate exceptions Act-and-notify on briefing & analysis; recommendations only Act-and-notify on testing, remediation prep & pack assembly; humans approve fixes & sign-off Act-and-notify on drafting & cross-check; legal/policy judgement stays human",
     risks: "The matrix-defined approver always decides Team leads validate captured knowledge and simplified policy Risk owners and reviewers decide; the agent reviews and recommends Managers decide on staffing and cover; the agent surfaces and recommends Staff handle exceptions; the recipient confirms key submissions Leadership decides; the agent informs and recommends Governance, CISO/GRC and auditors own findings & sign-off The author and Head of Legal review & approve; signatory signs", nextAction: "",
     talksTo: [],
-    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "In Progress" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }]
+    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "Ready" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }]
   },
   {
     id: "lg-v4", name: "Knowledge-Capture & Policy-Simplifier", kind: "value-add", tier: "Value-add",
@@ -1272,10 +1272,10 @@ const COMMS_AGENTS = [
     systems: ["Events Now", "Email", "Outlook calendar", "Oracle"],
     outputs: ["Booked event", "confirmed providers", "run-sheet", "closure report", "annual plan"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on matching, coordination & closure; escalate approvals",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on matching, coordination & closure; escalate approvals",
     risks: "Director (Event & Communication) and Chief approve; leadership confirms attendance", nextAction: "",
     talksTo: [],
-    subAgents: [{ name: "Creates event request matches", desc: "Creates the event request and matches venues/providers", complexity: "Medium", type: "Validation", deps: "Events Now", status: "In Progress" }, { name: "Drives verification & approval", desc: "drives verification & approval", complexity: "Medium", type: "Validation", deps: "Events Now", status: "In Progress" }, { name: "Confirms providers", desc: "confirms providers", complexity: "Medium", type: "Task", deps: "Events Now", status: "In Progress" }]
+    subAgents: [{ name: "Creates event request matches", desc: "Creates the event request and matches venues/providers", complexity: "Medium", type: "Validation", deps: "Events Now", status: "Needs Review" }, { name: "Drives verification & approval", desc: "drives verification & approval", complexity: "Medium", type: "Validation", deps: "Events Now", status: "Needs Review" }, { name: "Confirms providers", desc: "confirms providers", complexity: "Medium", type: "Task", deps: "Events Now", status: "Needs Review" }]
   },
   {
     id: "ev-e2", name: "Creative & Production Agent", kind: "core", tier: "Core",
@@ -1286,7 +1286,7 @@ const COMMS_AGENTS = [
     systems: ["Adobe Suite", "Figma", "Canva", "Dropbox", "Email"],
     outputs: ["Produced", "reviewed and delivered creative assets", "archive"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on intake, assignment & tracking; humans create and approve",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on intake, assignment & tracking; humans create and approve",
     risks: "Creative leads review and approve; leadership approves key assets", nextAction: "",
     talksTo: [],
     subAgents: [{ name: "Intakes triages creative briefs", desc: "Intakes and triages creative briefs", complexity: "Medium", type: "Reporting", deps: "Adobe Suite", status: "In Progress" }, { name: "Assigns designers/producers", desc: "assigns to designers/producers", complexity: "Medium", type: "Reporting", deps: "Adobe Suite", status: "In Progress" }, { name: "Tracks production through review approval", desc: "tracks production through review and approval", complexity: "Medium", type: "Monitoring", deps: "Adobe Suite", status: "In Progress" }]
@@ -1300,7 +1300,7 @@ const COMMS_AGENTS = [
     systems: ["Email", "Media wires", "Social Media", "SharePoint"],
     outputs: ["Drafted releases/circulars", "coverage reports & sentiment", "speaker support"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on drafting, monitoring & reporting; escalate release approval",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on drafting, monitoring & reporting; escalate release approval",
     risks: "Head of News & Coverage and leadership approve releases", nextAction: "",
     talksTo: [],
     subAgents: [{ name: "Drafts press releases circulars review", desc: "Drafts press releases and circulars for review", complexity: "Medium", type: "Drafting", deps: "Email", status: "In Progress" }, { name: "Coordinates publication", desc: "coordinates publication", complexity: "Medium", type: "Orchestration", deps: "Email", status: "In Progress" }, { name: "Monitors media compiles coverage reports", desc: "monitors media and compiles coverage reports", complexity: "Medium", type: "Monitoring", deps: "Email", status: "In Progress" }]
@@ -1314,7 +1314,7 @@ const COMMS_AGENTS = [
     systems: ["Media/social monitoring", "the agent ecosystem", "MOCA Smart"],
     outputs: ["Early-warning alerts", "sentiment trends", "coverage tracking", "recommended responses"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on monitoring & early-warning; the response stays human",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on monitoring & early-warning; the response stays human",
     risks: "Comms leadership decide the response; the agent watches and recommends", nextAction: "",
     talksTo: ["ev-g1", "ev-v8"],
     subAgents: [{ name: "Monitors media, social public channels", desc: "Monitors media, social and public channels in Arabic and English", complexity: "Medium", type: "Monitoring", deps: "Media/social monitoring", status: "In Progress" }, { name: "Detects emerging narratives, sentiment", desc: "detects emerging narratives, sentiment shifts and potential issues", complexity: "Medium", type: "Task", deps: "Media/social monitoring", status: "In Progress" }, { name: "Classifies escalates recommended response", desc: "classifies and escalates with a recommended response", complexity: "Medium", type: "Orchestration", deps: "Media/social monitoring", status: "In Progress" }]
@@ -1328,10 +1328,10 @@ const COMMS_AGENTS = [
     systems: ["Oracle", "MOCA Smart", "MOCA APP", "Teams", "Email Oracle (read)", "the agent ecosystem"],
     outputs: ["Pushed decision packages", "captured decisions written back", "full audit trail"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on answering, routine outbound calls & logging; warm-transfer sensitive matters Act-and-notify on collection & analysis; humans own improvements Act-and-notify on information, requirements, status & on-behalf handling; escalate exceptions Act-and-notify on assembly, team view & pre-fill; decisions stay human Act-and-notify on briefing & analysis; recommendations only Act-and-notify on tracking, flagging & reporting; re-planning and project decisions stay human",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on answering, routine outbound calls & logging; warm-transfer sensitive matters Act-and-notify on collection & analysis; humans own improvements Act-and-notify on information, requirements, status & on-behalf handling; escalate exceptions Act-and-notify on assembly, team view & pre-fill; decisions stay human Act-and-notify on briefing & analysis; recommendations only Act-and-notify on tracking, flagging & reporting; re-planning and project decisions stay human",
     risks: "The matrix-defined approver always decides Risk owners and reviewers decide; the agent reviews and recommends Managers decide on staffing and cover; the agent surfaces and recommends Staff take warm transfers; sensitive/binding matters are human Process owners act on the backlog; management reviews the pulse Staff handle exceptions; the recipient confirms key submissions The manager decides; the companion prepares Leadership decides; the agent informs and recommends Project owners and leadership own decisions and re-planning; the agent tracks, flags and reports", nextAction: "",
     talksTo: ["ev-e4", "ev-v10", "ev-v2", "ev-v8"],
-    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "In Progress" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }]
+    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "Ready" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }]
   },
   {
     id: "ev-v9", name: "Continuous Risk & Quality Assurance", kind: "value-add", tier: "Value-add",
@@ -1457,10 +1457,10 @@ const CYBER_AGENTS = [
     systems: ["IBM QRadar SIEM", "JIRA", "CrowdStrike", "Active Directory", "Credential Vault"],
     outputs: ["Triaged incidents", "evidence", "containment actions", "post-incident review"],
     complexity: "High", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on enrichment, triage & low-risk containment; escalate business-impacting actions",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on enrichment, triage & low-risk containment; escalate business-impacting actions",
     risks: "SOC Lead/Manager approve containment that impacts business; CISO owns major incidents", nextAction: "",
     talksTo: [],
-    subAgents: [{ name: "Intakes QRadar offenses JIRA/end-user", desc: "Intakes QRadar offenses and JIRA/end-user reports", complexity: "Medium", type: "Reporting", deps: "IBM QRadar SIEM", status: "In Progress" }, { name: "Enriches triages", desc: "enriches and triages", complexity: "Medium", type: "Conversational", deps: "IBM QRadar SIEM", status: "In Progress" }, { name: "Classifies severity", desc: "classifies severity", complexity: "Medium", type: "Task", deps: "IBM QRadar SIEM", status: "In Progress" }]
+    subAgents: [{ name: "Intakes QRadar offenses JIRA/end-user", desc: "Intakes QRadar offenses and JIRA/end-user reports", complexity: "Medium", type: "Reporting", deps: "IBM QRadar SIEM", status: "Needs Review" }, { name: "Enriches triages", desc: "enriches and triages", complexity: "Medium", type: "Conversational", deps: "IBM QRadar SIEM", status: "Needs Review" }, { name: "Classifies severity", desc: "classifies severity", complexity: "Medium", type: "Task", deps: "IBM QRadar SIEM", status: "Needs Review" }]
   },
   {
     id: "cy-c2", name: "Security Clearance & GRC Agent", kind: "core", tier: "Core",
@@ -1471,7 +1471,7 @@ const CYBER_AGENTS = [
     systems: ["GRC Dashboard", "Confluence", "Email", "Asset Inventory"],
     outputs: ["Completed checklist", "risk assessment", "clearance recommendation"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on checklist, assessment & tracking; escalate clearance decisions",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on checklist, assessment & tracking; escalate clearance decisions",
     risks: "CISO/GRC grant clearance and conditional approval", nextAction: "",
     talksTo: [],
     subAgents: [{ name: "Initiates clearance", desc: "Initiates the clearance", complexity: "Medium", type: "Task", deps: "GRC Dashboard", status: "In Progress" }, { name: "Issues pre-populates security checklist", desc: "issues and pre-populates the security checklist", complexity: "Medium", type: "Validation", deps: "GRC Dashboard", status: "In Progress" }, { name: "Performs risk assessment", desc: "performs the risk assessment", complexity: "Medium", type: "Task", deps: "GRC Dashboard", status: "In Progress" }]
@@ -1485,7 +1485,7 @@ const CYBER_AGENTS = [
     systems: ["QRadar", "CrowdStrike", "threat-intel feeds", "the agent ecosystem"],
     outputs: ["Proactive hunt findings", "weak-signal detections", "hardening recommendations"],
     complexity: "High", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on hunting & recommendations; any action follows the SOC's governed ladder",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on hunting & recommendations; any action follows the SOC's governed ladder",
     risks: "SOC Lead/CISO direct and act on hunts; the agent hunts and recommends", nextAction: "",
     talksTo: [],
     subAgents: [{ name: "Ingests threat intelligence", desc: "Ingests threat intelligence", complexity: "Medium", type: "Task", deps: "QRadar", status: "In Progress" }, { name: "Proactively hunts logs, endpoints", desc: "proactively hunts across logs, endpoints and identities for indicators and weak signals that haven't tripped an alert", complexity: "Medium", type: "Monitoring", deps: "QRadar", status: "In Progress" }, { name: "Correlates environment", desc: "correlates with the environment", complexity: "Medium", type: "Task", deps: "QRadar", status: "In Progress" }]
@@ -1499,7 +1499,7 @@ const CYBER_AGENTS = [
     systems: ["GRC Dashboard", "security tools", "the agent ecosystem"],
     outputs: ["Continuous posture view", "drift alerts", "prepared evidence", "remediation routing"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on testing, evidence & routing; remediation approved by humans",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on testing, evidence & routing; remediation approved by humans",
     risks: "CISO/GRC own posture decisions and sign-off; the agent tests and prepares", nextAction: "",
     talksTo: [],
     subAgents: [{ name: "Continuously tests controls,", desc: "Continuously tests controls, configurations and policy compliance against the security baseline and GRC framework", complexity: "Medium", type: "Task", deps: "GRC Dashboard", status: "In Progress" }, { name: "Tracks posture drift", desc: "tracks posture and drift", complexity: "Medium", type: "Monitoring", deps: "GRC Dashboard", status: "In Progress" }, { name: "Prepares evidence", desc: "prepares evidence", complexity: "Medium", type: "Drafting", deps: "GRC Dashboard", status: "In Progress" }]
@@ -1513,10 +1513,10 @@ const CYBER_AGENTS = [
     systems: ["Oracle", "MOCA Smart", "MOCA APP", "Teams", "Email Oracle (read)", "the agent ecosystem"],
     outputs: ["Pushed decision packages", "captured decisions written back", "full audit trail"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on information, requirements, status & on-behalf handling; escalate exceptions Act-and-notify on briefing & analysis; recommendations only Act-and-notify on surfacing, nudging & tracking; the owner acts Act-and-notify on testing, remediation prep & pack assembly; humans approve fixes & sign-off Act-and-notify on tracking, flagging & reporting; re-planning and project decisions stay human",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on information, requirements, status & on-behalf handling; escalate exceptions Act-and-notify on briefing & analysis; recommendations only Act-and-notify on surfacing, nudging & tracking; the owner acts Act-and-notify on testing, remediation prep & pack assembly; humans approve fixes & sign-off Act-and-notify on tracking, flagging & reporting; re-planning and project decisions stay human",
     risks: "The matrix-defined approver always decides Risk owners and reviewers decide; the agent reviews and recommends Managers decide on staffing and cover; the agent surfaces and recommends Staff handle exceptions; the recipient confirms key submissions Leadership decides; the agent informs and recommends Owners action the items; the radar surfaces and tracks Governance, CISO/GRC and auditors own findings & sign-off Project owners and leadership own decisions and re-planning; the agent tracks, flags and reports", nextAction: "",
     talksTo: ["cy-v5"],
-    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "In Progress" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }]
+    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "Ready" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }]
   },
   {
     id: "cy-v9", name: "Continuous Risk & Quality Assurance", kind: "value-add", tier: "Value-add",
@@ -1628,10 +1628,10 @@ const IT_AGENTS = [
     systems: ["MOCA Digital Portal", "Ivanti", "Teams", "Email"],
     outputs: ["Resolved tickets", "provisioned software/access", "KB deflection", "SLA adherence"],
     complexity: "Medium", impact: "High", feasibility: "High",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on standard fulfilment & resolution; escalate non-standard or approval cases",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on standard fulfilment & resolution; escalate non-standard or approval cases",
     risks: "IT support handles complex/again-approval cases; Department Head approves where required", nextAction: "",
     talksTo: ["it-i2", "it-i3"],
-    subAgents: [{ name: "Creates validates service records", desc: "Creates and validates service records", complexity: "Medium", type: "Validation", deps: "MOCA Digital Portal", status: "In Progress" }, { name: "Auto-resolves common requests (password", desc: "auto-resolves common requests (password reset, software install, access to standard apps)", complexity: "Medium", type: "Task", deps: "MOCA Digital Portal", status: "In Progress" }, { name: "Guides user", desc: "guides the user", complexity: "Medium", type: "Conversational", deps: "MOCA Digital Portal", status: "In Progress" }]
+    subAgents: [{ name: "Creates validates service records", desc: "Creates and validates service records", complexity: "Medium", type: "Validation", deps: "MOCA Digital Portal", status: "Ready" }, { name: "Auto-resolves common requests (password", desc: "auto-resolves common requests (password reset, software install, access to standard apps)", complexity: "Medium", type: "Task", deps: "MOCA Digital Portal", status: "Ready" }, { name: "Guides user", desc: "guides the user", complexity: "Medium", type: "Conversational", deps: "MOCA Digital Portal", status: "Ready" }]
   },
   {
     id: "it-i2", name: "IT Access & Identity Agent", kind: "core", tier: "Core",
@@ -1656,10 +1656,10 @@ const IT_AGENTS = [
     systems: ["Monitoring Tool", "MOCA Digital Portal", "Ivanti"],
     outputs: ["Health alerts", "restored services", "prepared change packages", "asset lifecycle records"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on monitoring, backup checks & change prep; escalate change approval",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on monitoring, backup checks & change prep; escalate change approval",
     risks: "CAB approves changes; CIO/Director approve major changes", nextAction: "",
     talksTo: ["it-i1", "it-i2"],
-    subAgents: [{ name: "Watches system uptime monitoring raises", desc: "Watches system and uptime monitoring and raises alerts", complexity: "Medium", type: "Monitoring", deps: "Monitoring Tool", status: "In Progress" }, { name: "Coordinates backup restoration", desc: "coordinates backup and restoration", complexity: "Medium", type: "Orchestration", deps: "Monitoring Tool", status: "In Progress" }, { name: "Prepares change/enhancement/new-system", desc: "prepares change/enhancement/new-system requests for the CAB", complexity: "Medium", type: "Drafting", deps: "Monitoring Tool", status: "In Progress" }]
+    subAgents: [{ name: "Watches system uptime monitoring raises", desc: "Watches system and uptime monitoring and raises alerts", complexity: "Medium", type: "Monitoring", deps: "Monitoring Tool", status: "Needs Review" }, { name: "Coordinates backup restoration", desc: "coordinates backup and restoration", complexity: "Medium", type: "Orchestration", deps: "Monitoring Tool", status: "Needs Review" }, { name: "Prepares change/enhancement/new-system", desc: "prepares change/enhancement/new-system requests for the CAB", complexity: "Medium", type: "Drafting", deps: "Monitoring Tool", status: "Needs Review" }]
   },
   {
     id: "it-i4", name: "Predictive Operations & Self-Healing Agent", kind: "core", tier: "Core",
@@ -1670,7 +1670,7 @@ const IT_AGENTS = [
     systems: ["Monitoring tools", "MOCA Portal/Ivanti", "the agent ecosystem"],
     outputs: ["Predicted failures averted", "auto-remediated incidents", "pre-diagnosed tickets"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on prediction & safe self-healing; non-trivial remediation escalated",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on prediction & safe self-healing; non-trivial remediation escalated",
     risks: "IT approves non-trivial remediation; the agent predicts and self-heals safe cases", nextAction: "",
     talksTo: ["it-i5"],
     subAgents: [{ name: "Monitors system, capacity performance", desc: "Monitors system, capacity and performance telemetry", complexity: "Medium", type: "Monitoring", deps: "Monitoring tools", status: "In Progress" }, { name: "Predicts failures capacity issues", desc: "predicts failures and capacity issues", complexity: "Medium", type: "Task", deps: "Monitoring tools", status: "In Progress" }, { name: "Auto-remediates known, safe issues", desc: "auto-remediates known, safe issues (restarts, clear-downs, scaling) within policy", complexity: "Medium", type: "Task", deps: "Monitoring tools", status: "In Progress" }]
@@ -1684,7 +1684,7 @@ const IT_AGENTS = [
     systems: ["MOCA Portal/Ivanti", "MDM", "the agent ecosystem"],
     outputs: ["Reclaimed licences", "optimised renewals", "idle-asset flags", "per-entity IT savings"],
     complexity: "Low", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on analysis & recommendations; decisions stay human",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on analysis & recommendations; decisions stay human",
     risks: "IT and entity owners decide on reclaim/renewal; the agent finds and recommends", nextAction: "",
     talksTo: ["it-i4"],
     subAgents: [{ name: "Reconciles licences assets actual usage", desc: "Reconciles licences and assets against actual usage per entity", complexity: "Low", type: "Validation", deps: "MOCA Portal/Ivanti", status: "In Progress" }, { name: "Flags unused, under-used duplicate", desc: "flags unused, under-used and duplicate licences and idle hardware", complexity: "Low", type: "Task", deps: "MOCA Portal/Ivanti", status: "In Progress" }, { name: "Recommends reclaim, redistribution", desc: "recommends reclaim, redistribution and renewal timing", complexity: "Low", type: "Task", deps: "MOCA Portal/Ivanti", status: "In Progress" }]
@@ -1698,10 +1698,10 @@ const IT_AGENTS = [
     systems: ["Oracle", "MOCA Smart", "MOCA APP", "Teams", "Email Oracle (read)", "the agent ecosystem"],
     outputs: ["Pushed decision packages", "captured decisions written back", "full audit trail"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on answering, routing & reminders; escalate exceptions Act-and-notify on answering, routine outbound calls & logging; warm-transfer sensitive matters Act-and-notify on collection & analysis; humans own improvements Act-and-notify on assembly, team view & pre-fill; decisions stay human Act-and-notify on surfacing, nudging & tracking; the owner acts Act-and-notify on tracking, flagging & reporting; re-planning and project decisions stay human",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on answering, routing & reminders; escalate exceptions Act-and-notify on answering, routine outbound calls & logging; warm-transfer sensitive matters Act-and-notify on collection & analysis; humans own improvements Act-and-notify on assembly, team view & pre-fill; decisions stay human Act-and-notify on surfacing, nudging & tracking; the owner acts Act-and-notify on tracking, flagging & reporting; re-planning and project decisions stay human",
     risks: "The matrix-defined approver always decides Risk owners and reviewers decide; the agent reviews and recommends Managers decide on staffing and cover; the agent surfaces and recommends Specialist teams handle exceptions; the employee confirms actions Staff take warm transfers; sensitive/binding matters are human Process owners act on the backlog; management reviews the pulse The manager decides; the companion prepares Owners action the items; the radar surfaces and tracks Project owners and leadership own decisions and re-planning; the agent tracks, flags and reports", nextAction: "",
     talksTo: ["it-v1", "it-v2", "it-v8"],
-    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "In Progress" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }]
+    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "Ready" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }]
   },
   {
     id: "it-v9", name: "Continuous Risk & Quality Assurance", kind: "value-add", tier: "Value-add",
@@ -1827,10 +1827,10 @@ const PROTOCOL_AGENTS = [
     systems: ["E-manasa", "Department Calendar", "Email", "Briefing templates"],
     outputs: ["Coordinated visit", "visit brief", "readiness", "closure report", "satisfaction data"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on coordination, briefs & readiness; escalate seating & approvals",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on coordination, briefs & readiness; escalate seating & approvals",
     risks: "Protocol Team Lead approves seating & readiness; Minister's office confirms", nextAction: "",
     talksTo: ["pt-pr2"],
-    subAgents: [{ name: "Validates registers request", desc: "Validates and registers the request", complexity: "Medium", type: "Validation", deps: "E-manasa", status: "In Progress" }, { name: "Assigns dates calendar", desc: "assigns dates in the calendar", complexity: "Medium", type: "Task", deps: "E-manasa", status: "In Progress" }, { name: "Coordinates pre-visit logistics (access,", desc: "coordinates pre-visit logistics (access, parking, seating, site inspection)", complexity: "Medium", type: "Orchestration", deps: "E-manasa", status: "In Progress" }]
+    subAgents: [{ name: "Validates registers request", desc: "Validates and registers the request", complexity: "Medium", type: "Validation", deps: "E-manasa", status: "Needs Review" }, { name: "Assigns dates calendar", desc: "assigns dates in the calendar", complexity: "Medium", type: "Task", deps: "E-manasa", status: "Needs Review" }, { name: "Coordinates pre-visit logistics (access,", desc: "coordinates pre-visit logistics (access, parking, seating, site inspection)", complexity: "Medium", type: "Orchestration", deps: "E-manasa", status: "Needs Review" }]
   },
   {
     id: "pt-pr2", name: "Airport & Movement Protocol Agent", kind: "core", tier: "Core",
@@ -1841,10 +1841,10 @@ const PROTOCOL_AGENTS = [
     systems: ["E-manasa", "Airport Service Portal", "Airline website", "Email"],
     outputs: ["Booked airport service", "permits", "movement plan", "live flight tracking"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on booking, permits & monitoring; escalate security approvals",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on booking, permits & monitoring; escalate security approvals",
     risks: "Protocol Team Lead and Security approve arrangements", nextAction: "",
     talksTo: ["pt-pr1"],
-    subAgents: [{ name: "Validates airport-service request", desc: "Validates the airport-service request", complexity: "Medium", type: "Validation", deps: "E-manasa", status: "In Progress" }, { name: "Selects books airport service (Al", desc: "selects and books the airport service (Al Majlis/fast-track)", complexity: "Medium", type: "Monitoring", deps: "E-manasa", status: "In Progress" }, { name: "Coordinates security vehicle permits", desc: "coordinates security and vehicle permits", complexity: "Medium", type: "Orchestration", deps: "E-manasa", status: "In Progress" }]
+    subAgents: [{ name: "Validates airport-service request", desc: "Validates the airport-service request", complexity: "Medium", type: "Validation", deps: "E-manasa", status: "Needs Review" }, { name: "Selects books airport service (Al", desc: "selects and books the airport service (Al Majlis/fast-track)", complexity: "Medium", type: "Monitoring", deps: "E-manasa", status: "Needs Review" }, { name: "Coordinates security vehicle permits", desc: "coordinates security and vehicle permits", complexity: "Medium", type: "Orchestration", deps: "E-manasa", status: "Needs Review" }]
   },
   {
     id: "pt-pr3", name: "Visit Intelligence & Briefing Agent", kind: "core", tier: "Core",
@@ -1855,7 +1855,7 @@ const PROTOCOL_AGENTS = [
     systems: ["E-manasa", "public sources", "the agent ecosystem"],
     outputs: ["Guest/delegation dossiers", "protocol preferences", "talking points", "an enriched visit brief"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on assembly from public sources; the briefing is validated by humans",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on assembly from public sources; the briefing is validated by humans",
     risks: "Protocol leadership validate and own the briefing; the agent assembles", nextAction: "",
     talksTo: [],
     subAgents: [{ name: "Assembles guest delegation dossiers public", desc: "Assembles guest and delegation dossiers from public, official sources and the sector's own prior-visit history", complexity: "Medium", type: "Orchestration", deps: "E-manasa", status: "In Progress" }, { name: "Prepares titles, protocol preferences,", desc: "prepares titles, protocol preferences, sensitivities, prior interactions and suggested talking points", complexity: "Medium", type: "Drafting", deps: "E-manasa", status: "In Progress" }, { name: "Keeps everything respectful public-source", desc: "keeps everything respectful and public-source only", complexity: "Medium", type: "Task", deps: "E-manasa", status: "In Progress" }]
@@ -1869,10 +1869,10 @@ const PROTOCOL_AGENTS = [
     systems: ["Oracle", "MOCA Smart", "MOCA APP", "Teams", "Email Oracle (read)", "the agent ecosystem"],
     outputs: ["Pushed decision packages", "captured decisions written back", "full audit trail"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on answering, routine outbound calls & logging; warm-transfer sensitive matters Act-and-notify on collection & analysis; humans own improvements Act-and-notify on information, requirements, status & on-behalf handling; escalate exceptions Act-and-notify on briefing & analysis; recommendations only Act-and-notify on surfacing, nudging & tracking; the owner acts",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on answering, routine outbound calls & logging; warm-transfer sensitive matters Act-and-notify on collection & analysis; humans own improvements Act-and-notify on information, requirements, status & on-behalf handling; escalate exceptions Act-and-notify on briefing & analysis; recommendations only Act-and-notify on surfacing, nudging & tracking; the owner acts",
     risks: "The matrix-defined approver always decides Risk owners and reviewers decide; the agent reviews and recommends Managers decide on staffing and cover; the agent surfaces and recommends Staff take warm transfers; sensitive/binding matters are human Process owners act on the backlog; management reviews the pulse Staff handle exceptions; the recipient confirms key submissions Leadership decides; the agent informs and recommends Owners action the items; the radar surfaces and tracks", nextAction: "",
     talksTo: ["pt-v10", "pt-v8"],
-    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "In Progress" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }]
+    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "Ready" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }]
   },
   {
     id: "pt-v9", name: "Continuous Risk & Quality Assurance", kind: "value-add", tier: "Value-add",
@@ -1998,10 +1998,10 @@ const ADMIN_AGENTS = [
     systems: ["SPAN Tool", "PACKMAN", "Aramex", "GovSign", "Excel"],
     outputs: ["Reconciled asset counts", "tagged assets", "tracked movements", "disposals"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on counts, tagging & movement tracking; escalate disposals",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on counts, tagging & movement tracking; escalate disposals",
     risks: "Asset Officer/Auditor confirm counts; disposal is approved", nextAction: "",
     talksTo: ["ad-ad1"],
-    subAgents: [{ name: "Runs partial annual inventory counts", desc: "Runs partial and annual inventory counts", complexity: "Medium", type: "Task", deps: "SPAN Tool", status: "In Progress" }, { name: "Monitors controls assets", desc: "monitors and controls assets", complexity: "Medium", type: "Monitoring", deps: "SPAN Tool", status: "In Progress" }, { name: "Issues receives assets events", desc: "issues and receives assets for events", complexity: "Medium", type: "Task", deps: "SPAN Tool", status: "In Progress" }]
+    subAgents: [{ name: "Runs partial annual inventory counts", desc: "Runs partial and annual inventory counts", complexity: "Medium", type: "Task", deps: "SPAN Tool", status: "Needs Review" }, { name: "Monitors controls assets", desc: "monitors and controls assets", complexity: "Medium", type: "Monitoring", deps: "SPAN Tool", status: "Needs Review" }, { name: "Issues receives assets events", desc: "issues and receives assets for events", complexity: "Medium", type: "Task", deps: "SPAN Tool", status: "Needs Review" }]
   },
   {
     id: "ad-ad3", name: "Workplace Intelligence Agent", kind: "core", tier: "Core",
@@ -2012,7 +2012,7 @@ const ADMIN_AGENTS = [
     systems: ["Qlub", "SPAN", "the agent ecosystem"],
     outputs: ["Predicted restock", "space-optimisation recommendations", "sustainability tracking"],
     complexity: "Low", impact: "Medium", feasibility: "High",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on prediction & order prep; purchases & space decisions confirmed by humans",
+    status: "In Progress", priority: "Future Phase", autonomy: "Act-and-notify on prediction & order prep; purchases & space decisions confirmed by humans",
     risks: "Admin confirms orders and space decisions; the agent predicts and recommends", nextAction: "",
     talksTo: ["ad-ad4"],
     subAgents: [{ name: "Predicts pantry supply restock consumption", desc: "Predicts pantry and supply restock from consumption", complexity: "Low", type: "Task", deps: "Qlub", status: "In Progress" }, { name: "Analyses desk/space utilisation", desc: "analyses desk/space utilisation and recommends optimisation", complexity: "Low", type: "Reporting", deps: "Qlub", status: "In Progress" }, { name: "Tracks consumption sustainability metrics", desc: "tracks consumption and sustainability metrics", complexity: "Low", type: "Monitoring", deps: "Qlub", status: "In Progress" }]
@@ -2026,10 +2026,10 @@ const ADMIN_AGENTS = [
     systems: ["SPAN", "PACKMAN/Aramex", "the agent ecosystem"],
     outputs: ["Real-time movement tracking", "overdue-return & shrinkage flags", "recovery recommendations"],
     complexity: "Medium", impact: "Medium", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on tracking, reconciliation & flagging; recovery/write-off decisions stay human",
+    status: "Needs Review", priority: "Complex", autonomy: "Act-and-notify on tracking, reconciliation & flagging; recovery/write-off decisions stay human",
     risks: "Asset officers act on flags; disposal/write-off stays a human decision", nextAction: "",
     talksTo: ["ad-ad3"],
-    subAgents: [{ name: "Tracks asset movements events (issue", desc: "Tracks asset movements for events (issue, location, return) in real time against the register", complexity: "Medium", type: "Monitoring", deps: "SPAN", status: "In Progress" }, { name: "Reconciles continuously SPAN", desc: "reconciles continuously with SPAN", complexity: "Medium", type: "Validation", deps: "SPAN", status: "In Progress" }, { name: "Flags overdue returns, mismatches", desc: "flags overdue returns, mismatches and shrinkage with the evidence", complexity: "Medium", type: "Validation", deps: "SPAN", status: "In Progress" }]
+    subAgents: [{ name: "Tracks asset movements events (issue", desc: "Tracks asset movements for events (issue, location, return) in real time against the register", complexity: "Medium", type: "Monitoring", deps: "SPAN", status: "Needs Review" }, { name: "Reconciles continuously SPAN", desc: "reconciles continuously with SPAN", complexity: "Medium", type: "Validation", deps: "SPAN", status: "Needs Review" }, { name: "Flags overdue returns, mismatches", desc: "flags overdue returns, mismatches and shrinkage with the evidence", complexity: "Medium", type: "Validation", deps: "SPAN", status: "Needs Review" }]
   },
   {
     id: "ad-g1", name: "Approval Concierge", kind: "core", tier: "Core",
@@ -2040,10 +2040,10 @@ const ADMIN_AGENTS = [
     systems: ["Oracle", "MOCA Smart", "MOCA APP", "Teams", "Email Oracle (read)", "the agent ecosystem"],
     outputs: ["Pushed decision packages", "captured decisions written back", "full audit trail"],
     complexity: "Medium", impact: "High", feasibility: "Medium",
-    status: "In Progress", priority: "Strategic", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on answering, routing & reminders; escalate exceptions Act-and-notify on collection & analysis; humans own improvements Act-and-notify on information, requirements, status & on-behalf handling; escalate exceptions Act-and-notify on surfacing, nudging & tracking; the owner acts",
+    status: "Ready", priority: "Quick Win", autonomy: "Act-and-notify on assembly, delivery & write-back; the human decision is never automated Act-and-notify on risk tracking & review; humans own decisions & corrections Act-and-notify on monitoring & rebalancing suggestions; staffing decisions stay human Act-and-notify on answering, routing & reminders; escalate exceptions Act-and-notify on collection & analysis; humans own improvements Act-and-notify on information, requirements, status & on-behalf handling; escalate exceptions Act-and-notify on surfacing, nudging & tracking; the owner acts",
     risks: "The matrix-defined approver always decides Risk owners and reviewers decide; the agent reviews and recommends Managers decide on staffing and cover; the agent surfaces and recommends Specialist teams handle exceptions; the employee confirms actions Process owners act on the backlog; management reviews the pulse Staff handle exceptions; the recipient confirms key submissions Owners action the items; the radar surfaces and tracks", nextAction: "",
     talksTo: ["ad-v1", "ad-v10"],
-    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "In Progress" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "In Progress" }]
+    subAgents: [{ name: "Assembles decision package any workflow", desc: "Assembles the decision package for any workflow", complexity: "Medium", type: "Orchestration", deps: "Oracle", status: "Ready" }, { name: "Applies relevant matrix (the Leave", desc: "applies the relevant matrix (the 25-type Leave Matrix, procurement delegation, the travel chain, finance sign-offs)", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }, { name: "Pushes person's channel", desc: "pushes it via the person's channel", complexity: "Medium", type: "Task", deps: "Oracle", status: "Ready" }]
   },
   {
     id: "ad-v9", name: "Continuous Risk & Quality Assurance", kind: "value-add", tier: "Value-add",
