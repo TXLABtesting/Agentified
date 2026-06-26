@@ -2363,62 +2363,62 @@ const PM_AGENTS = [
 
 const DEPARTMENTS = [
   {
-    id: "hr", name: "Human Resources", short: "HR", nameAr: "الموارد البشرية",
+    id: "hr", name: "Human Resources", short: "HR",
     description: "People & HR agents under one orchestrator — covering the employee journey, performance, leave and case work — wrapping the human-judgment layer on top of Oracle HCM.",
     owner: "Total Experience Team — Corporate Support Services", focal: "Aisha Al Mansoori · Director, HR Transformation", lastUpdated: "2026-06-26", agents: HR_AGENTS
   },
   {
-    id: "procurement", name: "Procurement, Travel & Vendor", short: "Procurement", nameAr: "المشتريات والسفر",
+    id: "procurement", name: "Procurement, Travel & Vendor", short: "Procurement",
     description: "Procure-to-pay, travel and vendor agents — intake, sourcing, vendor validation, contract drafting and approvals — over Oracle, NER and ICP.",
     owner: "Corporate Support Services — Procurement", focal: "Mohammed Al Hashimi · Head of Procurement", lastUpdated: "2026-06-26", agents: PROCUREMENT_AGENTS
   },
   {
-    id: "finance", name: "Finance & Accounting", short: "Finance", nameAr: "المالية والمحاسبة",
+    id: "finance", name: "Finance & Accounting", short: "Finance",
     description: "Finance & accounting agents — AP/AR, payments, payroll, reconciliations, VAT, budgeting, period-close and reporting — with payments and the close kept human-approved.",
     owner: "Corporate Support Services — Finance", focal: "Fatima Al Zaabi · Director of Finance", lastUpdated: "2026-06-26", agents: FINANCE_AGENTS
   },
   {
-    id: "knowledge", name: "Knowledge & Content", short: "Knowledge", nameAr: "المعرفة والمحتوى",
+    id: "knowledge", name: "Knowledge & Content", short: "Knowledge",
     description: "Knowledge & content agents — translation & interpretation, authoring, proofreading, publishing and documentation — over Email, Events Now and SharePoint.",
     owner: "Government Communication & Knowledge", focal: "Layla Al Hammadi · Head of Knowledge & Content", lastUpdated: "2026-06-26", agents: KNOWLEDGE_AGENTS
   },
   {
-    id: "legal", name: "Legal", short: "Legal", nameAr: "الشؤون القانونية",
+    id: "legal", name: "Legal", short: "Legal",
     description: "Legal agents — contract and clause review, regulatory tracking, legal research and matter coordination — with every opinion kept with counsel.",
     owner: "Legal Affairs", focal: "Noura Al Kaabi · Legal Counsel", lastUpdated: "2026-06-26", agents: LEGAL_AGENTS
   },
   {
-    id: "comms", name: "Events & Communication", short: "Events", nameAr: "الفعاليات والاتصال",
+    id: "comms", name: "Events & Communication", short: "Events",
     description: "Event coordination, creative & production, and media & communications agents — with publishing and external messaging human-approved.",
     owner: "Government Communication", focal: "Omar Al Marri · Director of Communications", lastUpdated: "2026-06-26", agents: COMMS_AGENTS
   },
   {
-    id: "cyber", name: "Cyber Security", short: "Cyber", nameAr: "الأمن السيبراني",
+    id: "cyber", name: "Cyber Security", short: "Cyber",
     description: "Security operations (SOC), clearance & GRC and related agents — triaging threats and governance, with incident response kept human-decided.",
     owner: "Digital & Technology — Cyber Security", focal: "Rashid Al Balushi · Chief Information Security Officer", lastUpdated: "2026-06-26", agents: CYBER_AGENTS
   },
   {
-    id: "it", name: "IT Operations", short: "IT Ops", nameAr: "العمليات التقنية",
+    id: "it", name: "IT Operations", short: "IT Ops",
     description: "IT service desk, access & identity, and operations & change agents — keeping IT responsive and controlled, with privileged access human-approved.",
     owner: "Digital & Technology", focal: "Khalid Al Suwaidi · Chief Information Officer", lastUpdated: "2026-06-26", agents: IT_AGENTS
   },
   {
-    id: "protocol", name: "Protocol", short: "Protocol", nameAr: "المراسم",
+    id: "protocol", name: "Protocol", short: "Protocol",
     description: "Protocol & VIP coordination and movement protocol agents — orchestrating visits and delegations, with judgment kept human.",
     owner: "Office of the Minister — Protocol", focal: "Mariam Al Shamsi · Head of Protocol", lastUpdated: "2026-06-26", agents: PROTOCOL_AGENTS
   },
   {
-    id: "admin", name: "Admin Services", short: "Admin", nameAr: "الخدمات الإدارية",
+    id: "admin", name: "Admin Services", short: "Admin",
     description: "Workplace & hospitality and admin asset-management agents — running day-to-day corporate services with judgment kept human.",
     owner: "Corporate Support Services — Administration", focal: "Saeed Al Nuaimi · Head of Admin Services", lastUpdated: "2026-06-26", agents: ADMIN_AGENTS
   },
   {
-    id: "tx", name: "Total Experience Center", short: "Experience", nameAr: "مركز التجربة الشاملة",
+    id: "tx", name: "Total Experience Center", short: "Experience",
     description: "The experience engine of the organisation — owning user & app experience, service and process experience, employee and vendor experience, the work environment and overall wellbeing, and following up with every department to lift satisfaction and continuously enhance their services.",
     owner: "Total Experience Office", focal: "Hessa Al Falasi · Head of Total Experience", lastUpdated: "2026-06-26", agents: TX_AGENTS
   },
   {
-    id: "pm", name: "Project Management", short: "Projects", nameAr: "إدارة المشاريع",
+    id: "pm", name: "Project Management", short: "Projects",
     description: "The delivery backbone — planning, prioritising, resourcing and governing projects across the organisation, with live risk, status and budget tracking so initiatives land on time, on value and on budget.",
     owner: "Project Management Office (PMO)", focal: "Sultan Al Romaithi · Head of PMO", lastUpdated: "2026-06-26", agents: PM_AGENTS
   }

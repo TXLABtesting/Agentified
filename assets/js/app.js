@@ -280,7 +280,6 @@
     $("#header").innerHTML =
       '<div class="topbar">' +
         '<button class="btn btn--icon btn--ghost menu-toggle" data-menu>' + icon("menu") + "</button>" +
-        '<div class="topbar__crumb">' + icon("overview") + breadcrumb() + "</div>" +
         '<div class="search">' + icon("search") +
           '<input id="searchInput" type="search" placeholder="Search departments, agents or sub-agents" value="' +
           esc(STATE.search) + '" autocomplete="off" />' +
@@ -435,8 +434,7 @@
       return '<div class="dept-card" data-goto-dept="' + d.id + '">' +
         '<div class="dept-card__top">' +
           '<span class="dept-icon">' + icon(deptIconName(d.id)) + "</span>" +
-          "<div><div class=\"dept-card__name\">" + esc(d.name) +
-            '<span class="ar" dir="rtl">' + esc(d.nameAr) + "</span></div>" +
+          "<div><div class=\"dept-card__name\">" + esc(d.name) + "</div>" +
           '<div class="dept-card__owner">' + esc(d.focal) + "</div></div>" +
           '<div class="spacer"></div>' + statusChip(s.deptStatus) +
         "</div>" +
@@ -478,7 +476,7 @@
               '<span class="dept-icon dept-icon--lg">' + icon(deptIconName(d.id)) + "</span>" +
               "<div>" +
                 '<div class="flex items-center gap-3" style="flex-wrap:wrap">' +
-                  "<h2>" + esc(d.name) + ' <span class="ar" dir="rtl">' + esc(d.nameAr) + "</span></h2>" +
+                  "<h2>" + esc(d.name) + "</h2>" +
                   statusChip(s.deptStatus) +
                 "</div>" +
                 '<p class="dept-hero__desc">' + esc(d.description) + "</p>" +
@@ -506,11 +504,35 @@
     const agentCards = filtered.length ? filtered.map((a) => agentRow(a, d)).join("")
       : (d.agents.length === 0 ? emptyState("Awaiting this department's blueprint", "Agents will appear here once " + esc(d.name) + "'s details are provided.") : emptyState());
 
-    return '<div class="page">' + back + hero +
+    return '<div class="page">' + back + hero + readinessChecklist(d, s) +
       '<div class="section"><div class="section__head"><h3>Main agents</h3>' +
         '<span class="hint">' + filtered.length + (hasFilters() && filtered.length !== d.agents.length ? " of " + d.agents.length : "") +
         " agent" + (filtered.length !== 1 ? "s" : "") + " · " + s.subs + " sub-agents</span></div>" +
         '<div class="agent-grid">' + agentCards + "</div></div></div>";
+  }
+
+  // Checklist of what's left to reach 100% readiness (= every agent "Ready")
+  function readinessChecklist(d, s) {
+    if (!d.agents.length) return "";
+    const order = { "Needs Review": 0, "In Progress": 1, "Ready": 2 };
+    const items = d.agents.slice().sort((a, b) => (order[a.status] - order[b.status]) || a.name.localeCompare(b.name));
+    const readyN = d.agents.filter((a) => a.status === "Ready").length;
+    const need = d.agents.length - readyN;
+    const head = need === 0
+      ? '<div class="rchk__done">' + icon("check") + "All " + d.agents.length + " agents are Ready — this department is at 100%.</div>"
+      : '<p class="rchk__sub"><b>' + readyN + "</b> of <b>" + d.agents.length + "</b> agents Ready · make <b>" + need + "</b> more Ready to reach 100%.</p>";
+    const rows = items.map((a) => {
+      const done = a.status === "Ready";
+      const note = done ? "Ready"
+        : (a.status === "Needs Review" ? "Resolve the review, then mark Ready" : "Move from In Progress to Ready");
+      return '<button class="rchk__item' + (done ? " is-done" : "") + '" data-agent="' + a.id + '">' +
+        '<span class="rchk__box">' + (done ? icon("check") : "") + "</span>" +
+        '<span class="rchk__name">' + esc(a.name) + "</span>" +
+        '<span class="rchk__note">' + (done ? statusChip("Ready") : statusChip(a.status) + " " + esc(note)) + "</span></button>";
+    }).join("");
+    return '<div class="card rchk-card"><div class="card__head"><h3>Readiness checklist — to reach 100%</h3>' +
+      '<span class="hint">Readiness reaches 100% when every agent is Ready</span></div>' +
+      '<div class="card__body">' + head + '<div class="rchk">' + rows + "</div></div></div>";
   }
 
   function agentRow(a, d) {

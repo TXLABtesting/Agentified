@@ -427,6 +427,27 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
 .readiness-track { height: 10px; border-radius: var(--r-full); background: var(--line-2); overflow: hidden; }
 .readiness-track > i { display: block; height: 100%; border-radius: var(--r-full); background: linear-gradient(90deg, var(--green) 0%, #3C9466 100%); transition: width .6s cubic-bezier(.2,.7,.3,1); }
 
+/* Readiness-to-100% checklist */
+.rchk-card { margin-top: var(--sp-4); }
+.rchk__sub { font-size: var(--fs-sm); color: var(--ink-2); margin: 0 0 12px; }
+.rchk__done { display: flex; align-items: center; gap: 8px; font-size: var(--fs-sm); font-weight: 600; color: var(--green);
+  background: var(--green-bg); border-radius: var(--r-sm); padding: 12px 14px; }
+.rchk__done svg { width: 18px; height: 18px; }
+.rchk { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.rchk__item { display: flex; align-items: center; gap: 11px; text-align: left; width: 100%;
+  padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface);
+  cursor: pointer; transition: border-color .12s, background .12s; }
+.rchk__item:hover { border-color: var(--brand); background: var(--surface-2); }
+.rchk__box { width: 20px; height: 20px; flex: none; border-radius: 6px; border: 1.5px solid var(--line);
+  display: grid; place-items: center; color: #fff; }
+.rchk__box svg { width: 14px; height: 14px; }
+.rchk__item.is-done .rchk__box { background: var(--green); border-color: var(--green); }
+.rchk__name { font-size: var(--fs-sm); font-weight: 600; color: var(--ink); flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rchk__item.is-done .rchk__name { color: var(--ink-3); text-decoration: line-through; }
+.rchk__note { font-size: var(--fs-2xs); color: var(--ink-3); flex: none; display: flex; align-items: center; gap: 6px; }
+@media (max-width: 720px) { .rchk { grid-template-columns: 1fr; } }
+
 /* ---- Agent cards (listing-style) — 2-column grid ------------------------- */
 .agent-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-5); }
 .acard {
