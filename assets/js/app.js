@@ -1335,31 +1335,37 @@
   });
 
   // drag anywhere in the canvas to pan freely (both axes); transform-based
-  let mmPan = null;
+  let mmPan = null, mmDragged = false;
   document.addEventListener("pointerdown", function (e) {
+    mmDragged = false;   // any new press clears stale drag state — never leaks to other views
     const canvas = e.target.closest(".mm-canvas");
-    if (!canvas || e.button !== 0 || e.target.closest("button, a, input")) return;
+    if (!canvas || e.button !== 0 || e.target.closest("button, a, input, select")) return;
     mmPan = { c: canvas, x: e.clientX, y: e.clientY, px: STATE.mindPanX, py: STATE.mindPanY, moved: false };
   });
   document.addEventListener("pointermove", function (e) {
     if (!mmPan) return;
     const dx = e.clientX - mmPan.x, dy = e.clientY - mmPan.y;
-    if (!mmPan.moved && Math.abs(dx) + Math.abs(dy) > 4) { mmPan.moved = true; mmPan.c.classList.add("is-grabbing"); }
+    if (!mmPan.moved && Math.abs(dx) + Math.abs(dy) > 6) { mmPan.moved = true; mmPan.c.classList.add("is-grabbing"); }
     if (!mmPan.moved) return;
     STATE.mindPanX = mmPan.px + dx;
     STATE.mindPanY = mmPan.py + dy;
     applyMM();
   });
-  function endPan() { if (mmPan) { mmPan.c.classList.remove("is-grabbing"); mmPan = null; } }
+  function endPan() {
+    if (!mmPan) return;
+    if (mmPan.moved) mmDragged = true;   // a real drag just happened
+    mmPan.c.classList.remove("is-grabbing");
+    mmPan = null;
+  }
   document.addEventListener("pointerup", endPan);
   document.addEventListener("pointercancel", endPan);
-  // suppress the click that follows a real drag (so panning doesn't open an agent)
+  // only the click that immediately follows a real *in-canvas* drag is suppressed,
+  // so panning doesn't open an agent. Clicks anywhere else are never affected.
   document.addEventListener("click", function (e) {
-    if (mmDragged) { mmDragged = false; e.stopPropagation(); e.preventDefault(); }
+    if (mmDragged && e.target.closest(".mm-canvas")) { e.stopPropagation(); e.preventDefault(); }
+    mmDragged = false;
   }, true);
-  let mmDragged = false;
-  document.addEventListener("pointerup", function () { if (mmPan && mmPan.moved) mmDragged = true; }, true);
-  // wheel / trackpad to zoom toward the cursor
+  // wheel / trackpad to zoom toward the cursor (only over the canvas)
   document.addEventListener("wheel", function (e) {
     const canvas = e.target.closest(".mm-canvas"); if (!canvas) return;
     e.preventDefault();
