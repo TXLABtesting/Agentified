@@ -363,17 +363,18 @@
   function viewOverview() {
     const g = globalStats();
     const kpis = [
-      { v: g.total, l: "Total Agents", icon: "agents", cls: "is-violet", sub: "Designed across all departments" },
-      { v: g.depts, l: "Departments Covered", icon: "dept", cls: "is-green", sub: "Across corporate & support functions" },
-      { v: g.subs, l: "Total Sub-Agents", icon: "sub", cls: "is-blue", sub: "Specialised task agents" },
-      { v: g.quickWins, l: "Wave 1 — Quick Wins", icon: "bolt", cls: "is-amber", sub: "Recommended to deliver first" },
-      { v: g.high, l: "High-Complexity Agents", icon: "gauge", cls: "is-rose", sub: "Plan extra effort & time" },
-      { v: g.avg.toFixed(1), l: "Avg. Complexity", icon: "pulse", cls: "is-gold", sub: "Scale 1 (Low) – 4 (Very High)" }
+      { v: g.total, l: "Total Agents", icon: "agents", cls: "is-violet", sub: "Designed across all departments", view: "agents" },
+      { v: g.depts, l: "Departments Covered", icon: "dept", cls: "is-green", sub: "Across corporate & support functions", view: "departments" },
+      { v: g.subs, l: "Total Sub-Agents", icon: "sub", cls: "is-blue", sub: "Specialised task agents", view: "subagents" },
+      { v: g.quickWins, l: "Wave 1 — Quick Wins", icon: "bolt", cls: "is-amber", sub: "Recommended to deliver first", view: "agents", filter: "priority:Quick Win" },
+      { v: g.high, l: "High-Complexity Agents", icon: "gauge", cls: "is-rose", sub: "Plan extra effort & time", view: "agents", filter: "complexity:High,Very High" },
+      { v: g.avg.toFixed(1), l: "Avg. Complexity", icon: "pulse", cls: "is-gold", sub: "Scale 1 (Low) – 4 (Very High)", view: "agents" }
     ];
     const kpiHTML = '<div class="kpi-grid">' + kpis.map((k) =>
-      '<div class="kpi ' + k.cls + '"><div class="kpi__icon ' + k.cls + '">' + icon(k.icon) + "</div>" +
+      '<button class="kpi is-click ' + k.cls + '" data-kpi-view="' + k.view + '"' + (k.filter ? ' data-kpi-filter="' + esc(k.filter) + '"' : "") + ">" +
+      '<div class="kpi__icon ' + k.cls + '">' + icon(k.icon) + "</div>" +
       '<div class="kpi__value">' + k.v + "</div><div class=\"kpi__label\">" + k.l + "</div>" +
-      '<div class="kpi__sub">' + esc(k.sub) + "</div></div>").join("") + "</div>";
+      '<div class="kpi__sub">' + esc(k.sub) + "</div></button>").join("") + "</div>";
 
     // department table
     const rows = DATA.departments.map((d) => {
@@ -870,7 +871,7 @@
           hm.ladder.map((l, i) => {
             const parts = l.split("—");
             return '<div class="hl-step"><span class="hl-step__n">' + (i + 1) + "</span>" +
-              "<div><b>" + esc((parts[0] || l).trim()) + "</b>" +
+              '<div class="hl-step__tx"><b>' + esc((parts[0] || l).trim()) + "</b>" +
               (parts[1] ? "<span>" + esc(parts.slice(1).join("—").trim()) + "</span>" : "") + "</div></div>";
           }).join("") +
         "</div></div></div>" : "";
@@ -1385,7 +1386,7 @@
       "[data-close-drawer],[data-close-modal],[data-add],[data-export],[data-share],[data-reset]," +
       "[data-filter-toggle],[data-filter],[data-apply-filters],[data-clear-filters],[data-menu]," +
       "[data-suggest],[data-chat-clear],[data-mind],[data-mindsubs],[data-mindlinks],[data-zoom],[data-mindfull]," +
-      "[data-deptinfo],[data-proginfo],[data-sub]");
+      "[data-deptinfo],[data-proginfo],[data-sub],[data-kpi-view]");
     if (!t) {
       // close filter popover on outside click
       if (STATE.filterOpen && !e.target.closest(".has-pop")) { STATE.filterOpen = false; renderHeader(); }
@@ -1402,6 +1403,11 @@
     else if (t.dataset.sub) { const ps = t.dataset.sub.split("|"); openSubAgent(ps[0], +ps[1]); }
     else if (t.dataset.deptinfo) { openDeptDetail(t.dataset.deptinfo); }
     else if (t.hasAttribute("data-proginfo")) { openProgrammeDetail(); }
+    else if (t.dataset.kpiView) {
+      STATE.filters = { complexity: [], status: [], priority: [], category: [] };
+      if (t.dataset.kpiFilter) { const fp = t.dataset.kpiFilter.split(":"); STATE.filters[fp[0]] = fp[1].split(","); }
+      STATE.search = ""; go(t.dataset.kpiView);
+    }
     else if (t.dataset.gotoDept) { go("department", t.dataset.gotoDept); }
     else if (t.dataset.agent) { openAgent(t.dataset.agent); }
     else if (t.dataset.edit) { e.stopPropagation(); openEdit(t.dataset.edit); }
