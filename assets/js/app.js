@@ -265,7 +265,8 @@
         { id: "overview", label: "Overview", icon: "overview" },
         { id: "departments", label: "Departments", icon: "dept", count: g.depts },
         { id: "agents", label: "Agents", icon: "agents", count: g.total },
-        { id: "mindmap", label: "Agent team", icon: "mindmap" }
+        { id: "mindmap", label: "Agent team", icon: "mindmap" },
+        { id: "humanloop", label: "Human in the loop", icon: "user" }
       ]},
       { label: "Tools", items: [
         { id: "assistant", label: "Agent assistant", icon: "chat" },
@@ -524,6 +525,9 @@
           ? '<span class="acard__tag is-extras">Extras</span>'
           : '<span class="acard__tag is-process">' + esc(procTagOf(a)) + "</span>") +
       "</div>" +
+      ((a.humanLoop || a.risks) ?
+        '<div class="acard__human"><span class="acard__human-ic">' + icon("user") + "</span>" +
+          '<span><b>Human decides:</b> ' + esc((a.humanLoop || a.risks)) + "</span></div>" : "") +
       '<div class="acard__panel">' +
         '<div class="acard__info">' +
           (proc ? '<div class="acard__inforow">' + icon("layers") + "<span>" + esc(proc) + "</span></div>" : "") +
@@ -852,6 +856,52 @@
       "</div>";
   }
 
+  function viewHumanLoop() {
+    const hm = (DATA.humanModel) || { gate: "", ladder: [], map: [], sensitive: "", principles: [] };
+    const head =
+      '<div class="page__head"><div class="eyebrow">Governance · Unified Agentic System</div>' +
+        "<h2>Human in the Loop</h2>" +
+        "<p>" + esc(hm.gate) + "</p></div>";
+
+    const ladder = hm.ladder.length ?
+      '<div class="card hl-card"><div class="card__head"><h3>The decision gate &amp; autonomy ladder</h3>' +
+        '<span class="hint">Agents earn autonomy per case-type; it is revocable on drift</span></div>' +
+        '<div class="card__body"><div class="hl-ladder">' +
+          hm.ladder.map((l, i) => {
+            const parts = l.split("—");
+            return '<div class="hl-step"><span class="hl-step__n">' + (i + 1) + "</span>" +
+              "<div><b>" + esc((parts[0] || l).trim()) + "</b>" +
+              (parts[1] ? "<span>" + esc(parts.slice(1).join("—").trim()) + "</span>" : "") + "</div></div>";
+          }).join("") +
+        "</div></div></div>" : "";
+
+    const rows = hm.map.map((m) =>
+      '<tr class="clickable" data-goto-dept="' + esc(m.dept) + '">' +
+        '<td><div class="cell-strong">' + esc(m.domain) + "</div></td>" +
+        '<td class="cell-sub">' + esc(m.act) + "</td>" +
+        '<td><div class="hl-human">' + icon("user") + "<span>" + esc(m.human) + "</span></div></td>" +
+        '<td class="cell-sub nowrap">' + esc(m.owner) + "</td>" +
+      "</tr>").join("");
+    const mapCard =
+      '<div class="section"><div class="section__head"><h3>Where a human is always required</h3>' +
+        '<span class="hint">By domain — the agent acts on the clear cases; a named person owns the rest</span></div>' +
+        '<div class="card"><div class="table-wrap"><table class="tbl"><thead><tr>' +
+          "<th>Domain</th><th>Agents act on</th><th>A human decides &amp; is accountable for</th><th>Owner</th>" +
+        "</tr></thead><tbody>" + rows + "</tbody></table></div></div></div>";
+
+    const sensitive = hm.sensitive ?
+      '<div class="callout callout--human" style="margin-top:16px">' + icon("shield") +
+        "<div><b>The sensitive cases — always human, with extra care</b><p>" + esc(hm.sensitive) + "</p></div></div>" : "";
+
+    const principles = hm.principles.length ?
+      '<div class="card hl-card" style="margin-top:16px"><div class="card__head"><h3>Governance principles</h3></div>' +
+        '<div class="card__body"><ul class="hl-principles">' +
+          hm.principles.map((p) => "<li>" + icon("check") + "<span>" + esc(p) + "</span></li>").join("") +
+        "</ul></div></div>" : "";
+
+    return '<div class="page">' + head + ladder + mapCard + sensitive + principles + "</div>";
+  }
+
   function viewSettings() {
     const g = globalStats();
     return '<div class="page"><div class="page__head"><h2>Settings</h2>' +
@@ -989,6 +1039,10 @@
       "</div>" +
       '<div class="drawer__body">' +
         '<div class="scorebox">' + score + "</div>" +
+        ((a.humanLoop || a.risks) ?
+          '<div class="callout callout--human">' + icon("user") +
+            "<div><b>Human in the loop — where a person decides</b><p>" + esc(a.humanLoop || a.risks) + "</p></div></div>" +
+          '<div style="height:14px"></div>' : "") +
         field("Purpose", "target", esc(a.purpose), true) +
         field("Main Responsibilities", "list", esc(a.responsibilities)) +
         field("Process Covered", "layers", esc(a.process)) +
@@ -996,11 +1050,12 @@
         field("Inputs Needed", "input", tags(a.inputs)) +
         field("Systems It Connects To", "link", tags(a.systems)) +
         field("Outputs Produced", "output", tags(a.outputs)) +
-        field("Autonomy", "pulse", esc(a.autonomy)) +
+        field("Autonomy (act vs ask)", "pulse", esc(a.autonomy)) +
         '<div class="divider"></div>' +
-        '<div class="callout callout--risk">' + icon("review") +
-          "<div><b>Risks / Dependencies</b><p>" + esc(a.risks) + "</p></div></div>" +
-        '<div style="height:12px"></div>' +
+        (a.risks ?
+          '<div class="callout callout--risk">' + icon("review") +
+            "<div><b>Risks / Dependencies</b><p>" + esc(a.risks) + "</p></div></div>" +
+          '<div style="height:12px"></div>' : "") +
         '<div class="callout callout--action">' + icon("flag") +
           "<div><b>Recommended Next Action</b><p>" + esc(a.nextAction) + "</p></div></div>" +
         '<div class="divider"></div>' +
@@ -1279,7 +1334,7 @@
     const h = location.hash.replace(/^#\/?/, "");
     const parts = h.split("/");
     if (parts[0] === "department" && parts[1]) { STATE.view = "department"; STATE.deptId = parts[1]; return; }
-    const valid = ["overview", "departments", "agents", "subagents", "mindmap", "review", "assistant", "settings"];
+    const valid = ["overview", "departments", "agents", "subagents", "mindmap", "humanloop", "review", "assistant", "settings"];
     STATE.view = valid.includes(parts[0]) ? parts[0] : "overview";
   }
   function go(view, deptId) {
@@ -1294,7 +1349,7 @@
     const v = STATE.view;
     const map = {
       overview: viewOverview, departments: viewDepartments, department: viewDepartmentDetail,
-      agents: viewAgents, subagents: viewSubAgents, mindmap: viewMindmap, review: viewReview, assistant: viewAssistant, settings: viewSettings
+      agents: viewAgents, subagents: viewSubAgents, mindmap: viewMindmap, humanloop: viewHumanLoop, review: viewReview, assistant: viewAssistant, settings: viewSettings
     };
     $("#view").innerHTML = (map[v] || viewOverview)();
     window.scrollTo({ top: 0 });
@@ -1412,7 +1467,7 @@
     renderNav();
     const map = {
       overview: viewOverview, departments: viewDepartments, department: viewDepartmentDetail,
-      agents: viewAgents, subagents: viewSubAgents, mindmap: viewMindmap, review: viewReview, assistant: viewAssistant, settings: viewSettings
+      agents: viewAgents, subagents: viewSubAgents, mindmap: viewMindmap, humanloop: viewHumanLoop, review: viewReview, assistant: viewAssistant, settings: viewSettings
     };
     $("#view").innerHTML = (map[STATE.view] || viewOverview)();
     if (STATE.view === "mindmap") centerMindmap();

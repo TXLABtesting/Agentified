@@ -185,8 +185,9 @@
     if (field === "outputs") return head + chipRow("What it produces", a.outputs);
     if (field === "responsibilities") return head + "<p>" + esc(a.responsibilities || a.purpose) + "</p>";
     if (field === "process") return head + "<p><b>Process covered:</b> " + esc(a.process || "—") + "</p>";
-    if (field === "autonomy") return head + "<p><b>Autonomy / human-in-the-loop:</b> " + esc(a.autonomy || "—") + "</p>";
-    if (field === "risks") return head + "<p><b>Human involvement &amp; dependencies:</b> " + esc(a.risks || "—") + "</p>";
+    if (field === "autonomy") return head + "<p><b>Autonomy (act vs ask):</b> " + esc(a.autonomy || "—") + "</p>";
+    if (field === "humanLoop") return head + "<p><b>Human in the loop — where a person decides:</b> " + esc(a.humanLoop || a.risks || "—") + "</p>";
+    if (field === "risks") return head + "<p><b>Human involvement &amp; dependencies:</b> " + esc(a.humanLoop || a.risks || "—") + "</p>";
     if (field === "nextAction") return head + "<p><b>Recommended next action:</b> " + esc(a.nextAction || "—") + "</p>";
     if (field === "scores")
       return head + '<div class="chat-li__chips" style="margin-top:6px">' + cChip(a.complexity) +
@@ -202,8 +203,9 @@
     if (/output|produce|deliver|result|generate|create|what comes out/.test(ql)) return "outputs";
     if (/responsib|tasks?|handle|cover\b|in charge/.test(ql)) return "responsibilities";
     if (/process/.test(ql)) return "process";
-    if (/autonom|human in the loop|human-in|decision|approve|escalat|oversight|act on its own/.test(ql)) return "autonomy";
-    if (/risk|governance|human involve|dependenc/.test(ql)) return "risks";
+    if (/human|who (decides|approves|signs)|decides|sign.?off|accountab|oversight|in the loop/.test(ql)) return "humanLoop";
+    if (/autonom|act on its own|escalat/.test(ql)) return "autonomy";
+    if (/risk|governance|dependenc/.test(ql)) return "risks";
     if (/next|recommend|action/.test(ql)) return "nextAction";
     if (/impact|feasib|complexity|priority|status|rating|score/.test(ql)) return "scores";
     return null;
