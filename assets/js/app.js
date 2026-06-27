@@ -83,7 +83,7 @@
   function deptIconName(id) {
     return ({ hr: "user", procurement: "doc", finance: "pulse", knowledge: "folder",
       legal: "idcard", comms: "chat", cyber: "shield", it: "cpu", protocol: "flag",
-      admin: "layers", strategy: "target", tx: "spark", pm: "target", shared: "link" })[id] || "dept";
+      admin: "layers", strategy: "target", tx: "spark", pm: "target", sh: "flag", shared: "link" })[id] || "dept";
   }
 
   /* ---- Helpers ---------------------------------------------------------- */
