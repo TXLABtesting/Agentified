@@ -839,5 +839,24 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
   .form-grid { grid-template-columns: 1fr; }
   .form-field.col-2 { grid-column: span 1; }
   .set-grid { grid-template-columns: 1fr; }
+  .mm-wrap { padding: var(--sp-4); }
+}
+/* Phones: search on its own row, action buttons collapse to icons */
+@media (max-width: 640px) {
+  .topbar { flex-wrap: wrap; row-gap: 10px; }
+  .topbar__actions { order: 1; margin-left: auto; }
+  .search { order: 2; flex-basis: 100%; max-width: none; }
+  .topbar__actions .btn { width: 44px; height: 44px; padding: 0; justify-content: center; }
+  .topbar__actions .btn__t { display: none; }
+  .page { padding: var(--sp-5) var(--sp-4) var(--sp-8); }
+}
+@media (max-width: 760px) {
+  .mm-controls .flex { flex-wrap: wrap; }
+}
+@media (max-width: 420px) {
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .mm-controls { gap: 8px; }
+  .mm-pick { width: 100%; }
+  .mm-select { width: 100%; min-width: 0; }
 }
 .menu-toggle { display: none; }

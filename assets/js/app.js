@@ -307,12 +307,12 @@
         "</div>" +
         '<div class="topbar__actions">' +
           '<div class="has-pop">' +
-            '<button class="btn" data-filter-toggle>' + icon("filter") + "Filter" +
+            '<button class="btn" data-filter-toggle>' + icon("filter") + '<span class="btn__t">Filter</span>' +
               (activeFilters ? '<span class="badge-dot"></span>' : "") + "</button>" +
             filterPopover() +
           "</div>" +
-          '<button class="btn" data-export>' + icon("export") + "Export</button>" +
-          '<button class="btn btn--primary" data-add>' + icon("plus") + "Add / update agent</button>" +
+          '<button class="btn" data-export>' + icon("export") + '<span class="btn__t">Export</span></button>' +
+          '<button class="btn btn--primary" data-add>' + icon("plus") + '<span class="btn__t">Add / update agent</span></button>' +
         "</div>" +
       "</div>";
   }
