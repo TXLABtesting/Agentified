@@ -60,10 +60,6 @@
     if (!agents.length) return 0;
     return agents.reduce((s, a) => s + (CSCORE[a.complexity] || 0), 0) / agents.length;
   }
-  function readiness(agents) {
-    if (!agents.length) return 0;
-    return Math.round(agents.reduce((n, a) => n + (STAGE_WEIGHT[a.status] || 25), 0) / agents.length);
-  }
   function systemUsage() {
     const map = {};
     allAgents().forEach((a) => (a.systems || []).forEach((s) => {
@@ -268,12 +264,10 @@
     }
 
     /* delivery stage lists */
-    if (has(/\blive\b|deployed|operational/) && (has(/depart/) || has(/which (department|team)/))) return readinessBars();
     if (has(/\blive\b|deployed|operational|completed|finished/)) return statusList("Live", agents, dept);
     if (has(/in.?development|being built|under construction|in build/)) return statusList("In Development", agents, dept);
     if (has(/approved|greenlit|green-lit/)) return statusList("Approved", agents, dept);
     if (has(/blueprint|designed|not (yet )?started|on paper/)) return statusList("Blueprinted", agents, dept);
-    if (has(/which (departments?|teams?) (are )?(ready|furthest|most advanced)/) || (has(/readiness|how ready|delivery progress/))) return readinessBars();
 
     /* average complexity */
     if (has(/aver|avg|mean/) && has(/complex/)) {
@@ -392,7 +386,7 @@
       const d = byDept(dept.id); const subs = d.agents.reduce((s, a) => s + subsOf(a).length, 0);
       return "<p><b>" + esc(d.name) + "</b> — " + esc(d.description) + "</p>" +
         "<p style=\"margin-top:8px\"><b>" + d.agents.length + "</b> agents · <b>" + subs + "</b> sub-agents · avg complexity <b>" +
-        avgComplexity(d.agents).toFixed(1) + "</b> · readiness <b>" + readiness(d.agents) + "%</b> · focal point " + esc(d.focal) + ".</p>" +
+        avgComplexity(d.agents).toFixed(1) + "</b> · focal point " + esc(d.focal) + ".</p>" +
         '<button class="btn btn--sm" data-goto-dept="' + d.id + '" style="margin-top:8px">Open ' + esc(d.name) + "</button>";
     }
 
@@ -416,10 +410,6 @@
     if (!list.length) return "<p>No <b>" + esc(prio) + "</b> agents" + (dept ? " in " + esc(dept.name) : "") + ".</p>";
     return "<p><b>" + list.length + "</b> " + prio + " agent" + (list.length > 1 ? "s" : "") + (dept ? " in " + esc(dept.name) : "") + ":</p>" + agentLineList(list);
   }
-  function readinessBars() {
-    const rows = D().departments.map((d) => ({ label: d.short, value: readiness(d.agents) })).sort((a, b) => b.value - a.value);
-    return "<p>Delivery readiness — progress from design to Live (Blueprinted 25% · Approved 50% · In Development 75% · Live 100%):</p>" + rankBars(rows);
-  }
 
   function explainCats() {
     const agents = allAgents();
@@ -434,7 +424,7 @@
       g.a + "</b> AI agents (and <b>" + g.s + "</b> sub-agents) designed across <b>" + g.d + "</b> departments. The main areas:</p>" +
       '<div class="chat-list">' +
         aboutRow("Overview", "Headline KPIs and a department-by-department summary table.", "overview") +
-        aboutRow("Departments", "Each department as a card — agents, sub-agents and readiness.", "departments") +
+        aboutRow("Departments", "Each department as a card — agents, sub-agents and delivery stage.", "departments") +
         aboutRow("Agents", "Every agent in one searchable, filterable table.", "agents") +
         aboutRow("Agent team", "An org-chart / map of the agents — hover one to see who it works with.", "mindmap") +
         aboutRow("Agent assistant", "This chat — ask anything about the agents in plain language.", "assistant") +

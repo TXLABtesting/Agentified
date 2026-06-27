@@ -390,6 +390,7 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
 .mini-stat b { font-size: var(--fs-h2); font-weight: 700; display: block; line-height: 1.1; }
 .mini-stat span { font-size: var(--fs-2xs); color: var(--ink-3); }
 .dept-card__foot { margin-top: auto; padding-top: var(--sp-4); border-top: 1px solid var(--line-2); display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
+.dept-card__count { font-size: var(--fs-xs); color: var(--ink-3); font-weight: 600; }
 .readiness { display: flex; align-items: center; gap: 8px; font-size: var(--fs-xs); color: var(--ink-3); }
 .readiness__bar { width: 70px; height: 6px; border-radius: var(--r-full); background: var(--line-2); overflow: hidden; }
 .readiness__fill { height: 100%; border-radius: var(--r-full); background: var(--green); }

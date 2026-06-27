@@ -175,15 +175,12 @@
       else blueprinted++;
     });
     const avg = agents.length ? scoreSum / agents.length : 0;
-    // delivery readiness = progress toward Live (Blueprinted 25 … Live 100)
-    const readiness = agents.length
-      ? Math.round(agents.reduce((n, a) => n + (STAGE_WEIGHT[a.status] || 25), 0) / agents.length) : 0;
     let deptStatus = "Blueprinted";
     if (!agents.length) deptStatus = "Awaiting";
     else if (live === agents.length) deptStatus = "Live";
     else if (live + dev > 0) deptStatus = "In Development";
     else if (approved > 0) deptStatus = "Approved";
-    return { count: agents.length, subs, cdist, avg, readiness, live, dev, approved, blueprinted, deptStatus };
+    return { count: agents.length, subs, cdist, avg, live, dev, approved, blueprinted, deptStatus };
   }
   function globalStats() {
     const agents = allAgents();
@@ -192,9 +189,8 @@
     const live = agents.filter((a) => a.status === "Live").length;
     const inFlight = agents.filter((a) => a.status === "Approved" || a.status === "In Development").length;
     const quickWins = agents.filter((a) => a.priority === "Quick Win").length;
-    const readiness = agents.length ? Math.round(agents.reduce((n, a) => n + (STAGE_WEIGHT[a.status] || 25), 0) / agents.length) : 0;
     const avg = agents.reduce((s, a) => s + (CSCORE[a.complexity] || 0), 0) / Math.max(agents.length, 1);
-    return { total: agents.length, depts: DATA.departments.length, subs, high, live, inFlight, quickWins, readiness, avg };
+    return { total: agents.length, depts: DATA.departments.length, subs, high, live, inFlight, quickWins, avg };
   }
 
   /* ---- Charts (inline SVG) --------------------------------------------- */
@@ -366,12 +362,12 @@
   function viewOverview() {
     const g = globalStats();
     const kpis = [
-      { v: g.total, l: "Total Agents", icon: "agents", cls: "is-violet", sub: g.subs + " sub-agents · all designed" },
+      { v: g.total, l: "Total Agents", icon: "agents", cls: "is-violet", sub: "Designed across all departments" },
       { v: g.depts, l: "Departments Covered", icon: "dept", cls: "is-green", sub: "Across corporate & support functions" },
-      { v: g.quickWins, l: "Wave 1 — Quick Wins", icon: "bolt", cls: "is-blue", sub: "Recommended to deliver first" },
-      { v: g.high, l: "High-Complexity Agents", icon: "gauge", cls: "is-amber", sub: "Plan extra effort & time" },
-      { v: g.live + " / " + g.total, l: "Agents Live", icon: "check", cls: "is-rose", sub: g.inFlight + " in delivery" },
-      { v: g.readiness + "%", l: "Delivery Readiness", icon: "pulse", cls: "is-gold", sub: "Progress from design to Live" }
+      { v: g.subs, l: "Total Sub-Agents", icon: "sub", cls: "is-blue", sub: "Specialised task agents" },
+      { v: g.quickWins, l: "Wave 1 — Quick Wins", icon: "bolt", cls: "is-amber", sub: "Recommended to deliver first" },
+      { v: g.high, l: "High-Complexity Agents", icon: "gauge", cls: "is-rose", sub: "Plan extra effort & time" },
+      { v: g.avg.toFixed(1), l: "Avg. Complexity", icon: "pulse", cls: "is-gold", sub: "Scale 1 (Low) – 4 (Very High)" }
     ];
     const kpiHTML = '<div class="kpi-grid">' + kpis.map((k) =>
       '<div class="kpi ' + k.cls + '"><div class="kpi__icon ' + k.cls + '">' + icon(k.icon) + "</div>" +
@@ -396,8 +392,6 @@
             (s.cdist["Very High"] ? '<span><i style="background:var(--red)"></i>VH ' + s.cdist["Very High"] + "</span>" : "") +
           "</div></td>" +
         "<td>" + statusChip(s.deptStatus) + "</td>" +
-        "<td><div class=\"readiness\"><div class=\"readiness__bar\"><div class=\"readiness__fill\" style=\"width:" +
-          s.readiness + "%\"></div></div>" + s.readiness + "%</div></td>" +
         '<td class="cell-sub nowrap">' + fmtDate(d.lastUpdated) + "</td>" +
         '<td class="right"><button class="btn btn--sm" data-goto-dept="' + d.id + '">View ' + icon("chevR") + "</button></td>" +
       "</tr>";
@@ -408,7 +402,7 @@
         '<span class="hint">' + DATA.departments.length + " departments · " + g.total + " agents · " + g.subs + " sub-agents</span></div>" +
         '<div class="card"><div class="table-wrap"><table class="tbl"><thead><tr>' +
           "<th>Department</th><th class=\"th-num\">Main Agents</th><th class=\"th-num\">Sub-Agents</th>" +
-          "<th>Complexity Distribution</th><th>Status</th><th>Readiness</th><th>Last Updated</th><th></th>" +
+          "<th>Complexity Distribution</th><th>Stage</th><th>Last Updated</th><th></th>" +
         "</tr></thead><tbody>" + rows + "</tbody></table></div></div></div>";
 
     const head =
@@ -454,8 +448,7 @@
           (s.cdist["Very High"] ? '<span><i style="background:var(--red)"></i>Very High</span>' : "") +
         "</div>" +
         '<div class="dept-card__foot">' +
-          '<div class="readiness"><div class="readiness__bar"><div class="readiness__fill" style="width:' +
-            s.readiness + '%"></div></div>' + s.readiness + "% ready</div>" +
+          '<span class="dept-card__count">' + s.count + " agents · " + s.subs + " sub-agents</span>" +
           '<button class="btn btn--sm">View details ' + icon("chevR") + "</button>" +
         "</div>" +
       "</div>";
@@ -497,44 +490,17 @@
             '<div class="mini-stat"><b>' + s.live + " / " + s.count + "</b><span>Live</span></div>" +
           "</div>" +
         "</div>" +
-        '<div class="dept-readiness">' +
-          '<div class="dept-readiness__top"><span>Delivery readiness</span><b>' + s.readiness + "%</b></div>" +
-          '<div class="readiness-track"><i style="width:' + s.readiness + '%"></i></div>' +
-        "</div>" +
       "</div></div>";
 
     const filtered = d.agents.filter((a) => agentMatches(Object.assign({ deptName: d.name }, a)));
     const agentCards = filtered.length ? filtered.map((a) => agentRow(a, d)).join("")
       : (d.agents.length === 0 ? emptyState("Awaiting this department's blueprint", "Agents will appear here once " + esc(d.name) + "'s details are provided.") : emptyState());
 
-    return '<div class="page">' + back + hero + readinessChecklist(d, s) +
+    return '<div class="page">' + back + hero +
       '<div class="section"><div class="section__head"><h3>Main agents</h3>' +
         '<span class="hint">' + filtered.length + (hasFilters() && filtered.length !== d.agents.length ? " of " + d.agents.length : "") +
         " agent" + (filtered.length !== 1 ? "s" : "") + " · " + s.subs + " sub-agents</span></div>" +
         '<div class="agent-grid">' + agentCards + "</div></div></div>";
-  }
-
-  // The path to 100% delivery readiness: advance every agent to Live.
-  function readinessChecklist(d, s) {
-    if (!d.agents.length) return "";
-    const items = d.agents.slice().sort((a, b) => (STAGE_ORDER[a.status] - STAGE_ORDER[b.status]) || a.name.localeCompare(b.name));
-    const liveN = d.agents.filter((a) => a.status === "Live").length;
-    const need = d.agents.length - liveN;
-    const head = need === 0
-      ? '<div class="rchk__done">' + icon("check") + "All " + d.agents.length + " agents are Live — this department is at 100%.</div>"
-      : '<p class="rchk__sub"><b>' + liveN + "</b> of <b>" + d.agents.length + "</b> agents Live · <b>" + need +
-        "</b> still to deliver. Each agent moves <b>Blueprinted → Approved → In Development → Live</b>; readiness reaches 100% when all are Live.</p>";
-    const rows = items.map((a) => {
-      const done = a.status === "Live";
-      return '<button class="rchk__item' + (done ? " is-done" : "") + '" data-agent="' + a.id + '">' +
-        '<span class="rchk__box">' + (done ? icon("check") : "") + "</span>" +
-        '<span class="rchk__name">' + esc(a.name) + "</span>" +
-        '<span class="rchk__note">' + statusChip(a.status) +
-          (done ? "" : ' <span class="rchk__next">Next: ' + esc(STAGE_NEXT[a.status] || STAGE_NEXT.Blueprinted) + "</span>") + "</span></button>";
-    }).join("");
-    return '<div class="card rchk-card"><div class="card__head"><h3>Path to 100% — deliver every agent</h3>' +
-      '<span class="hint">Readiness = delivery progress to Live</span></div>' +
-      '<div class="card__body">' + head + '<div class="rchk">' + rows + "</div></div></div>";
   }
 
   function agentRow(a, d) {
@@ -1084,7 +1050,7 @@
       '<div class="drawer__body">' +
         '<div class="scorebox" style="grid-template-columns:repeat(2,1fr)">' +
           scoreCell("Agents", s.count) + scoreCell("Sub-agents", s.subs) +
-          scoreCell("Avg complexity", s.avg.toFixed(1) + " / 4") + scoreCell("Readiness", s.readiness + "%") + "</div>" +
+          scoreCell("Avg complexity", s.avg.toFixed(1) + " / 4") + scoreCell("Stage", s.deptStatus) + "</div>" +
         field("About", "target", esc(d.description), true) +
         field("Process vs Extras", "layers", chip(proc + " Process", "brand") + " " + chip((s.count - proc) + " Extras", "gold")) +
         field("Complexity mix", "gauge", cmix || "—") +
