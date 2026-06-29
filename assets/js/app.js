@@ -50,6 +50,7 @@
     calendar:  'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z',
     layers:    'M12 2l9 5-9 5-9-5 9-5zM3 12l9 5 9-5M3 17l9 5 9-5',
     target:    'M12 22a10 10 0 100-20 10 10 0 000 20zm0-4a6 6 0 100-12 6 6 0 000 12zm0-4a2 2 0 100-4 2 2 0 000 4z',
+    compass:   'M12 22a10 10 0 100-20 10 10 0 000 20zm4-14l-2.5 6.5L7 17l2.5-6.5L16 8z',
     pulse:     'M3 12h4l3 8 4-16 3 8h4',
     user:      'M12 12a4 4 0 100-8 4 4 0 000 8zM6 21v-1a6 6 0 0112 0v1',
     bolt:      'M13 2L4 14h6l-1 8 9-12h-6l1-8z',
@@ -83,7 +84,7 @@
   function deptIconName(id) {
     return ({ hr: "user", procurement: "doc", finance: "pulse", knowledge: "folder",
       legal: "idcard", comms: "chat", cyber: "shield", it: "cpu", protocol: "flag",
-      admin: "layers", strategy: "target", tx: "spark", pm: "target", sh: "flag", shared: "link" })[id] || "dept";
+      admin: "layers", strategy: "compass", tx: "spark", pm: "target", sh: "flag", shared: "link" })[id] || "dept";
   }
 
   /* ---- Helpers ---------------------------------------------------------- */

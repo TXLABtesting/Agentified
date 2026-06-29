@@ -1270,6 +1270,84 @@ const SH_AGENTS = [
   }
 ];
 
+const STRATEGY_AGENTS = [
+  {
+    id: "st-st1", name: "Policy Development & Drafting Agent", kind: "core", tier: "Core",
+    purpose: "Own internal policy end-to-end — turn a need into a clear, consistent, legally-sound policy or procedure, drafted with Legal, consulted with the affected departments, approved and published, so the sector runs on current, coherent rules.",
+    responsibilities: "Detects the need for a new or revised policy (from a gap, a regulatory change or a request); drafts the policy, procedure or framework against the sector's standards; routes it to Legal (L1/L4) for legal review and to the affected departments for consultation; reconciles feedback; prepares the approval package; publishes the approved policy and notifies stakeholders. Uses the Policy/Memo Author (V7) for the authoring craft, but owns the development process.",
+    process: "Internal policy development — need identification, drafting, legal review (with Legal), stakeholder consultation, approval, publication",
+    inputs: ["Policy need or gap", "regulatory & legal input", "existing policies", "stakeholder feedback", "drafting standards"],
+    systems: ["SharePoint", "GovSign", "Power BI", "Email", "MOCA Smart"],
+    outputs: ["Drafted & consulted policies", "legal-review trail", "approval packages", "published policies", "stakeholder notifications"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "Blueprinted", priority: "Future Phase", autonomy: "Act-and-notify on drafting, consultation routing and publication; legal sign-off and policy approval stay with Legal and the committee",
+    humanLoop: "Legal signs off the legal aspects; the policy committee and leadership approve every policy; Strategy owns the content and process",
+    risks: "", nextAction: "",
+    talksTo: ["st-st2", "st-st3"],
+    subAgents: [{ name: "Detects need new revised policy", desc: "Detects the need for a new or revised policy (from a gap, a regulatory change or a request)", complexity: "Medium", type: "Task", deps: "SharePoint", status: "Blueprinted" }, { name: "Drafts policy, procedure framework", desc: "drafts the policy, procedure or framework against the sector's standards", complexity: "Medium", type: "Drafting", deps: "SharePoint", status: "Blueprinted" }, { name: "Routes Legal (L1/L4) legal review", desc: "routes it to Legal (L1/L4) for legal review and to the affected departments for consultation", complexity: "Medium", type: "Orchestration", deps: "SharePoint", status: "Blueprinted" }]
+  },
+  {
+    id: "st-st2", name: "Policy Lifecycle & Review Agent", kind: "core", tier: "Core",
+    purpose: "Keep every policy current — maintain the policy register, run the review and expiry cycles, control versions, and trigger an update the moment a regulation or decision makes a policy out of date.",
+    responsibilities: "Maintains the master policy register and version history; tracks review dates and expiry; schedules and chases policy reviews; flags policies affected by regulatory change (with Legal L3) or by a new decision; retires superseded policies; keeps one authoritative, searchable policy library.",
+    process: "Policy lifecycle — register, version control, review & expiry cycles, regulatory-change triggers, retirement",
+    inputs: ["Policy register", "review dates", "regulatory-change signals", "decisions & directives", "version history"],
+    systems: ["SharePoint", "Power BI", "Email", "MOCA Smart"],
+    outputs: ["A current policy register", "review-cycle tracking", "change-triggered flags", "version control", "a clean policy library"],
+    complexity: "Medium", impact: "High", feasibility: "Medium",
+    status: "Blueprinted", priority: "Future Phase", autonomy: "Act-and-notify on register upkeep, scheduling and flagging; revision and retirement decisions stay with policy owners",
+    humanLoop: "Policy owners approve revisions and retirements; the agent tracks, schedules and flags",
+    risks: "", nextAction: "",
+    talksTo: ["st-st1", "st-st3"],
+    subAgents: [{ name: "Maintains master policy register version", desc: "Maintains the master policy register and version history", complexity: "Medium", type: "Task", deps: "SharePoint", status: "Blueprinted" }, { name: "Tracks review dates expiry", desc: "tracks review dates and expiry", complexity: "Medium", type: "Monitoring", deps: "SharePoint", status: "Blueprinted" }, { name: "Schedules chases policy reviews", desc: "schedules and chases policy reviews", complexity: "Medium", type: "Orchestration", deps: "SharePoint", status: "Blueprinted" }]
+  },
+  {
+    id: "st-st3", name: "Strategy & Planning Agent", kind: "core", tier: "Core",
+    purpose: "Turn the sector's direction into a living plan — draft and cascade the strategy, objectives and KPIs, align them to the national and ministry agenda, and keep progress visible so strategy doesn't sit on a shelf.",
+    responsibilities: "Drafts the sector strategy, objectives and KPI framework; cascades them into department-level objectives; aligns to the national and ministry agenda; tracks strategic-initiative progress against targets; flags drift; prepares strategy reviews for leadership. Coordinates with the PMO for delivery and the Leadership Briefing (V3) for the picture.",
+    process: "Strategic planning — strategy drafting, objective & KPI cascade, national-agenda alignment, progress tracking",
+    inputs: ["National & ministry agenda", "sector direction", "performance data", "initiative status", "objectives & KPIs"],
+    systems: ["Power BI", "SharePoint", "MOCA Smart", "Email"],
+    outputs: ["Drafted strategy & KPI framework", "cascaded objectives", "alignment map", "progress tracking", "strategy-review packs"],
+    complexity: "High", impact: "High", feasibility: "Medium",
+    status: "Blueprinted", priority: "Future Phase", autonomy: "Act-and-notify on drafting, cascading and tracking; strategy and target decisions stay with leadership",
+    humanLoop: "Leadership sets and owns the strategy; the agent drafts, cascades and tracks",
+    risks: "", nextAction: "",
+    talksTo: ["st-st1", "st-st2", "st-st4", "st-st5"],
+    subAgents: [{ name: "Drafts sector strategy, objectives KPI", desc: "Drafts the sector strategy, objectives and KPI framework", complexity: "Medium", type: "Drafting", deps: "Power BI", status: "Blueprinted" }, { name: "Cascades them department-level objectives", desc: "cascades them into department-level objectives", complexity: "Medium", type: "Task", deps: "Power BI", status: "Blueprinted" }, { name: "Aligns national ministry agenda", desc: "aligns to the national and ministry agenda", complexity: "Medium", type: "Task", deps: "Power BI", status: "Blueprinted" }]
+  },
+  {
+    id: "st-st4", name: "Governance & Institutional Excellence Agent", kind: "core", tier: "Core",
+    purpose: "Hold the sector to a high standard — build and maintain the governance frameworks and institutional-excellence standards, run honest self-assessments against the government excellence models, and prepare the sector for excellence reviews and awards.",
+    responsibilities: "Builds and maintains governance frameworks and institutional-excellence standards; runs maturity and self-assessments against the relevant government excellence models; identifies gaps and improvement actions; prepares evidence for excellence audits and awards; coordinates the improvement plan across departments.",
+    process: "Governance & institutional excellence — frameworks, maturity & self-assessment, excellence-model evidence, improvement planning",
+    inputs: ["Excellence-model criteria", "governance frameworks", "department evidence", "assessment results", "improvement actions"],
+    systems: ["SharePoint", "Power BI", "MOCA Smart", "Email"],
+    outputs: ["Governance frameworks", "maturity & self-assessment results", "gap & improvement plans", "excellence-award evidence packs"],
+    complexity: "Medium", impact: "High", feasibility: "Medium",
+    status: "Blueprinted", priority: "Future Phase", autonomy: "Act-and-notify on assessment, evidencing and improvement-tracking; framework and commitment decisions stay with leadership",
+    humanLoop: "Leadership owns the governance frameworks and excellence commitments; the agent assesses, evidences and recommends",
+    risks: "", nextAction: "",
+    talksTo: ["st-st3", "st-st5"],
+    subAgents: [{ name: "Builds maintains governance frameworks", desc: "Builds and maintains governance frameworks and institutional-excellence standards", complexity: "Medium", type: "Task", deps: "SharePoint", status: "Blueprinted" }, { name: "Runs maturity self-assessments relevant", desc: "runs maturity and self-assessments against the relevant government excellence models", complexity: "Medium", type: "Task", deps: "SharePoint", status: "Blueprinted" }, { name: "Identifies gaps improvement actions", desc: "identifies gaps and improvement actions", complexity: "Medium", type: "Task", deps: "SharePoint", status: "Blueprinted" }]
+  },
+  {
+    id: "st-st5", name: "Policy Impact & Adoption Agent", kind: "core", tier: "Core",
+    purpose: "Make sure policies actually work — assess a policy's likely impact before it launches, then track how well it's adopted and complied with across departments, and feed what's learned back into the next revision.",
+    responsibilities: "Runs an impact assessment on a proposed policy (who's affected, cost, risk, change required); monitors adoption and compliance across departments after launch; gathers feedback and friction signals; flags low adoption or unintended effects; recommends revisions back to the Policy Development agent. Coordinates with the TX Center on the experience of complying with a policy.",
+    process: "Policy impact & adoption — pre-launch impact assessment, adoption & compliance monitoring, feedback, revision recommendations",
+    inputs: ["Proposed & live policies", "affected populations", "adoption & compliance data", "feedback signals"],
+    systems: ["Power BI", "SharePoint", "MOCA Smart", "Email"],
+    outputs: ["Impact assessments", "adoption & compliance dashboards", "friction & exception flags", "revision recommendations"],
+    complexity: "Medium", impact: "High", feasibility: "Medium",
+    status: "Blueprinted", priority: "Future Phase", autonomy: "Act-and-notify on assessment, monitoring and recommendations; revision decisions stay with policy owners",
+    humanLoop: "Policy owners decide on revisions; the agent assesses, monitors and recommends",
+    risks: "", nextAction: "",
+    talksTo: ["st-st3", "st-st4"],
+    subAgents: [{ name: "Runs impact assessment proposed policy", desc: "Runs an impact assessment on a proposed policy (who's affected, cost, risk, change required)", complexity: "Medium", type: "Task", deps: "Power BI", status: "Blueprinted" }, { name: "Monitors adoption compliance departments", desc: "monitors adoption and compliance across departments after launch", complexity: "Medium", type: "Monitoring", deps: "Power BI", status: "Blueprinted" }, { name: "Gathers feedback friction signals", desc: "gathers feedback and friction signals", complexity: "Medium", type: "Task", deps: "Power BI", status: "Blueprinted" }]
+  }
+];
+
 const SHARED_AGENTS = [
   {
     id: "sh-g1", name: "Approval Concierge", kind: "core", tier: "Core",
@@ -1565,6 +1643,11 @@ const DEPARTMENTS = [
     owner: "Office of the Sector Head", focal: "Chief of Staff · Sector Head Office", lastUpdated: "2026-06-26", agents: SH_AGENTS
   },
   {
+    id: "strategy", name: "Strategy & Policy", short: "Strategy",
+    description: "The policy & strategy engine — internal policy development with Legal, policy lifecycle & review, strategic planning, governance & institutional excellence, and policy impact & adoption across every department, with legal sign-off and policy approval kept human.",
+    owner: "Strategy & Policy — Corporate Support Services", focal: "Director · Strategy & Policy", lastUpdated: "2026-06-26", agents: STRATEGY_AGENTS
+  },
+  {
     id: "shared", name: "Cross-Sector Services", short: "Shared",
     description: "Agents defined once and reused across every department — the shared Approval Concierge plus the cross-sector value-add agents. A capability needed everywhere is built once and owned once, never rebuilt per department, so there are no duplicates and no gaps.",
     owner: "The Orchestrator · sector-wide", focal: "Governance Office", lastUpdated: "2026-06-26", agents: SHARED_AGENTS
@@ -1585,7 +1668,8 @@ const HUMAN_MODEL = {
     { domain: "IT", dept: "it", act: "Standard fulfilment, provisioning, safe self-healing", human: "Elevated access, non-trivial change", owner: "IT & Security" },
     { domain: "Protocol", dept: "protocol", act: "Visit build, booking, briefing assembly", human: "Readiness & the briefing", owner: "Protocol leadership" },
     { domain: "Admin", dept: "admin", act: "Pantry, asset tracking & reconciliation", human: "Purchases, disposal / write-off", owner: "Admin officers" },
-    { domain: "Wellbeing (Experience)", dept: "tx", act: "Overload detection on work signals, aggregate insight", human: "Every individual concern", owner: "Confidential Wellbeing contact / EAP" }
+    { domain: "Wellbeing (Experience)", dept: "tx", act: "Overload detection on work signals, aggregate insight", human: "Every individual concern", owner: "Confidential Wellbeing contact / EAP" },
+    { domain: "Strategy & Policy", dept: "strategy", act: "Policy drafting & consultation routing, lifecycle tracking, strategy cascade, impact analysis", human: "Legal sign-off, every policy approval, the strategy & targets", owner: "Legal, the policy committee & leadership" }
   ],
   sensitive: "Security containment that impacts the business, legal positions, financial postings, the HR retention signal, terminations, and any individual wellbeing concern carry the strictest human oversight — no agent acts alone on any of these.",
   principles: [
