@@ -17,6 +17,7 @@
     filterOpen: false,
     chat: [],
     procDept: "all",
+    procExpand: false,
     mindDept: "hr",
     mindSubs: false,
     mindLinks: false,
@@ -610,10 +611,17 @@
       "</tr></thead><tbody>" + rows + "</tbody></table></div></div></div>";
   }
 
+  function stepData() { return window.PROCESS_STEPS || {}; }
+  function deptStepCount(id) {
+    return (stepData()[id] || []).reduce((n, b) => n + b.steps.length, 0);
+  }
+
   function viewProcesses() {
     const pc = DATA.processCatalog || {};
     const depts = DATA.departments.filter((d) => pc[d.id] && pc[d.id].processes.length);
+    const SD = stepData();
     const totalProc = depts.reduce((n, d) => n + pc[d.id].processes.length, 0);
+    const totalSteps = depts.reduce((n, d) => n + deptStepCount(d.id), 0);
     const sysSet = new Set();
     depts.forEach((d) => pc[d.id].systems.forEach((s) => sysSet.add(s.name)));
 
@@ -621,25 +629,31 @@
       .concat(depts.map((d) => '<option value="' + d.id + '"' + (STATE.procDept === d.id ? " selected" : "") +
         ">" + esc(d.short) + "</option>")).join("");
 
-    const shown = STATE.procDept === "all" ? depts : depts.filter((d) => d.id === STATE.procDept);
-
     const head = '<div class="page__head">' +
       '<div class="eyebrow">Operating model · Current state</div>' +
       "<h2>Process Catalogue</h2>" +
-      "<p>Every current process across the sector, grounded in the CSS Processes Documentation — the sub-process areas each " +
-      "function runs today and the systems of record they run inside. This is the &ldquo;as-is&rdquo; the agents wrap, " +
-      "never replace.</p></div>";
+      "<p>Every current process across the sector, grounded in the CSS Processes Documentation (10 June 2026) — the sub-process " +
+      "areas each function runs today, the systems of record they run inside, and every documented step. This is the " +
+      "&ldquo;as-is&rdquo; the agents wrap, never replace.</p></div>";
 
     const bar = '<div class="proc-bar">' +
       '<div class="proc-stat"><b>' + depts.length + "</b><span>Functions</span></div>" +
       '<div class="proc-stat"><b>' + totalProc + "</b><span>Processes</span></div>" +
+      '<div class="proc-stat"><b>' + totalSteps.toLocaleString() + "</b><span>Documented steps</span></div>" +
       '<div class="proc-stat"><b>' + sysSet.size + "</b><span>Systems of record</span></div>" +
       '<div class="spacer"></div>' +
       '<label class="proc-pick"><span>Department</span><select class="select" data-procselect>' + opts + "</select></label>" +
       "</div>";
 
-    const sections = shown.map((d) => {
+    if (STATE.procDept !== "all") {
+      const d = depts.find((x) => x.id === STATE.procDept);
+      if (d) return '<div class="page">' + head + bar + procDeepDive(d, pc[d.id], SD[d.id] || []) + "</div>";
+    }
+
+    // ---- Overview: all departments ----
+    const sections = depts.map((d) => {
       const cat = pc[d.id];
+      const sc = deptStepCount(d.id);
       const sysChips = cat.systems.map((s) =>
         '<span class="proc-sys" title="' + esc(s.type + " — " + s.role) + '">' + icon("db") +
           "<b>" + esc(s.name) + "</b><span>" + esc(s.type) + "</span></span>").join("");
@@ -650,14 +664,15 @@
             '<div class="proc-row__name">' + esc(p.name) + "</div>" +
             '<div class="proc-row__covers">' + esc(p.covers) + "</div>" +
           "</div></div>").join("");
-      const steps = cat.steps ? '<span class="proc-steps">' + icon("list") + esc(cat.steps) + "</span>" : "";
+      const stepBadge = sc ? '<span class="proc-steps">' + icon("list") + sc.toLocaleString() + " steps</span>" : "";
       return '<div class="section proc-dept">' +
-        '<div class="proc-dept__head clickable" data-goto-dept="' + d.id + '">' +
+        '<div class="proc-dept__head clickable" data-procpick="' + d.id + '">' +
           '<span class="dept-icon">' + icon(deptIconName(d.id)) + "</span>" +
           '<div class="proc-dept__title"><h3>' + esc(d.name) + "</h3>" +
             "<span>" + esc(d.focal) + " · " + cat.processes.length + " processes</span></div>" +
-          '<div class="spacer"></div>' + steps +
-          '<button class="btn btn--sm">View agents ' + icon("chevR") + "</button>" +
+          '<div class="spacer"></div>' + stepBadge +
+          (sc ? '<button class="btn btn--sm" data-procpick="' + d.id + '">View steps ' + icon("chevR") + "</button>"
+              : '<button class="btn btn--sm" data-goto-dept="' + d.id + '">Agents ' + icon("chevR") + "</button>") +
         "</div>" +
         (sysChips ? '<div class="proc-syswrap"><div class="proc-syslabel">Runs on today</div>' +
           '<div class="proc-sysrow">' + sysChips + "</div></div>" : "") +
@@ -666,6 +681,75 @@
     }).join("");
 
     return '<div class="page">' + head + bar + sections + "</div>";
+  }
+
+  // Per-department deep-dive: overview + the full documented step list
+  function procDeepDive(d, cat, blocks) {
+    const back = '<button class="backlink" data-procpick="">' + icon("chevL") + "All departments</button>";
+    const total = blocks.reduce((n, b) => n + b.steps.length, 0);
+    const sysChips = cat.systems.map((s) =>
+      '<span class="proc-sys" title="' + esc(s.type + " — " + s.role) + '">' + icon("db") +
+        "<b>" + esc(s.name) + "</b><span>" + esc(s.type) + "</span></span>").join("");
+
+    const hero =
+      '<div class="proc-hero">' +
+        '<span class="dept-icon dept-icon--lg">' + icon(deptIconName(d.id)) + "</span>" +
+        "<div><h2>" + esc(d.name) + "</h2>" +
+          "<p>" + esc(d.focal) + " · " + blocks.length + " process areas · " + total.toLocaleString() + " documented steps</p></div>" +
+        '<div class="spacer"></div>' +
+        '<button class="btn btn--sm" data-goto-dept="' + d.id + '">View agents ' + icon("chevR") + "</button>" +
+      "</div>" +
+      (sysChips ? '<div class="proc-syswrap proc-syswrap--flat"><div class="proc-syslabel">Runs on today</div>' +
+        '<div class="proc-sysrow">' + sysChips + "</div></div>" : "");
+
+    if (!blocks.length) {
+      return back + hero + '<div class="empty">No documented steps recorded for this function.</div>';
+    }
+
+    // group blocks by their source section (workbook tab)
+    const secOrder = []; const bySec = {};
+    blocks.forEach((b) => { if (!bySec[b.section]) { bySec[b.section] = []; secOrder.push(b.section); } bySec[b.section].push(b); });
+    const multiSec = secOrder.length > 1;
+    const openAttr = STATE.procExpand ? " open" : "";
+
+    const body = secOrder.map((sec) => {
+      const areas = bySec[sec].map((b) => {
+        const steps = b.steps.map((s) => {
+          const gate = /^\s*yes/i.test(s.approval || "");
+          const meta = [
+            s.by ? '<span class="pstep__chip">' + icon("user") + esc(s.by) + "</span>" : "",
+            s.tool ? '<span class="pstep__chip">' + icon("cpu") + esc(s.tool) + "</span>" : "",
+            gate ? '<span class="pstep__chip pstep__chip--gate">' + icon("check") + "Approval: " + esc(s.approval) + "</span>" : "",
+            s.time ? '<span class="pstep__chip pstep__chip--time">' + icon("calendar") + esc(s.time) + "</span>" : ""
+          ].join("");
+          const io = (s.input || s.output) ?
+            '<div class="pstep__io">' +
+              (s.input ? "<span><b>In</b> " + esc(s.input) + "</span>" : "") +
+              (s.output ? "<span><b>Out</b> " + esc(s.output) + "</span>" : "") +
+            "</div>" : "";
+          return '<div class="pstep">' +
+            '<span class="pstep__n">' + esc(s.n) + "</span>" +
+            '<div class="pstep__body">' +
+              (s.sub ? '<div class="pstep__title">' + esc(s.sub) + "</div>" : "") +
+              '<div class="pstep__desc">' + esc(s.desc) + "</div>" +
+              (meta ? '<div class="pstep__meta">' + meta + "</div>" : "") + io +
+            "</div></div>";
+        }).join("");
+        return '<details class="proc-area"' + openAttr + ">" +
+          '<summary><span class="proc-area__name">' + esc(b.area) + "</span>" +
+            '<span class="proc-area__count">' + b.steps.length + " steps</span>" + icon("chevR") + "</summary>" +
+          '<div class="proc-area__steps">' + steps + "</div></details>";
+      }).join("");
+      return multiSec
+        ? '<div class="proc-sec"><div class="proc-sec__label">' + esc(sec) + "</div>" + areas + "</div>"
+        : areas;
+    }).join("");
+
+    const toolbar = '<div class="proc-explore__head">' +
+      "<h3>Documented process steps</h3>" +
+      '<button class="btn btn--sm btn--ghost" data-stepexpand>' + (STATE.procExpand ? "Collapse all" : "Expand all") + "</button></div>";
+
+    return back + hero + '<div class="proc-explore">' + toolbar + body + "</div>";
   }
 
   function viewReview() {
@@ -1449,7 +1533,7 @@
       "[data-close-drawer],[data-close-modal],[data-add],[data-export],[data-share],[data-reset]," +
       "[data-filter-toggle],[data-filter],[data-apply-filters],[data-clear-filters],[data-menu]," +
       "[data-suggest],[data-chat-clear],[data-mind],[data-mindsubs],[data-mindlinks],[data-zoom],[data-mindfull]," +
-      "[data-deptinfo],[data-proginfo],[data-sub],[data-kpi-view]");
+      "[data-deptinfo],[data-proginfo],[data-sub],[data-kpi-view],[data-procpick],[data-stepexpand]");
     if (!t) {
       // close filter popover on outside click
       if (STATE.filterOpen && !e.target.closest(".has-pop")) { STATE.filterOpen = false; renderHeader(); }
@@ -1471,6 +1555,12 @@
       if (t.dataset.kpiFilter) { const fp = t.dataset.kpiFilter.split(":"); STATE.filters[fp[0]] = fp[1].split(","); }
       STATE.search = ""; go(t.dataset.kpiView);
     }
+    else if (t.dataset.procpick != null) {
+      STATE.procDept = t.dataset.procpick; STATE.procExpand = false;
+      if (STATE.view !== "processes") { go("processes"); } else { renderBody(); }
+      window.scrollTo({ top: 0 });
+    }
+    else if (t.hasAttribute("data-stepexpand")) { STATE.procExpand = !STATE.procExpand; renderBody(); }
     else if (t.dataset.gotoDept) { go("department", t.dataset.gotoDept); }
     else if (t.dataset.agent) { openAgent(t.dataset.agent); }
     else if (t.dataset.edit) { e.stopPropagation(); openEdit(t.dataset.edit); }
