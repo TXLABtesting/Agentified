@@ -1681,4 +1681,231 @@ const HUMAN_MODEL = {
   ]
 };
 
-window.DASHBOARD_DATA = { departments: DEPARTMENTS, programmeAgents: [], humanModel: HUMAN_MODEL, complexityScore: COMPLEXITY_SCORE };
+const PROCESS_CATALOG = {
+  "hr": {
+    steps: "~354 steps across 84 sub-process areas",
+    systems: [
+      { name: "Oracle EBS / Oracle HR (HCM)", type: "ERP — system of record", role: "HR, Procurement, Finance, Payroll and assets all run here." },
+      { name: "GovSign", type: "E-signature", role: "Contracts, decisions, and HR & admin documents." },
+      { name: "GPSSA / Pension Portal", type: "Pension authority", role: "Pension enrolment and contributions." },
+      { name: "MOCA Smart / MOCA APP / MOCAverse", type: "Employee app & notifications", role: "Push notifications, self-service and knowledge." },
+      { name: "SharePoint / Teams / Outlook", type: "Collaboration & archive", role: "Documents, communication and records." }
+    ],
+    processes: [
+      { name: "Onboarding & Joining", covers: "Begins at the Talent-team handoff (recruitment and hiring sit with Talent, outside the sector): the handoff email is checked and routed to Onboarding, which runs security clearance, first-day documents, ILOE registration, GPSSA pension enrolment, probation tracking and ICP data verification." },
+      { name: "Attendance & Leave", covers: "17 leave types each with their own rules (prerequisites such as compensation-after-annual, document validation for sick/maternity/Hajj, balance & accrual, type-specific archiving), permissions, remote work and attendance justifications — across the 25-type Leave Approval Matrix." },
+      { name: "Attendance Violations Management", covers: "Compiling and cleaning the year-to-date violations report, contacting each employee with a call-to-action, weekly reminders, escalation of repeat offenders to the HR Director, year-end leave carry-over offset, and the outsourced-staff (agency) flow." },
+      { name: "Employee Self-Service (ESS)", covers: "Personal & bank updates, education & air-ticket claims, dependent/relative declarations, HR letters, payslips, residency visa, health insurance, gift disclosure." },
+      { name: "HR Operations & Lifecycle (HR-SS)", covers: "Change pay & manager, update employment, contract renewal (permanent & outsource), acting/secondment/loaning/borrowing/delegation, administrative & ministerial decisions." },
+      { name: "Performance Management", covers: "Objective setting, executive-director reviews, mid-year and annual reviews." },
+      { name: "Payroll (PPP) & Adjustments", covers: "Payroll backbone, leave encashment, bonus, overtime, per-diem, expense reimbursement, allowances, recoveries/deductions, monthly payroll run, costing & GL, adjustments (executed by the Payroll Agent F10 using HR inputs)." },
+      { name: "End of Service & Offboarding", covers: "Resignation, offboarding notification, station clearance, final settlement & payment, post-departure cleanup." },
+      { name: "Employee Relations", covers: "Inquiries, complaints/grievances and special-case support across HR Services email, Emanasa and the MOCA App." }
+    ]
+  },
+  "procurement": {
+    steps: "~188 steps across P2P + Business Mission",
+    systems: [
+      { name: "Oracle EBS / Oracle HR (HCM)", type: "ERP — system of record", role: "HR, Procurement, Finance, Payroll and assets all run here." },
+      { name: "GovSign", type: "E-signature", role: "Contracts, decisions, and HR & admin documents." },
+      { name: "SPAN", type: "Asset platform", role: "Fixed and admin assets, with nightly Oracle integration." },
+      { name: "Bank Portal / H2H", type: "Banking", role: "Payments and statement (MT940) retrieval." },
+      { name: "MOCA Smart / MOCA APP / MOCAverse", type: "Employee app & notifications", role: "Push notifications, self-service and knowledge." }
+    ],
+    processes: [
+      { name: "Requisition & SOW", covers: "Pre-requisition/SOW authoring, requisition entry, attachments, funds reservation." },
+      { name: "Vendor Registration & Due-Diligence", covers: "Self-registration, document collection, HR conflict-of-interest check, Legal consultation, Chief approval, categorisation." },
+      { name: "Sourcing, Bid Evaluation & Award", covers: "RFQ/RFP, supplier portal, quotations, clarifications, surrogate quotes, one-bid, technical scoring, award." },
+      { name: "Contract, PO & Work-Confirmation", covers: "Contract drafting & GovSign signature, PO/LOA, work confirmation (GRN), bank guarantees." },
+      { name: "Invoicing & Payment", covers: "Invoice intake, three-way exception handling, payment." },
+      { name: "Vendor Evaluation", covers: "Periodic vendor performance evaluation and the monthly Chief report." },
+      { name: "Business Mission (Travel)", covers: "Request, quotations, the multi-level approval chain, per-diems, leaves, payment, completion." }
+    ]
+  },
+  "finance": {
+    steps: "~386 steps across 7 finance domains",
+    systems: [
+      { name: "Oracle EBS / Oracle HR (HCM)", type: "ERP — system of record", role: "HR, Procurement, Finance, Payroll and assets all run here." },
+      { name: "SPAN", type: "Asset platform", role: "Fixed and admin assets, with nightly Oracle integration." },
+      { name: "Bank Portal / H2H", type: "Banking", role: "Payments and statement (MT940) retrieval." },
+      { name: "FTA Portal", type: "Tax authority", role: "VAT return submission and settlement." },
+      { name: "GPSSA / Pension Portal", type: "Pension authority", role: "Pension enrolment and contributions." },
+      { name: "SharePoint / Teams / Outlook", type: "Collaboration & archive", role: "Documents, communication and records." }
+    ],
+    processes: [
+      { name: "VAT", covers: "Extract, calculate, reconcile, prepare the return, submit on the FTA portal, settle and archive." },
+      { name: "AR & Collections", covers: "Customer registration, billing, invoices, credit memos, receipts, reminders & calls, AR reconciliation." },
+      { name: "Fixed Assets", covers: "GRN, SPAN integration, mass additions, capitalisation, retirement, depreciation, stock count, FA reporting." },
+      { name: "Cash & Bank Reconciliation", covers: "Statement receipt, import, auto-reconciliation, manual matching, bank charges, BRS report." },
+      { name: "Budgeting & FP&A", covers: "Smart enquiries, annual planning, commitment monitoring, performance reports, transfers, uploads, PR/PO review, project cost." },
+      { name: "Period-Close & Reporting (R2R)", covers: "Submodule close, reconciliations, accruals, prepaid, suspense, lease, ECL, intercompany, statements, consolidation." },
+      { name: "Payroll", covers: "Deductions, net salary, bank transfer, GL posting, allowances, gratuity, GPSSA pension, overtime, per-diems, close." }
+    ]
+  },
+  "knowledge": {
+    steps: "~203 steps across 11 sub-process areas",
+    systems: [
+      { name: "SharePoint / Teams / Outlook", type: "Collaboration & archive", role: "Documents, communication and records." },
+      { name: "Events Now", type: "Event & venue platform", role: "Event requests, venue matching and booking." },
+      { name: "MOCA Smart / MOCA APP / MOCAverse", type: "Employee app & notifications", role: "Push notifications, self-service and knowledge." },
+      { name: "Oracle EBS / Oracle HR (HCM)", type: "ERP — system of record", role: "HR, Procurement, Finance, Payroll and assets all run here." }
+    ],
+    processes: [
+      { name: "Editorial Translation & Interpretation", covers: "Bilingual (Arabic/English) translation and interpretation with consistent terminology." },
+      { name: "Content Writing", covers: "Drafting content from briefs to a publishable standard." },
+      { name: "Content Review & Proofreading", covers: "Grammar, style and bilingual-terminology checks; version control." },
+      { name: "Publishing Media & Circulars", covers: "Publishing through official channels; circular distribution." },
+      { name: "Documentation", covers: "MOCA forms and publication documentation." },
+      { name: "Coverage & Subscriptions", covers: "Big-event media coverage; newspaper subscriptions; event venue check." }
+    ]
+  },
+  "legal": {
+    steps: "~107 steps across 12 competencies",
+    systems: [
+      { name: "GovSign", type: "E-signature", role: "Contracts, decisions, and HR & admin documents." },
+      { name: "Taresh", type: "Correspondence & archive", role: "Legal barcoding, registry and archiving." },
+      { name: "Federal Gazette / MoE / MoJ", type: "External legal sources", role: "Regulation and precedent for legal drafting and compliance." },
+      { name: "SharePoint / Teams / Outlook", type: "Collaboration & archive", role: "Documents, communication and records." }
+    ],
+    processes: [
+      { name: "Decisions & Legislation", covers: "Drafting and reviewing decisions and legislation." },
+      { name: "Agreements & MoUs", covers: "Drafting and managing agreements and memoranda of understanding." },
+      { name: "Memos & Correspondence", covers: "Internal and external memos and formal correspondence." },
+      { name: "Cases, Disputes & Investigations", covers: "Case files, external disputes and administrative investigations." },
+      { name: "Compliance & Legal Studies", covers: "Compliance with central regulations; legal studies and consultations." },
+      { name: "IP, Archiving & Committees", covers: "Intellectual-property protection; archiving (Taresh); committee management." }
+    ]
+  },
+  "comms": {
+    steps: "~154 steps across 37 sub-process areas",
+    systems: [
+      { name: "Events Now", type: "Event & venue platform", role: "Event requests, venue matching and booking." },
+      { name: "Creative Suite (Adobe, Figma, Canva)", type: "Creative production", role: "Design, motion graphics and media production." },
+      { name: "SharePoint / Teams / Outlook", type: "Collaboration & archive", role: "Documents, communication and records." },
+      { name: "Oracle EBS / Oracle HR (HCM)", type: "ERP — system of record", role: "HR, Procurement, Finance, Payroll and assets all run here." }
+    ],
+    processes: [
+      { name: "Event Organisation", covers: "Request, verification & approval, provider confirmation, kickoff, pre-event coordination, day-of execution, closure, security clearance." },
+      { name: "Creative Production", covers: "Design, motion graphics, video and photography production; social media." },
+      { name: "Media & Communications", covers: "Press releases and circulars, media monitoring, coverage reports, speaker & MC training." },
+      { name: "Planning & Reporting", covers: "Annual event plan and department reports." }
+    ]
+  },
+  "cyber": {
+    steps: "~133 steps across incident lifecycle + clearance",
+    systems: [
+      { name: "IBM QRadar SIEM + JIRA + CrowdStrike", type: "Security operations", role: "Alert correlation, incident tickets and endpoint response." },
+      { name: "SharePoint / Teams / Outlook", type: "Collaboration & archive", role: "Documents, communication and records." }
+    ],
+    processes: [
+      { name: "Incident Lifecycle", covers: "Alert intake, initial triage, classification & severity, evidence collection, notification." },
+      { name: "Containment & Eradication", covers: "Short-term containment, threat removal, vulnerability remediation, credential reset, verification." },
+      { name: "Recovery & Closure", covers: "System restoration, business validation, post-recovery monitoring, closure, post-incident review." },
+      { name: "Project Security Clearance & GRC", covers: "Feasibility, security checklist, risk assessment, workshop, technical and GRC clearance, conditional approval." }
+    ]
+  },
+  "it": {
+    steps: "~248 steps across 44 sub-process areas",
+    systems: [
+      { name: "MOCA Digital Portal + Ivanti", type: "IT service management", role: "IT tickets, fulfilment and SLA across the service catalogue." },
+      { name: "SharePoint / Teams / Outlook", type: "Collaboration & archive", role: "Documents, communication and records." }
+    ],
+    processes: [
+      { name: "Service Desk", covers: "Device, software, email, peripheral and printer requests; password reset; general support." },
+      { name: "Access & Identity", covers: "Access/VPN requests; onboarding, offboarding and transfer provisioning; MDM; certificates." },
+      { name: "Operations & Change", covers: "System & uptime monitoring; backup & restore; change, enhancement and new-system requests via the CAB." },
+      { name: "IT Asset Lifecycle", covers: "Asset inventory, warranty and lifecycle, disposal and decommissioning." }
+    ]
+  },
+  "protocol": {
+    steps: "~133 steps across 94 sub-process areas",
+    systems: [
+      { name: "E-manasa", type: "Protocol platform", role: "VIP visit and airport-service coordination." },
+      { name: "SharePoint / Teams / Outlook", type: "Collaboration & archive", role: "Documents, communication and records." }
+    ],
+    processes: [
+      { name: "VIP Reception & Escort", covers: "Request validation, pre-visit coordination, access & parking, site inspection, seating, meeting support, arrival, reception, escort, farewell, closure, satisfaction." },
+      { name: "Airport & Movement Services", covers: "Airport-service selection & booking, security coordination, vehicle permits, movement instructions, flight monitoring." }
+    ]
+  },
+  "admin": {
+    steps: "~25 steps across 22 sub-process areas",
+    systems: [
+      { name: "SPAN", type: "Asset platform", role: "Fixed and admin assets, with nightly Oracle integration." },
+      { name: "Qlub / PACKMAN / Aramex", type: "Workplace & logistics", role: "E-Pantry, MOCA Mart and asset logistics." },
+      { name: "GovSign", type: "E-signature", role: "Contracts, decisions, and HR & admin documents." },
+      { name: "SharePoint / Teams / Outlook", type: "Collaboration & archive", role: "Documents, communication and records." }
+    ],
+    processes: [
+      { name: "Workplace & Hospitality", covers: "E-Pantry / Qlub (menu, QR, office mapping, ordering, fulfilment) and MOCA Mart orders." },
+      { name: "Admin Asset Management", covers: "Partial & annual inventory counts, asset monitoring, issuing & receiving assets for events, registration & tagging, transfer, disposal." }
+    ]
+  },
+  "tx": {
+    steps: "",
+    systems: [
+      { name: "MOCA Smart / MOCA APP / MOCAverse", type: "Employee app & notifications", role: "Push notifications, self-service and knowledge." },
+      { name: "Oracle EBS / Oracle HR (HCM)", type: "ERP — system of record", role: "HR, Procurement, Finance, Payroll and assets all run here." },
+      { name: "Power BI / Analytics", type: "Analytics & dashboards", role: "KPIs, dashboards and executive reporting across the sector." },
+      { name: "SharePoint / Teams / Outlook", type: "Collaboration & archive", role: "Documents, communication and records." }
+    ],
+    processes: [
+      { name: "Zero Bureaucracy", covers: "Hunting redundant steps, approvals, documents and waiting time across every service journey and turning each into the fewest possible steps (the Zero Government Bureaucracy mandate)." },
+      { name: "Digital & App Experience", covers: "Usability, accessibility, journey analytics and design-system compliance across the apps and portals we build." },
+      { name: "Service & Process Experience", covers: "Journey mapping, CSAT/effort measurement and pain-point detection across internal and external services (owned with the Recipient-Experience and Feedback agents)." },
+      { name: "Employee & Workplace Wellbeing (governed)", covers: "Team-level engagement, workload-overload detection and aggregate work-environment insight — governed, signals not content, individual concerns routed to a confidential human." },
+      { name: "Continuous Improvement", covers: "Turning every experience finding into an owned, dated action, following it to done, and proving satisfaction moved." }
+    ]
+  },
+  "pm": {
+    steps: "",
+    systems: [
+      { name: "MS Project / PPM", type: "Project & portfolio mgmt", role: "Project plans, schedules, milestones and the portfolio." },
+      { name: "Power BI / Analytics", type: "Analytics & dashboards", role: "KPIs, dashboards and executive reporting across the sector." },
+      { name: "Oracle EBS / Oracle HR (HCM)", type: "ERP — system of record", role: "HR, Procurement, Finance, Payroll and assets all run here." },
+      { name: "SharePoint / Teams / Outlook", type: "Collaboration & archive", role: "Documents, communication and records." }
+    ],
+    processes: [
+      { name: "Planning & Scheduling", covers: "WBS, milestones, dependencies, critical path and baselining for every initiative." },
+      { name: "Portfolio & Prioritisation", covers: "One prioritised portfolio scored by value, risk, effort and strategic fit, with pipeline balance." },
+      { name: "Risk, Issue & Status", covers: "Live risk/issue registers, RAG roll-up, automated status and drift detection." },
+      { name: "Resource & Capacity", covers: "Allocation, utilisation and capacity forecasting (drawing on HR workforce planning, not duplicating it)." },
+      { name: "Governance, Budget & Benefits", covers: "Gate reviews and steering, budget vs spend and benefits realised after go-live (with Finance)." },
+      { name: "Overlap & Synergy", covers: "Scanning every new project and SOW for duplicate or overlapping effort and recommending consolidation or reuse." }
+    ]
+  },
+  "sh": {
+    steps: "",
+    systems: [
+      { name: "SharePoint / Teams / Outlook", type: "Collaboration & archive", role: "Documents, communication and records." },
+      { name: "Power BI / Analytics", type: "Analytics & dashboards", role: "KPIs, dashboards and executive reporting across the sector." },
+      { name: "GovSign", type: "E-signature", role: "Contracts, decisions, and HR & admin documents." },
+      { name: "MOCA Smart / MOCA APP / MOCAverse", type: "Employee app & notifications", role: "Push notifications, self-service and knowledge." }
+    ],
+    processes: [
+      { name: "Leadership Meeting Rhythm", covers: "Convening the sector head's meetings, building the agenda from what's open, packaging pre-reads, and capturing decisions and actions to closure." },
+      { name: "Cross-Department Milestones", covers: "Holding the live picture of every department's milestones and commitments to the head, chasing owners and escalating risk early." },
+      { name: "Decisions & Directives", covers: "Logging every decision and directive, assigning it with a due date, and following it through to done with an audit trail." },
+      { name: "Executive Correspondence & Briefing", covers: "Preparing the head's correspondence, decision memos, talking points and engagement briefings from the facts, ready for signature." },
+      { name: "Stakeholder & Engagement", covers: "Preparing and sequencing the head's engagements, capturing commitments made and following up on what others promised." }
+    ]
+  },
+  "strategy": {
+    steps: "",
+    systems: [
+      { name: "SharePoint / Teams / Outlook", type: "Collaboration & archive", role: "Documents, communication and records." },
+      { name: "Power BI / Analytics", type: "Analytics & dashboards", role: "KPIs, dashboards and executive reporting across the sector." },
+      { name: "GovSign", type: "E-signature", role: "Contracts, decisions, and HR & admin documents." },
+      { name: "MOCA Smart / MOCA APP / MOCAverse", type: "Employee app & notifications", role: "Push notifications, self-service and knowledge." }
+    ],
+    processes: [
+      { name: "Internal Policy Development", covers: "Turning a need into a clear, legally-sound policy or procedure — drafted with the Legal team, consulted with affected departments, approved and published." },
+      { name: "Policy Lifecycle & Review", covers: "The policy register, version control, review and expiry cycles, and updates triggered by regulatory change or new decisions." },
+      { name: "Strategic Planning", covers: "Drafting and cascading the sector strategy, objectives and KPIs, aligned to the national and ministry agenda, with progress tracked." },
+      { name: "Governance & Institutional Excellence", covers: "Governance frameworks and excellence standards, maturity self-assessments against the government excellence models, and award evidence." },
+      { name: "Policy Impact & Adoption", covers: "Assessing a policy's impact before launch and its adoption and compliance after, feeding lessons into the next revision." }
+    ]
+  }
+};
+
+window.DASHBOARD_DATA = { departments: DEPARTMENTS, programmeAgents: [], humanModel: HUMAN_MODEL, processCatalog: PROCESS_CATALOG, complexityScore: COMPLEXITY_SCORE };

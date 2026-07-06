@@ -500,6 +500,48 @@ table.tbl tbody tr.clickable:hover { background: var(--surface-2); }
 .hl-principles li svg { width: 16px; height: 16px; flex: none; color: var(--green); margin-top: 2px; }
 @media (max-width: 760px) { .hl-ladder { grid-template-columns: 1fr; } }
 
+/* ---- Process catalogue ------------------------------------------------- */
+.proc-bar { display: flex; align-items: center; gap: var(--sp-5); flex-wrap: wrap;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md);
+  box-shadow: var(--sh-1); padding: var(--sp-4) var(--sp-5); margin-top: var(--sp-5); }
+.proc-stat { display: flex; flex-direction: column; line-height: 1.15; }
+.proc-stat b { font-size: var(--fs-h1); font-weight: 700; color: var(--ink); }
+.proc-stat span { font-size: var(--fs-xs); color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; }
+.proc-pick { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-sm); color: var(--ink-3); }
+.proc-pick .select { min-width: 190px; }
+
+.proc-dept { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md);
+  box-shadow: var(--sh-1); overflow: hidden; margin-top: var(--sp-5); }
+.proc-dept__head { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--line-2); cursor: pointer; }
+.proc-dept__head:hover { background: var(--surface-2); }
+.proc-dept__title h3 { font-size: var(--fs-h2); font-weight: 700; }
+.proc-dept__title span { font-size: var(--fs-sm); color: var(--ink-3); }
+.proc-steps { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-xs); color: var(--gold-ink);
+  background: var(--gold-soft); border: 1px solid var(--gold); border-radius: var(--r-full); padding: 4px 12px; white-space: nowrap; }
+.proc-steps svg { width: 14px; height: 14px; }
+
+.proc-syswrap { padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--line-2); background: var(--surface-2); }
+.proc-syslabel { font-size: var(--fs-2xs); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); margin-bottom: var(--sp-3); }
+.proc-sysrow { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.proc-sys { display: inline-flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-full); padding: 6px 14px 6px 10px; }
+.proc-sys svg { width: 15px; height: 15px; color: var(--brand); flex: none; }
+.proc-sys b { font-size: var(--fs-sm); font-weight: 600; color: var(--ink); }
+.proc-sys > span { font-size: var(--fs-2xs); color: var(--ink-3); }
+
+.proc-list { padding: var(--sp-3) var(--sp-5) var(--sp-4); }
+.proc-row { display: flex; gap: var(--sp-3); padding: var(--sp-4) 0; border-bottom: 1px solid var(--line-2); }
+.proc-row:last-child { border-bottom: none; }
+.proc-row__n { flex: none; width: 24px; height: 24px; border-radius: var(--r-full); background: var(--brand-tint);
+  color: var(--brand); font-size: var(--fs-xs); font-weight: 700; display: grid; place-items: center; margin-top: 1px; }
+.proc-row__name { font-size: var(--fs-body); font-weight: 600; color: var(--ink); margin-bottom: 3px; }
+.proc-row__covers { font-size: var(--fs-sm); color: var(--ink-2); line-height: 1.55; }
+@media (max-width: 640px) {
+  .proc-bar { gap: var(--sp-4); } .proc-pick { width: 100%; } .proc-pick .select { flex: 1; }
+  .proc-dept__head { flex-wrap: wrap; } .proc-dept__head .btn--sm { display: none; }
+}
+
 .acard__panel { background: var(--surface-2); border: 1px solid var(--line-2); border-radius: var(--r-md); padding: 14px; display: flex; flex-direction: column; gap: 12px; }
 .acard__info { display: flex; flex-direction: column; gap: 8px; }
 .acard__inforow { display: flex; align-items: flex-start; gap: 8px; font-size: var(--fs-sm); color: var(--ink-2); }

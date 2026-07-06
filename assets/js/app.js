@@ -16,6 +16,7 @@
     filters: { complexity: [], status: [], priority: [], category: [] },
     filterOpen: false,
     chat: [],
+    procDept: "all",
     mindDept: "hr",
     mindSubs: false,
     mindLinks: false,
@@ -191,7 +192,9 @@
     const inFlight = agents.filter((a) => a.status === "Approved" || a.status === "In Development").length;
     const quickWins = agents.filter((a) => a.priority === "Quick Win").length;
     const avg = agents.reduce((s, a) => s + (CSCORE[a.complexity] || 0), 0) / Math.max(agents.length, 1);
-    return { total: agents.length, depts: DATA.departments.length, subs, high, live, inFlight, quickWins, avg };
+    const pc = DATA.processCatalog || {};
+    const processes = Object.keys(pc).reduce((n, k) => n + ((pc[k].processes || []).length), 0);
+    return { total: agents.length, depts: DATA.departments.length, subs, high, live, inFlight, quickWins, avg, processes };
   }
 
   /* ---- Charts (inline SVG) --------------------------------------------- */
@@ -266,6 +269,7 @@
         { id: "overview", label: "Overview", icon: "overview" },
         { id: "departments", label: "Departments", icon: "dept", count: g.depts },
         { id: "agents", label: "Agents", icon: "agents", count: g.total },
+        { id: "processes", label: "Processes", icon: "list", count: g.processes },
         { id: "mindmap", label: "Agent team", icon: "mindmap" },
         { id: "humanloop", label: "Human in the loop", icon: "user" }
       ]},
@@ -289,7 +293,7 @@
   function breadcrumb() {
     const v = STATE.view;
     const names = { overview: "Overview", departments: "Departments", agents: "Agents",
-      subagents: "Sub-agents", mindmap: "Agent team", review: "Pending review", assistant: "Agent assistant", settings: "Settings" };
+      subagents: "Sub-agents", processes: "Processes", mindmap: "Agent team", review: "Pending review", assistant: "Agent assistant", settings: "Settings" };
     if (v === "department") {
       const d = findDept(STATE.deptId);
       return '<button data-nav="departments">Departments</button><span class="sep">·</span>' +
@@ -604,6 +608,64 @@
         "<th>Sub-Agent</th><th>Description</th><th>Parent Agent</th><th>Department</th>" +
         "<th>Task Type</th><th>Complexity</th><th>Dependencies</th><th>Status</th>" +
       "</tr></thead><tbody>" + rows + "</tbody></table></div></div></div>";
+  }
+
+  function viewProcesses() {
+    const pc = DATA.processCatalog || {};
+    const depts = DATA.departments.filter((d) => pc[d.id] && pc[d.id].processes.length);
+    const totalProc = depts.reduce((n, d) => n + pc[d.id].processes.length, 0);
+    const sysSet = new Set();
+    depts.forEach((d) => pc[d.id].systems.forEach((s) => sysSet.add(s.name)));
+
+    const opts = ['<option value="all"' + (STATE.procDept === "all" ? " selected" : "") + ">All departments</option>"]
+      .concat(depts.map((d) => '<option value="' + d.id + '"' + (STATE.procDept === d.id ? " selected" : "") +
+        ">" + esc(d.short) + "</option>")).join("");
+
+    const shown = STATE.procDept === "all" ? depts : depts.filter((d) => d.id === STATE.procDept);
+
+    const head = '<div class="page__head">' +
+      '<div class="eyebrow">Operating model · Current state</div>' +
+      "<h2>Process Catalogue</h2>" +
+      "<p>Every current process across the sector, grounded in the CSS Processes Documentation — the sub-process areas each " +
+      "function runs today and the systems of record they run inside. This is the &ldquo;as-is&rdquo; the agents wrap, " +
+      "never replace.</p></div>";
+
+    const bar = '<div class="proc-bar">' +
+      '<div class="proc-stat"><b>' + depts.length + "</b><span>Functions</span></div>" +
+      '<div class="proc-stat"><b>' + totalProc + "</b><span>Processes</span></div>" +
+      '<div class="proc-stat"><b>' + sysSet.size + "</b><span>Systems of record</span></div>" +
+      '<div class="spacer"></div>' +
+      '<label class="proc-pick"><span>Department</span><select class="select" data-procselect>' + opts + "</select></label>" +
+      "</div>";
+
+    const sections = shown.map((d) => {
+      const cat = pc[d.id];
+      const sysChips = cat.systems.map((s) =>
+        '<span class="proc-sys" title="' + esc(s.type + " — " + s.role) + '">' + icon("db") +
+          "<b>" + esc(s.name) + "</b><span>" + esc(s.type) + "</span></span>").join("");
+      const rows = cat.processes.map((p, i) =>
+        '<div class="proc-row">' +
+          '<span class="proc-row__n">' + (i + 1) + "</span>" +
+          '<div class="proc-row__body">' +
+            '<div class="proc-row__name">' + esc(p.name) + "</div>" +
+            '<div class="proc-row__covers">' + esc(p.covers) + "</div>" +
+          "</div></div>").join("");
+      const steps = cat.steps ? '<span class="proc-steps">' + icon("list") + esc(cat.steps) + "</span>" : "";
+      return '<div class="section proc-dept">' +
+        '<div class="proc-dept__head clickable" data-goto-dept="' + d.id + '">' +
+          '<span class="dept-icon">' + icon(deptIconName(d.id)) + "</span>" +
+          '<div class="proc-dept__title"><h3>' + esc(d.name) + "</h3>" +
+            "<span>" + esc(d.focal) + " · " + cat.processes.length + " processes</span></div>" +
+          '<div class="spacer"></div>' + steps +
+          '<button class="btn btn--sm">View agents ' + icon("chevR") + "</button>" +
+        "</div>" +
+        (sysChips ? '<div class="proc-syswrap"><div class="proc-syslabel">Runs on today</div>' +
+          '<div class="proc-sysrow">' + sysChips + "</div></div>" : "") +
+        '<div class="proc-list">' + rows + "</div>" +
+      "</div>";
+    }).join("");
+
+    return '<div class="page">' + head + bar + sections + "</div>";
   }
 
   function viewReview() {
@@ -1336,7 +1398,7 @@
     const h = location.hash.replace(/^#\/?/, "");
     const parts = h.split("/");
     if (parts[0] === "department" && parts[1]) { STATE.view = "department"; STATE.deptId = parts[1]; return; }
-    const valid = ["overview", "departments", "agents", "subagents", "mindmap", "humanloop", "review", "assistant", "settings"];
+    const valid = ["overview", "departments", "agents", "subagents", "processes", "mindmap", "humanloop", "review", "assistant", "settings"];
     STATE.view = valid.includes(parts[0]) ? parts[0] : "overview";
   }
   function go(view, deptId) {
@@ -1351,7 +1413,7 @@
     const v = STATE.view;
     const map = {
       overview: viewOverview, departments: viewDepartments, department: viewDepartmentDetail,
-      agents: viewAgents, subagents: viewSubAgents, mindmap: viewMindmap, humanloop: viewHumanLoop, review: viewReview, assistant: viewAssistant, settings: viewSettings
+      agents: viewAgents, subagents: viewSubAgents, processes: viewProcesses, mindmap: viewMindmap, humanloop: viewHumanLoop, review: viewReview, assistant: viewAssistant, settings: viewSettings
     };
     $("#view").innerHTML = (map[v] || viewOverview)();
     window.scrollTo({ top: 0 });
@@ -1474,7 +1536,7 @@
     renderNav();
     const map = {
       overview: viewOverview, departments: viewDepartments, department: viewDepartmentDetail,
-      agents: viewAgents, subagents: viewSubAgents, mindmap: viewMindmap, humanloop: viewHumanLoop, review: viewReview, assistant: viewAssistant, settings: viewSettings
+      agents: viewAgents, subagents: viewSubAgents, processes: viewProcesses, mindmap: viewMindmap, humanloop: viewHumanLoop, review: viewReview, assistant: viewAssistant, settings: viewSettings
     };
     $("#view").innerHTML = (map[STATE.view] || viewOverview)();
     if (STATE.view === "mindmap") centerMindmap();
@@ -1533,6 +1595,8 @@
   document.addEventListener("change", function (e) {
     const sel = e.target.closest("[data-mindselect]");
     if (sel) { STATE.mindDept = sel.value; renderBody(); }
+    const psel = e.target.closest("[data-procselect]");
+    if (psel) { STATE.procDept = psel.value; renderBody(); }
   });
 
   // drag anywhere in the canvas to pan freely (both axes); transform-based
